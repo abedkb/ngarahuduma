@@ -1,0 +1,2116 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NGARA HUDUMA</title>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+/* ════════════════════════════════════════════════════════════════
+   STOREFRONT THEME — Dark Glass, 3D frosted panels over a molten
+   rust/steel glow, still built on the warehouse-ledger structure
+   ════════════════════════════════════════════════════════════════ */
+:root{
+  --rg:#FF7A45;          /* rust/brand — primary action, brighter for glass pop */
+  --rg-light:rgba(255,122,69,0.35);
+  --rg-pale:rgba(255,122,69,0.12);
+  --rg-dark:#E85D2C;
+  --steel:#6EA8FF;
+  --cream:#0A0E18;       /* deep navy base instead of limestone */
+  --white:#FFFFFF;
+  --ink:#F3F5FA;         /* near-white text on dark glass */
+  --ink2:#D6DBE8;
+  --ink3:#98A0B5;
+  --ink4:#6A7288;
+  --line:rgba(255,255,255,0.14);
+  --line-hover:rgba(255,122,69,0.55);
+  --card-bg:rgba(255,255,255,0.055);
+  --glass-blur:blur(20px) saturate(160%);
+  --shadow:0 12px 36px rgba(0,0,0,0.45);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:
+    radial-gradient(ellipse 900px 700px at 12% -8%, rgba(255,122,69,0.22), transparent 60%),
+    radial-gradient(ellipse 800px 640px at 105% 8%, rgba(110,168,255,0.20), transparent 60%),
+    radial-gradient(ellipse 700px 640px at 45% 105%, rgba(255,122,69,0.12), transparent 60%),
+    linear-gradient(180deg,#0A0E18 0%,#111A2E 45%,#0A0E18 100%);
+  background-attachment:fixed;
+  color:var(--ink);font-family:'IBM Plex Sans',sans-serif;font-weight:400;min-height:100vh;overflow-x:hidden;
+}
+.num{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;}
+
+/* ─── STOREFRONT NAV ─── */
+#storeNav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(10,14,24,0.55);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border-bottom:1px solid rgba(255,255,255,0.08);padding:0 5%;height:64px;display:flex;align-items:center;justify-content:space-between;}
+.s-logo{font-family:'Big Shoulders Display',sans-serif;font-size:21px;font-weight:800;color:var(--steel);letter-spacing:1px;text-decoration:none;display:flex;align-items:center;gap:8px;}
+.s-logo span{color:var(--rg);}
+.s-nav-links{display:flex;gap:32px;list-style:none;}
+.s-nav-links a{color:var(--ink3);text-decoration:none;font-size:12px;letter-spacing:1px;transition:color 0.3s;cursor:pointer;}
+.s-nav-links a:hover{color:var(--rg);}
+.s-nav-right{display:flex;align-items:center;gap:14px;}
+.s-cart-btn{background:rgba(255,255,255,0.06);backdrop-filter:blur(10px);border:1px solid var(--line);color:var(--ink);padding:9px 18px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;font-size:12px;letter-spacing:1px;transition:all 0.3s;display:flex;align-items:center;gap:8px;border-radius:10px;}
+.s-cart-btn:hover{border-color:var(--rg);color:var(--rg);box-shadow:0 0 0 1px var(--rg-light);}
+.s-cart-count{background:var(--rg);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;font-family:'IBM Plex Mono',monospace;box-shadow:0 0 12px rgba(255,122,69,0.6);}
+.s-hamburger{display:none;background:none;border:none;cursor:pointer;flex-direction:column;gap:5px;padding:4px;}
+.s-hamburger span{display:block;width:22px;height:1.5px;background:var(--ink3);}
+.s-mobile-menu{display:none;position:fixed;top:64px;left:0;right:0;background:rgba(10,14,24,0.85);backdrop-filter:var(--glass-blur);border-bottom:1px solid rgba(255,255,255,0.08);padding:20px 5%;z-index:999;flex-direction:column;gap:4px;}
+.s-mobile-menu.open{display:flex;}
+.s-mobile-menu a{color:var(--ink3);text-decoration:none;font-size:13px;letter-spacing:1px;padding:14px 0;border-bottom:1px solid var(--line);cursor:pointer;}
+.s-mobile-menu a:last-child{border-bottom:none;}
+.s-mobile-menu a:hover{color:var(--rg);}
+@media(max-width:768px){.s-nav-links{display:none;}.s-hamburger{display:flex;}}
+
+/* ─── HERO ─── */
+.s-hero{min-height:88vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:100px 5% 60px;position:relative;overflow:hidden;}
+.hero-crate{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:640px;height:640px;border:1px solid rgba(255,122,69,0.14);border-radius:50%;pointer-events:none;}
+.hero-crate2{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:460px;height:460px;border:1px solid rgba(110,168,255,0.14);border-radius:50%;pointer-events:none;}
+.hero-eyebrow{font-size:11px;letter-spacing:5px;text-transform:uppercase;color:var(--rg);margin-bottom:24px;display:flex;align-items:center;justify-content:center;gap:10px;animation:fadeUp 0.8s ease both;}
+.hero-eyebrow::before,.hero-eyebrow::after{content:'';width:30px;height:1px;background:var(--rg);}
+.hero-title{font-family:'Big Shoulders Display',sans-serif;font-size:clamp(46px,8vw,92px);font-weight:800;line-height:0.95;color:var(--ink);margin-bottom:16px;animation:fadeUp 0.8s 0.15s ease both;letter-spacing:0.01em;text-shadow:0 4px 40px rgba(255,122,69,0.25);}
+.hero-title em{font-style:normal;color:var(--rg);}
+.hero-divider{width:40px;height:2px;background:var(--rg);margin:0 auto 20px;animation:fadeUp 0.8s 0.25s ease both;box-shadow:0 0 12px rgba(255,122,69,0.7);}
+.hero-sub{font-size:13px;letter-spacing:2px;color:var(--ink3);margin-bottom:48px;animation:fadeUp 0.8s 0.3s ease both;}
+.hero-cta{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;animation:fadeUp 0.8s 0.45s ease both;}
+.btn-rg{background:linear-gradient(135deg,var(--rg),var(--rg-dark));color:#fff;border:none;padding:15px 38px;font-family:'IBM Plex Sans',sans-serif;font-size:12px;letter-spacing:1.5px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all 0.3s;font-weight:600;border-radius:12px;box-shadow:0 10px 30px rgba(255,122,69,0.35);}
+.btn-rg:hover{transform:translateY(-2px);box-shadow:0 14px 38px rgba(255,122,69,0.5);}
+.btn-outline{background:rgba(255,255,255,0.05);backdrop-filter:blur(10px);color:var(--ink);border:1px solid rgba(255,255,255,0.22);padding:15px 38px;font-family:'IBM Plex Sans',sans-serif;font-size:12px;letter-spacing:1.5px;cursor:pointer;display:inline-flex;align-items:center;transition:all 0.3s;border-radius:12px;}
+.btn-outline:hover{border-color:var(--rg);color:var(--rg);}
+.hero-scroll{position:absolute;bottom:36px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--ink4);font-size:9px;letter-spacing:3px;text-transform:uppercase;}
+.hero-scroll::after{content:'';width:1px;height:40px;background:linear-gradient(to bottom,var(--rg),transparent);animation:scrollLine 2s ease-in-out infinite;}
+
+/* ─── SECTION ─── */
+.s-section{padding:80px 5%;}
+.s-section-label{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--rg);display:block;margin-bottom:12px;text-align:center;}
+.s-section-divider{width:40px;height:2px;background:var(--rg);margin:0 auto 16px;box-shadow:0 0 12px rgba(255,122,69,0.7);}
+.s-section-title{font-family:'Big Shoulders Display',sans-serif;font-size:clamp(28px,4.5vw,44px);font-weight:700;color:var(--ink);text-align:center;}
+
+/* ─── FILTER BAR ─── */
+.s-filter-bar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:40px 0;}
+.s-filter-btn{background:rgba(255,255,255,0.05);backdrop-filter:blur(10px);border:1px solid var(--line);color:var(--ink3);padding:9px 22px;font-family:'IBM Plex Sans',sans-serif;font-size:11px;letter-spacing:1px;cursor:pointer;transition:all 0.3s;border-radius:10px;flex-shrink:0;}
+.s-filter-btn:hover,.s-filter-btn.active{border-color:var(--rg);color:var(--rg);background:var(--rg-pale);box-shadow:0 0 16px rgba(255,122,69,0.18);}
+@media(max-width:640px){
+  .s-filter-bar{flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:4px 5% 14px;margin:30px 0;scrollbar-width:none;}
+  .s-filter-bar::-webkit-scrollbar{display:none;}
+}
+
+/* ─── PRODUCT GRID ─── */
+.s-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px;max-width:1200px;margin:0 auto;}
+.s-grid-state{grid-column:1/-1;text-align:center;padding:70px 20px;color:var(--ink3);}
+.s-spinner{width:30px;height:30px;border:1px solid var(--line);border-top-color:var(--rg);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 20px;}
+
+/* ─── PRODUCT CARD (glass) ─── */
+.s-card{background:var(--card-bg);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border:1px solid rgba(255,255,255,0.10);overflow:hidden;transition:all 0.35s cubic-bezier(.2,.8,.3,1);position:relative;border-radius:18px;box-shadow:0 8px 28px rgba(0,0,0,0.32),inset 0 1px 0 rgba(255,255,255,0.06);}
+.s-card:hover{border-color:var(--line-hover);transform:translateY(-6px) scale(1.012);box-shadow:0 24px 50px rgba(255,122,69,0.16),0 10px 26px rgba(0,0,0,0.4);}
+.s-card.taken{opacity:0.5;pointer-events:none;}
+.s-img-wrap{position:relative;aspect-ratio:4/3;overflow:hidden;background:rgba(255,122,69,0.08);}
+.s-img-wrap img,.s-img-wrap video{width:100%;height:100%;object-fit:cover;display:block;}
+.s-badge{position:absolute;top:12px;left:12px;background:var(--rg);color:#fff;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 11px;font-weight:600;border-radius:8px;box-shadow:0 4px 14px rgba(255,122,69,0.5);}
+.s-taken-stamp{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,14,24,0.75);backdrop-filter:blur(6px);}
+.s-taken-stamp span{border:2px solid var(--rg);color:var(--rg);font-size:12px;letter-spacing:3px;text-transform:uppercase;padding:8px 18px;font-weight:700;border-radius:8px;}
+.s-card-info{padding:14px 14px 6px;}
+.s-card-name{font-family:'Big Shoulders Display',sans-serif;font-size:18px;font-weight:700;color:var(--ink);margin-bottom:3px;letter-spacing:0.01em;}
+.s-card-unit{font-size:11px;color:var(--ink3);margin-bottom:6px;}
+.s-card-price{font-size:14px;color:var(--rg);font-family:'IBM Plex Mono',monospace;font-weight:600;}
+.s-card-actions{padding:8px 14px 14px;}
+.s-add-btn{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--line);color:var(--ink3);padding:10px;font-family:'IBM Plex Sans',sans-serif;font-size:11px;letter-spacing:1px;cursor:pointer;transition:all 0.3s;border-radius:10px;}
+.s-add-btn:hover:not(:disabled){border-color:var(--rg);color:var(--rg);background:var(--rg-pale);}
+.s-add-btn.in-cart{border-color:var(--rg);color:var(--rg);background:var(--rg-pale);}
+.s-add-btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+/* ─── CART SIDEBAR (glass) ─── */
+.s-cart-overlay{position:fixed;inset:0;background:rgba(5,7,12,0.6);backdrop-filter:blur(4px);z-index:2000;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+.s-cart-overlay.open{opacity:1;pointer-events:all;}
+.s-cart-sidebar{position:fixed;top:0;right:0;bottom:0;width:min(430px,100vw);background:rgba(14,19,32,0.88);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border-left:1px solid rgba(255,255,255,0.10);z-index:2001;transform:translateX(100%);transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);display:flex;flex-direction:column;box-shadow:-20px 0 60px rgba(0,0,0,0.4);}
+.s-cart-sidebar.open{transform:translateX(0);}
+.s-cart-header{padding:20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.s-cart-title{font-family:'Big Shoulders Display',sans-serif;font-size:22px;color:var(--ink);}
+.s-icon-btn{background:none;border:none;color:var(--ink3);cursor:pointer;font-size:18px;padding:4px;}
+.s-icon-btn:hover{color:var(--rg);}
+.s-cart-body{flex:1;overflow-y:auto;padding:12px;}
+.s-cart-empty{text-align:center;padding:70px 20px;color:var(--ink3);font-size:13px;line-height:2;}
+.s-cart-item{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid var(--line);}
+.s-cart-item-img{width:66px;height:66px;object-fit:cover;background:rgba(255,122,69,0.08);flex-shrink:0;border-radius:8px;}
+.s-cart-item-info{flex:1;}
+.s-cart-item-name{font-family:'Big Shoulders Display',sans-serif;font-size:16px;font-weight:700;color:var(--ink);margin-bottom:2px;}
+.s-cart-item-price{font-size:12px;color:var(--rg);font-family:'IBM Plex Mono',monospace;margin-bottom:6px;}
+.s-qty-row{display:flex;align-items:center;gap:10px;font-size:13px;}
+.s-qty-btn{background:rgba(255,255,255,0.05);border:1px solid var(--line);color:var(--ink3);width:26px;height:26px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;border-radius:8px;}
+.s-qty-btn:hover{border-color:var(--rg);color:var(--rg);}
+.s-rm-btn{background:none;border:none;color:var(--ink4);cursor:pointer;font-size:17px;padding:4px;margin-left:auto;}
+.s-rm-btn:hover{color:#FF6B6B;}
+.s-cart-footer{padding:18px 20px;border-top:1px solid var(--line);flex-shrink:0;}
+.s-total-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.s-total-label{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink3);}
+.s-total-amt{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600;color:var(--rg);}
+.s-phone-field{margin-bottom:12px;}
+.s-phone-field label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink3);display:block;margin-bottom:6px;}
+.s-phone-field input{width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--line);color:var(--ink);padding:11px 14px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;outline:none;border-radius:10px;}
+.s-phone-field input:focus{border-color:var(--rg);}
+.s-order-btn{width:100%;background:linear-gradient(135deg,var(--rg),var(--rg-dark));color:#fff;border:none;padding:14px;font-family:'IBM Plex Sans',sans-serif;font-size:12px;letter-spacing:1.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-weight:600;transition:all 0.3s;border-radius:12px;margin-bottom:10px;box-shadow:0 10px 28px rgba(255,122,69,0.35);}
+.s-order-btn:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(255,122,69,0.5);}
+.s-checkout-hint{font-size:11px;color:var(--ink3);text-align:center;line-height:1.6;}
+
+/* ─── MODAL (quick view, glass) ─── */
+.s-modal-bg{position:fixed;inset:0;background:rgba(5,7,12,0.7);backdrop-filter:blur(6px);z-index:3000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+.s-modal-bg.open{opacity:1;pointer-events:all;}
+.s-modal-box{background:rgba(16,21,36,0.9);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);max-width:760px;width:100%;max-height:90vh;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;transform:scale(0.94);transition:transform 0.3s;position:relative;border-radius:20px;border:1px solid rgba(255,255,255,0.10);box-shadow:0 30px 80px rgba(0,0,0,0.5);}
+.s-modal-bg.open .s-modal-box{transform:scale(1);}
+.s-modal-photo{width:100%;height:100%;min-height:300px;object-fit:cover;background:rgba(255,122,69,0.08);display:block;}
+.s-modal-info{padding:32px 28px;}
+.s-close-btn{position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.08);backdrop-filter:blur(10px);border:1px solid var(--line);color:var(--ink3);cursor:pointer;font-size:15px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;z-index:10;border-radius:10px;}
+.s-close-btn:hover{border-color:var(--rg);color:var(--rg);}
+.s-modal-cat{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--rg);margin-bottom:8px;display:block;}
+.s-modal-name{font-family:'Big Shoulders Display',sans-serif;font-size:28px;font-weight:800;color:var(--ink);margin-bottom:4px;}
+.s-modal-unit{font-size:12px;color:var(--ink3);margin-bottom:6px;}
+.s-modal-price{font-size:16px;font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--rg);margin-bottom:22px;}
+.s-modal-taken{background:rgba(255,107,107,0.12);border:1px solid rgba(255,107,107,0.3);color:#FF8A8A;padding:10px 14px;font-size:11px;text-align:center;margin-bottom:16px;border-radius:10px;}
+.s-attr-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink3);margin-bottom:10px;display:block;}
+.s-qty-picker{display:flex;align-items:center;gap:14px;margin-bottom:24px;}
+.s-qty-picker .s-qty-btn{width:34px;height:34px;font-size:18px;}
+.s-qty-picker .qty-val{font-family:'IBM Plex Mono',monospace;font-size:18px;min-width:56px;width:70px;text-align:center;border:1px solid var(--line);border-radius:10px;padding:6px 4px;background:rgba(255,255,255,0.05);color:var(--ink);}
+.s-qty-picker .qty-val:focus{border-color:var(--rg);outline:none;}
+.s-qty-picker .qty-val::-webkit-inner-spin-button,.s-qty-picker .qty-val::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+.s-modal-add-btn{width:100%;background:linear-gradient(135deg,var(--rg),var(--rg-dark));color:#fff;border:none;padding:15px;font-family:'IBM Plex Sans',sans-serif;font-size:12px;letter-spacing:1.5px;cursor:pointer;font-weight:600;transition:all 0.3s;border-radius:12px;box-shadow:0 10px 28px rgba(255,122,69,0.35);}
+.s-modal-add-btn:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(255,122,69,0.5);}
+.s-modal-add-btn:disabled{opacity:0.4;cursor:not-allowed;}
+@media(max-width:620px){.s-modal-box{grid-template-columns:1fr;}.s-modal-photo{max-height:230px;}}
+
+/* ─── CONTACT ─── */
+.s-contact{padding:80px 5%;background:rgba(255,255,255,0.02);border-top:1px solid var(--line);}
+.s-contact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:28px;max-width:900px;margin:48px auto 0;text-align:center;}
+.s-contact-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--rg);display:block;margin-bottom:6px;}
+.s-contact-val{font-family:'IBM Plex Sans',sans-serif;font-size:15px;color:var(--ink);font-weight:500;overflow-wrap:anywhere;word-break:break-word;}
+.s-pay-pills{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:36px;}
+.s-pay-pill{background:rgba(255,255,255,0.05);backdrop-filter:blur(10px);border:1px solid var(--line);color:var(--ink3);padding:6px 16px;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;border-radius:8px;}
+
+footer{padding:28px 5%;border-top:1px solid var(--line);text-align:center;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink4);}
+footer b{color:var(--rg);font-weight:600;}
+
+/* ─── LOGIN OVERLAY (glass) ─── */
+.s-login-overlay{position:fixed;inset:0;background:rgba(5,7,12,0.85);backdrop-filter:blur(8px);z-index:6000;display:none;align-items:center;justify-content:center;}
+.s-login-overlay.open{display:flex;}
+.s-login-card{background:rgba(16,21,36,0.88);backdrop-filter:var(--glass-blur);padding:40px 36px;width:min(380px,92vw);text-align:center;border-radius:20px;border:1px solid rgba(255,255,255,0.12);box-shadow:0 30px 80px rgba(0,0,0,0.5);}
+.s-login-title{font-family:'Big Shoulders Display',sans-serif;font-size:22px;color:var(--rg);margin-bottom:6px;font-weight:800;}
+.s-login-sub{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink3);margin-bottom:28px;}
+.s-login-err{font-size:11px;color:#FF8A8A;margin-bottom:12px;min-height:16px;}
+.s-login-card input,.s-login-card select{width:100%;background:rgba(255,255,255,0.06);border:1px solid var(--line);color:var(--ink);padding:11px 14px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;outline:none;border-radius:10px;margin-bottom:12px;text-align:center;}
+.s-login-card input:focus{border-color:var(--rg);}
+
+/* ─── GEAR BTN ─── */
+.s-gear-btn{position:fixed;bottom:24px;left:24px;background:rgba(16,21,36,0.7);backdrop-filter:blur(14px);border:1px solid var(--line);color:var(--ink3);width:42px;height:42px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;z-index:500;transition:all 0.3s;box-shadow:var(--shadow);}
+.s-gear-btn:hover{border-color:var(--rg);color:var(--rg);transform:rotate(35deg);}
+
+/* ─── TOAST ─── */
+.s-toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(90px);background:rgba(16,21,36,0.92);backdrop-filter:blur(14px);color:var(--white);padding:12px 26px;font-size:12px;letter-spacing:0.5px;z-index:9999;transition:transform 0.4s ease;white-space:nowrap;border-radius:10px;max-width:90vw;text-align:center;border:1px solid rgba(255,255,255,0.1);box-shadow:0 12px 32px rgba(0,0,0,0.4);}
+.s-toast.show{transform:translateX(-50%) translateY(0);}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px);}to{opacity:1;transform:translateY(0);}}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes scrollLine{0%{opacity:0;transform:translateY(-8px);}50%{opacity:1;}100%{opacity:0;transform:translateY(8px);}}
+.fade-in{opacity:0;transform:translateY(26px);transition:opacity 0.6s ease,transform 0.6s ease;}
+.fade-in.visible{opacity:1;transform:translateY(0);}
+
+/* ════════════════════════════════════════════════════════════════
+   ADMIN THEME — dark glass dashboard, namespaced under #adminApp
+   ════════════════════════════════════════════════════════════════ */
+#adminApp{
+  --a-bg:transparent;--a-panel:rgba(255,255,255,0.055);--a-text:#F3F5FA;--a-muted:#98A0B5;
+  --a-line:rgba(255,255,255,0.12);--a-accent:#0D1424;--a-rg:#FF7A45;--a-rg-light:rgba(255,122,69,0.15);
+  --a-green:#3ECF8E;--a-green-light:rgba(62,207,142,0.14);--a-red:#FF6B6B;--a-red-light:rgba(255,107,107,0.14);
+  --a-amber:#FFC857;--a-amber-light:rgba(255,200,87,0.14);--a-blue:#6EA8FF;--a-blue-light:rgba(110,168,255,0.14);
+  --a-radius:18px;--a-radius-sm:10px;--a-shadow:0 10px 34px rgba(0,0,0,0.4);
+  --a-sidebar-w:230px;
+  font-family:'IBM Plex Sans',sans-serif;color:var(--a-text);min-height:100vh;
+  background:
+    radial-gradient(ellipse 900px 700px at 10% -10%, rgba(255,122,69,0.16), transparent 60%),
+    radial-gradient(ellipse 800px 640px at 105% 0%, rgba(110,168,255,0.16), transparent 60%),
+    linear-gradient(180deg,#0A0E18 0%,#111A2E 50%,#0A0E18 100%);
+  position:fixed;inset:0;z-index:8000;display:none;overflow:hidden;
+}
+#adminApp.open{display:block;}
+#adminApp *{box-sizing:border-box;}
+#adminApp .app{display:grid;grid-template-columns:var(--a-sidebar-w) 1fr;height:100vh;overflow:hidden;}
+#adminApp .sidebar{background:rgba(10,14,24,0.55);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);color:#fff;height:100vh;display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0;border-right:1px solid rgba(255,255,255,0.08);}
+#adminApp .brand{padding:22px 18px 16px;border-bottom:1px solid rgba(255,255,255,0.08);}
+#adminApp .brand-name{font-family:'Big Shoulders Display',serif;font-weight:800;font-size:18px;color:#fff;line-height:1.2;letter-spacing:0.01em;}
+#adminApp .brand-sub{font-size:11px;color:rgba(255,255,255,0.4);margin-top:3px;}
+#adminApp .mode-badge{display:inline-flex;align-items:center;gap:5px;margin-top:8px;background:rgba(255,122,69,0.18);color:var(--a-rg);border:1px solid rgba(255,122,69,0.35);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+#adminApp .a-nav{padding:10px 8px;flex:1;}
+#adminApp .nav-section{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.28);padding:12px 10px 6px;font-weight:600;}
+#adminApp .nav-btn{width:100%;border:none;background:transparent;color:rgba(255,255,255,0.55);text-align:left;padding:10px 12px;margin-bottom:1px;border-radius:var(--a-radius-sm);cursor:pointer;font-size:13px;font-family:'IBM Plex Sans',sans-serif;font-weight:500;transition:all .15s;display:flex;align-items:center;gap:9px;}
+#adminApp .nav-btn:hover{background:rgba(255,255,255,0.07);color:#fff;}
+#adminApp .nav-btn.active{background:linear-gradient(135deg,var(--a-rg),#E85D2C);color:#fff;box-shadow:0 6px 18px rgba(255,122,69,0.35);}
+#adminApp .nav-btn .icon{font-size:15px;width:18px;text-align:center;}
+#adminApp .nav-btn .count-pill{margin-left:auto;background:var(--a-red);color:#fff;font-size:10px;font-weight:700;padding:1px 7px;border-radius:999px;}
+#adminApp .sidebar-footer{padding:14px 18px;border-top:1px solid rgba(255,255,255,0.08);font-size:11px;color:rgba(255,255,255,0.22);}
+#adminApp .main{padding:24px 28px;overflow-y:auto;overflow-x:hidden;height:100vh;width:100%;}
+#adminApp .page{display:none;}
+#adminApp .page.active{display:block;}
+#adminApp .topbar{margin-bottom:20px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+#adminApp .topbar-left h2{font-family:'Big Shoulders Display',sans-serif;font-size:26px;font-weight:700;}
+#adminApp .topbar-left p{color:var(--a-muted);font-size:13px;margin-top:3px;}
+#adminApp .cards{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;}
+#adminApp .card{background:var(--a-panel);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border-radius:var(--a-radius);padding:16px 18px;box-shadow:var(--a-shadow),inset 0 1px 0 rgba(255,255,255,0.06);border:1px solid var(--a-line);transition:transform .25s,box-shadow .25s;}
+#adminApp .card:hover{transform:translateY(-3px);box-shadow:0 16px 40px rgba(0,0,0,0.45),inset 0 1px 0 rgba(255,255,255,0.08);}
+#adminApp .c-label{font-size:11px;color:var(--a-muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
+#adminApp .c-value{font-size:21px;font-weight:700;margin-top:8px;line-height:1;font-family:'IBM Plex Mono',monospace;}
+#adminApp .c-badge{display:inline-flex;align-items:center;margin-top:8px;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600;}
+#adminApp .badge-green{background:var(--a-green-light);color:var(--a-green);}
+#adminApp .badge-amber{background:var(--a-amber-light);color:var(--a-amber);}
+#adminApp .badge-red{background:var(--a-red-light);color:var(--a-red);}
+#adminApp .badge-gray{background:rgba(255,255,255,0.08);color:var(--a-muted);}
+#adminApp .section{background:var(--a-panel);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border-radius:var(--a-radius);box-shadow:var(--a-shadow),inset 0 1px 0 rgba(255,255,255,0.06);border:1px solid var(--a-line);overflow:hidden;margin-bottom:16px;}
+#adminApp .section-header{padding:14px 20px;border-bottom:1px solid var(--a-line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;background:rgba(255,255,255,0.03);}
+#adminApp .section-header h3{font-size:14px;font-weight:600;}
+#adminApp .section-body{padding:20px;}
+#adminApp .grid-2{display:grid;grid-template-columns:2fr 1fr;gap:16px;}
+#adminApp .summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+#adminApp .mini{background:rgba(255,255,255,0.04);border-radius:var(--a-radius-sm);padding:14px;border:1px solid var(--a-line);}
+#adminApp .mini .label{font-size:11px;color:var(--a-muted);font-weight:500;}
+#adminApp .mini .value{font-size:18px;font-weight:700;margin-top:5px;font-family:'IBM Plex Mono',monospace;}
+#adminApp .alert-box{border:1px solid var(--a-line);border-left:3px solid var(--a-rg);padding:11px 14px;border-radius:var(--a-radius-sm);margin-bottom:10px;background:rgba(255,255,255,0.03);}
+#adminApp .alert-box strong{display:block;font-size:12px;font-weight:600;margin-bottom:3px;}
+#adminApp .alert-box span{font-size:12px;color:var(--a-muted);}
+#adminApp .alert-box.danger{border-left-color:var(--a-red);background:var(--a-red-light);}
+#adminApp .alert-box.success{border-left-color:var(--a-green);background:var(--a-green-light);}
+#adminApp .table-wrap{overflow-x:auto;}
+#adminApp table{width:100%;border-collapse:collapse;min-width:500px;}
+#adminApp th{text-align:left;padding:9px 12px;font-size:11px;font-weight:600;color:var(--a-muted);text-transform:uppercase;letter-spacing:.05em;background:rgba(255,255,255,0.03);border-bottom:1px solid var(--a-line);}
+#adminApp td{padding:10px 12px;font-size:13px;border-bottom:1px solid var(--a-line);vertical-align:middle;}
+#adminApp tr:last-child td{border-bottom:none;}
+#adminApp tr:hover td{background:rgba(255,255,255,0.035);}
+#adminApp .pill{display:inline-flex;align-items:center;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;font-family:'IBM Plex Mono',monospace;}
+#adminApp .pill-green{background:var(--a-green-light);color:var(--a-green);}
+#adminApp .pill-amber{background:var(--a-amber-light);color:var(--a-amber);}
+#adminApp .pill-red{background:var(--a-red-light);color:var(--a-red);}
+#adminApp .pill-gray{background:rgba(255,255,255,0.08);color:var(--a-muted);}
+#adminApp .pill-blue{background:var(--a-blue-light);color:var(--a-blue);}
+#adminApp .cat-group-row td{background:var(--a-rg-light);font-weight:700;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--a-rg);padding:8px 12px;border-bottom:1px solid var(--a-line);}
+#adminApp .cat-group-row .cat-count{font-weight:500;color:var(--a-muted);text-transform:none;letter-spacing:0;font-size:11px;}
+#adminApp .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px;}
+#adminApp .form-grid .full{grid-column:1/-1;}
+#adminApp .field{display:flex;flex-direction:column;gap:5px;}
+#adminApp .field label{font-size:11px;font-weight:600;color:var(--a-muted);text-transform:uppercase;letter-spacing:.05em;}
+#adminApp input,#adminApp select,#adminApp textarea{padding:10px 12px;border:1.5px solid var(--a-line);border-radius:var(--a-radius-sm);font-size:13px;font-family:'IBM Plex Sans',sans-serif;background:rgba(255,255,255,0.05);color:var(--a-text);width:100%;transition:border-color .15s;outline:none;}
+#adminApp input:focus,#adminApp select:focus,#adminApp textarea:focus{border-color:var(--a-rg);}
+#adminApp input:read-only{background:rgba(255,255,255,0.02);cursor:not-allowed;}
+#adminApp .field-error{font-size:11px;color:var(--a-red);margin-top:2px;display:none;}
+#adminApp .field-error.show{display:block;}
+#adminApp .btn{border:none;background:rgba(255,255,255,0.08);backdrop-filter:blur(10px);color:#fff;padding:9px 16px;border-radius:var(--a-radius-sm);cursor:pointer;font-size:13px;font-weight:600;font-family:'IBM Plex Sans',sans-serif;transition:all .15s;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--a-line);}
+#adminApp .btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(0,0,0,0.3);}
+#adminApp .btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+#adminApp .btn.secondary{background:rgba(255,255,255,0.06);color:var(--a-text);}
+#adminApp .btn.gold{background:linear-gradient(135deg,var(--a-rg),#E85D2C);border-color:transparent;box-shadow:0 8px 22px rgba(255,122,69,0.32);}
+#adminApp .btn.danger{background:linear-gradient(135deg,var(--a-red),#E14D4D);border-color:transparent;box-shadow:0 8px 22px rgba(255,107,107,0.28);}
+#adminApp .btn.success{background:linear-gradient(135deg,var(--a-green),#2FB877);border-color:transparent;box-shadow:0 8px 22px rgba(62,207,142,0.28);}
+#adminApp .btn.sm{padding:5px 11px;font-size:11px;}
+#adminApp .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center;}
+#adminApp .notify{padding:10px 14px;border-radius:var(--a-radius-sm);font-size:13px;font-weight:500;margin-bottom:12px;display:none;}
+#adminApp .notify.show{display:block;}
+#adminApp .notify.success{background:var(--a-green-light);color:var(--a-green);}
+#adminApp .notify.error{background:var(--a-red-light);color:var(--a-red);}
+#adminApp .empty-state{text-align:center;padding:40px 20px;color:var(--a-muted);font-size:13px;}
+#adminApp .empty-state .icon{font-size:28px;margin-bottom:10px;}
+#adminApp .modal-overlay{display:none;position:fixed;inset:0;background:rgba(5,7,12,0.6);backdrop-filter:blur(6px);z-index:9100;align-items:center;justify-content:center;padding:20px;}
+#adminApp .modal-overlay.open{display:flex;}
+#adminApp .modal{background:rgba(18,24,40,0.92);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border-radius:var(--a-radius);padding:24px;width:90%;max-width:460px;box-shadow:0 30px 80px rgba(0,0,0,0.55);border:1px solid rgba(255,255,255,0.1);}
+#adminApp .modal.wide{max-width:640px;max-height:88vh;overflow-y:auto;}
+#adminApp .modal h3{font-size:17px;font-weight:600;margin-bottom:14px;}
+#adminApp .modal-actions{display:flex;gap:10px;margin-top:16px;justify-content:flex-end;}
+#adminApp .a-hamburger{display:none;background:rgba(16,21,36,0.8);backdrop-filter:blur(10px);color:#fff;border:1px solid var(--a-line);padding:9px 13px;cursor:pointer;font-size:18px;position:fixed;top:12px;left:12px;z-index:9400;border-radius:10px;}
+#adminApp .sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(3px);z-index:9200;}
+#adminApp .sidebar-backdrop.open{display:block;}
+#adminApp .sidebar-close-btn{display:none;}
+#adminApp .loading-row td{text-align:center;color:var(--a-muted);padding:30px;font-style:italic;}
+#adminApp .sync-dot{width:7px;height:7px;border-radius:50%;background:var(--a-green);display:inline-block;margin-right:4px;animation:pulse 2s ease-in-out infinite;box-shadow:0 0 8px var(--a-green);}
+#adminApp .report-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px;}
+#adminApp .upload-box{border:1px dashed var(--a-line);padding:26px 20px;text-align:center;cursor:pointer;transition:all 0.3s;position:relative;margin-bottom:14px;border-radius:var(--a-radius-sm);background:rgba(255,255,255,0.03);}
+#adminApp .upload-box:hover,#adminApp .upload-box.drag{border-color:var(--a-rg);background:var(--a-rg-light);}
+#adminApp .upload-box input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+#adminApp .upload-icon-txt{font-size:22px;color:var(--a-rg);margin-bottom:8px;}
+#adminApp .upload-hint{font-size:12px;color:var(--a-muted);}
+#adminApp .previews{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:8px;margin-bottom:14px;}
+#adminApp .preview-item{position:relative;aspect-ratio:4/3;}
+#adminApp .preview-item img,#adminApp .preview-item video{width:100%;height:100%;object-fit:cover;display:block;border-radius:var(--a-radius-sm);}
+#adminApp .preview-rm{position:absolute;top:3px;right:3px;background:rgba(0,0,0,0.65);color:#fff;border:none;width:20px;height:20px;font-size:11px;cursor:pointer;border-radius:50%;}
+#adminApp .toggle-wrap{display:flex;align-items:center;gap:8px;}
+#adminApp .toggle{width:38px;height:20px;background:var(--a-line);border-radius:11px;position:relative;cursor:pointer;transition:all 0.3s;flex-shrink:0;}
+#adminApp .toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.2);transition:all 0.3s;}
+#adminApp .toggle.on{background:var(--a-green);}
+#adminApp .toggle.on::after{transform:translateX(18px);}
+#adminApp .order-card{border:1px solid var(--a-line);border-radius:var(--a-radius-sm);padding:14px 16px;margin-bottom:10px;background:rgba(255,255,255,0.03);}
+#adminApp .order-card.pending{border-left:3px solid var(--a-rg);background:var(--a-rg-light);}
+#adminApp.role-hidden-mode .nav-section{display:none;}
+#adminApp .customer-select-list{max-height:260px;overflow-y:auto;border:1.5px solid var(--a-line);border-radius:var(--a-radius-sm);padding:8px;}
+#adminApp .customer-select-item{display:flex;align-items:center;gap:10px;padding:8px 6px;border-bottom:1px solid var(--a-line);font-size:13px;cursor:pointer;}
+#adminApp .customer-select-item:last-child{border-bottom:none;}
+#adminApp .customer-select-item:hover{background:rgba(255,255,255,0.04);}
+#adminApp .customer-select-item input[type=checkbox]{width:16px;height:16px;accent-color:var(--a-rg);cursor:pointer;flex-shrink:0;}
+#adminApp .broadcast-textarea{width:100%;min-height:90px;resize:vertical;}
+#adminApp .sel-all-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px;color:var(--a-muted);font-weight:600;}
+#adminApp .sel-all-row input{width:15px;height:15px;accent-color:var(--a-rg);cursor:pointer;}
+/* POS cart lines (Mauzo tab) */
+#adminApp .pos-pick{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--a-line);cursor:pointer;}
+#adminApp .pos-pick:hover{background:rgba(255,255,255,0.04);}
+#adminApp .pos-pick .pname{font-weight:600;font-size:13px;}
+#adminApp .pos-pick .pmeta{font-size:11px;color:var(--a-muted);}
+#adminApp .pos-pick .prate{font-family:'IBM Plex Mono',monospace;font-size:13px;}
+#adminApp .cart-line{display:grid;grid-template-columns:1fr 52px 80px 24px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--a-line);font-size:13px;}
+#adminApp .cart-line input[type=number]{padding:5px 6px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;text-align:center;}
+#adminApp .cart-remove{background:none;border:none;color:var(--a-red);cursor:pointer;font-size:15px;line-height:1;}
+#adminApp .totals-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13.5px;}
+#adminApp .totals-row.grand{font-size:18px;font-weight:700;border-top:1px solid var(--a-line);margin-top:6px;padding-top:12px;font-family:'IBM Plex Mono',monospace;}
+#adminApp .pay-toggle{display:flex;gap:8px;}
+#adminApp .pay-toggle label{flex:1;text-align:center;padding:8px;border:1.5px solid var(--a-line);border-radius:var(--a-radius-sm);font-size:12px;cursor:pointer;color:var(--a-muted);}
+#adminApp .pay-toggle input{display:none;}
+#adminApp .pay-toggle label:has(input:checked){border-color:var(--a-rg);background:var(--a-rg-light);color:var(--a-text);font-weight:600;}
+
+/* Invoice print sheet — stays light/print-friendly regardless of theme */
+.inv-overlay{position:fixed;inset:0;background:rgba(5,7,12,0.7);backdrop-filter:blur(6px);display:none;align-items:flex-start;justify-content:center;padding:32px 14px;z-index:9600;overflow:auto;}
+.inv-overlay.open{display:flex;}
+.inv-sheet{background:#fff;width:680px;max-width:100%;padding:34px 38px;font-family:'IBM Plex Sans',sans-serif;color:#1a1a1a;position:relative;border-radius:12px;box-shadow:0 30px 80px rgba(0,0,0,0.5);}
+.inv-close{position:absolute;top:10px;right:12px;background:none;border:none;font-size:20px;cursor:pointer;color:#6B675C;}
+.inv-title{text-align:center;text-decoration:underline;font-family:'Big Shoulders Display';font-weight:800;font-size:18px;letter-spacing:0.08em;margin-bottom:10px;}
+.inv-co{font-size:13px;line-height:1.65;}
+.inv-co b{font-family:'Big Shoulders Display';font-size:15px;letter-spacing:0.02em;}
+.inv-meta{margin-top:10px;font-size:13px;line-height:1.65;}
+table.inv-table{width:100%;border-collapse:collapse;margin-top:16px;font-size:12.5px;}
+table.inv-table th,table.inv-table td{border:1px solid #444;padding:6px 8px;}
+table.inv-table th{background:#F0EEE8;font-weight:600;text-align:left;}
+table.inv-table td.num,table.inv-table th.num{text-align:right;font-family:'IBM Plex Mono',monospace;}
+.inv-total-row td{font-weight:700;}
+.inv-acct{margin-top:16px;font-size:13px;}
+.inv-sign{display:flex;justify-content:space-between;margin-top:38px;font-size:12px;}
+.inv-sign div{width:30%;text-align:center;}
+.inv-sign .line{border-top:1px solid #333;margin-top:34px;padding-top:4px;}
+.inv-print-btn{margin-top:24px;text-align:center;}
+@media print{
+  body *{visibility:hidden;}
+  .inv-sheet,.inv-sheet *{visibility:visible;}
+  .inv-sheet{position:absolute;top:0;left:0;width:100%;box-shadow:none;}
+  .inv-close,.inv-print-btn{display:none;}
+}
+
+/* Mobile topnav */
+#adminApp .a-topnav{display:none;position:fixed;top:0;left:0;right:0;z-index:9500;background:rgba(10,14,24,0.75);backdrop-filter:var(--glass-blur);flex-direction:column;border-bottom:1px solid rgba(255,255,255,0.08);}
+#adminApp .a-topnav-brand{display:flex;align-items:center;justify-content:space-between;padding:8px 14px 4px;}
+#adminApp .a-topnav-title{font-family:'Big Shoulders Display',sans-serif;font-size:15px;color:#fff;font-weight:700;}
+#adminApp .a-topnav-action-btn{background:rgba(255,255,255,0.12);border:none;color:rgba(255,255,255,0.7);font-size:11px;padding:5px 10px;border-radius:6px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;}
+#adminApp .a-topnav-tabs{display:flex;overflow-x:scroll;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:0 6px 0;}
+#adminApp .a-topnav-tabs::-webkit-scrollbar{display:none;}
+#adminApp .a-tab-btn{flex:0 0 auto;background:transparent;border:none;border-bottom:2px solid transparent;padding:6px 10px 8px;color:rgba(255,255,255,0.42);font-family:'IBM Plex Sans',sans-serif;cursor:pointer;white-space:nowrap;position:relative;min-width:60px;}
+#adminApp .a-tab-btn .t-icon{font-size:18px;line-height:1.2;display:block;}
+#adminApp .a-tab-btn .t-label{font-size:9px;letter-spacing:0.3px;font-weight:500;display:block;}
+#adminApp .a-tab-btn.active{color:var(--a-rg);border-bottom-color:var(--a-rg);}
+#adminApp .a-tab-btn .t-pill{position:absolute;top:3px;right:4px;background:var(--a-red);color:#fff;font-size:8px;font-weight:700;padding:1px 4px;border-radius:999px;}
+
+@media(max-width:960px){
+  #adminApp .app{grid-template-columns:1fr;height:100vh;}
+  #adminApp .sidebar{position:fixed;left:calc(-1 * var(--a-sidebar-w) - 10px);width:var(--a-sidebar-w);z-index:9300;transition:left .25s;top:0;bottom:0;height:100vh;overflow-y:auto;box-shadow:4px 0 24px rgba(0,0,0,0.3);}
+  #adminApp .sidebar.open{left:0;}
+  #adminApp .sidebar-backdrop.open{display:block;}
+  #adminApp .sidebar-close-btn{display:block;position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.1);border:none;color:#fff;width:30px;height:30px;border-radius:50%;font-size:14px;cursor:pointer;z-index:1;}
+  #adminApp .a-topnav{display:flex;}
+  #adminApp .main{padding:14px;padding-top:90px;height:100vh;}
+  #adminApp .cards{grid-template-columns:repeat(2,1fr);}
+  #adminApp .grid-2{grid-template-columns:1fr;}
+  #adminApp .report-grid{grid-template-columns:repeat(2,1fr);}
+  #adminApp .form-grid{grid-template-columns:1fr;}
+}
+@media(max-width:540px){
+  #adminApp .cards{grid-template-columns:1fr;}
+  #adminApp .report-grid{grid-template-columns:1fr;}
+  #adminApp .summary-grid{grid-template-columns:1fr;}
+}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════
+     STOREFRONT
+════════════════════════════════════════════════════════ -->
+<div id="storeApp">
+
+<nav id="storeNav">
+  <a href="#" class="s-logo">
+    <svg width="22" height="22" viewBox="0 0 40 40" fill="none"><path d="M4 30L20 8L36 30" stroke="#C1440E" stroke-width="3.4" stroke-linejoin="round" fill="none"/><path d="M11 30L20 17L29 30" stroke="#2B4570" stroke-width="2.6" stroke-linejoin="round" fill="none"/></svg>
+    NGARA <span>HUDUMA</span>
+  </a>
+  <ul class="s-nav-links">
+    <li><a onclick="sScrollTo('collection')">Bidhaa</a></li>
+    <li><a onclick="sScrollTo('contact')">Wasiliana Nasi</a></li>
+  </ul>
+  <div class="s-nav-right">
+    <button class="s-cart-btn" onclick="openCart()">Chaguo <span class="s-cart-count" id="cartCount">0</span></button>
+    <button class="s-hamburger" onclick="toggleMobile()"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="s-mobile-menu" id="mobileMenu">
+  <a onclick="sScrollTo('collection');closeMobile()">Bidhaa</a>
+  <a onclick="sScrollTo('contact');closeMobile()">Wasiliana Nasi</a>
+  <a onclick="openCart();closeMobile()">Chaguo (<span id="mCartCount">0</span>)</a>
+</div>
+
+<section class="s-hero">
+  <div class="hero-crate"></div>
+  <div class="hero-crate2"></div>
+  <span class="hero-eyebrow">NGARA HUDUMA</span>
+  <h1 class="hero-title">NGARA <em>HUDUMA</em></h1>
+  <div class="hero-divider"></div>
+  <p class="hero-sub">Mabomba · Fittings · Umeme · Saruji · Zana za Ujenzi</p>
+  <div class="hero-cta">
+    <a class="btn-rg" onclick="sScrollTo('collection')">Angalia Bidhaa</a>
+    <a class="btn-outline" onclick="sScrollTo('contact')">Wasiliana Nasi</a>
+  </div>
+  <div class="hero-scroll"></div>
+</section>
+
+<section class="s-section" id="collection">
+  <span class="s-section-label fade-in">Bidhaa Zetu</span>
+  <div class="s-section-divider fade-in"></div>
+  <h2 class="s-section-title fade-in">Vifaa vya Ujenzi Unavyohitaji</h2>
+  <div class="s-filter-bar" id="branchFilterBar" style="margin-bottom:6px;">
+    <button class="s-filter-btn active" id="s-branch-yote" onclick="doStoreBranch('yote',this)">Matawi Yote</button>
+    <button class="s-filter-btn" id="s-branch-ngaramjini" onclick="doStoreBranch('ngaramjini',this)">Ngara Mjini</button>
+    <button class="s-filter-btn" id="s-branch-benaco" onclick="doStoreBranch('benaco',this)">Benaco</button>
+    <button class="s-filter-btn" id="s-branch-mugoma" onclick="doStoreBranch('mugoma',this)">Mugoma</button>
+  </div>
+  <div class="s-filter-bar" id="categoryFilterBar">
+    <button class="s-filter-btn active" onclick="doFilter('all',this)">Zote</button>
+    <button class="s-filter-btn" onclick="doFilter('mabomba',this)">Mabomba</button>
+    <button class="s-filter-btn" onclick="doFilter('fittings',this)">Fittings</button>
+    <button class="s-filter-btn" onclick="doFilter('umeme',this)">Umeme</button>
+    <button class="s-filter-btn" onclick="doFilter('saruji',this)">Saruji</button>
+    <button class="s-filter-btn" onclick="doFilter('zana',this)">Zana</button>
+    <button class="s-filter-btn" onclick="doFilter('mengineyo',this)">Mengineyo</button>
+  </div>
+  <div class="s-grid" id="productGrid">
+    <div class="s-grid-state"><div class="s-spinner"></div><p style="font-size:12px;letter-spacing:1px;color:var(--ink3)">Inapakia bidhaa...</p></div>
+  </div>
+</section>
+
+<section class="s-contact" id="contact">
+  <div class="fade-in">
+    <span class="s-section-label">Wasiliana Nasi</span>
+    <div class="s-section-divider"></div>
+    <h2 class="s-section-title">Tupo Tayari Kukuhudumia</h2>
+  </div>
+  <div class="s-contact-grid">
+    <div class="fade-in"><span class="s-contact-label">Simu</span><p class="s-contact-val">0764 748 447</p></div>
+    <div class="fade-in"><span class="s-contact-label">Mahali</span><p class="s-contact-val">P.O. Box 123, Ngara — Kagera</p></div>
+    <div class="fade-in"><span class="s-contact-label">Email</span><p class="s-contact-val" style="font-size:12.5px;">ngarahudumacompanylimited@gmail.com</p></div>
+    <div class="fade-in"><span class="s-contact-label">Masaa</span><p class="s-contact-val">Jumatatu – Jumamosi, 8am – 6pm</p></div>
+  </div>
+  <div class="s-pay-pills fade-in">
+    <div class="s-pay-pill">M-Pesa</div>
+    <div class="s-pay-pill">Airtel Money</div>
+    <div class="s-pay-pill">Tigo Pesa</div>
+    <div class="s-pay-pill">NMB Bank</div>
+    <div class="s-pay-pill">CRDB Bank</div>
+  </div>
+</section>
+
+<footer><p>© 2026 <b>Ngara Huduma Company Limited</b> &nbsp;·&nbsp; P.O. Box 123, Ngara</p></footer>
+
+<!-- CART SIDEBAR -->
+<div class="s-cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+<div class="s-cart-sidebar" id="cartSidebar">
+  <div class="s-cart-header">
+    <span class="s-cart-title">Chaguo Chako</span>
+    <button class="s-icon-btn" onclick="closeCart()">✕</button>
+  </div>
+  <div class="s-cart-body" id="cartBody">
+    <div class="s-cart-empty">Chaguo chako ni tupu.<br><br>Angalia bidhaa zetu na uongeze.</div>
+  </div>
+  <div class="s-cart-footer" id="cartFooter" style="display:none;">
+    <div class="s-total-row">
+      <span class="s-total-label">Jumla</span>
+      <span class="s-total-amt" id="cartTotal">TZS 0</span>
+    </div>
+    <div class="s-phone-field">
+      <label>Namba Yako ya Simu</label>
+      <input type="tel" id="custPhone" placeholder="mfano: 0764 748 447"/>
+    </div>
+    <div class="s-phone-field">
+      <label>Site / Eneo la Kazi (hiari)</label>
+      <input type="text" id="custSite" placeholder="mfano: Ngara Mjini, karibu na soko"/>
+    </div>
+    <button class="s-order-btn" onclick="placeOrder()">📦 Tuma Agizo/Ombi</button>
+    <p class="s-checkout-hint">Asante kwa kutuchagua Ngara Huduma. Timu yetu inawasiliana nawe hivi punde.</p>
+  </div>
+</div>
+
+<!-- QUICK VIEW MODAL -->
+<div class="s-modal-bg" id="modalBg" onclick="closeBgModal(event)">
+  <div class="s-modal-box">
+    <div id="mMediaWrap" style="position:relative;min-height:300px;background:var(--rg-pale);">
+      <img class="s-modal-photo" id="mPhoto" src="" alt="" style="display:block;"/>
+      <video class="s-modal-photo" id="mVideo" src="" autoplay muted loop playsinline style="display:none;"></video>
+    </div>
+    <div class="s-modal-info">
+      <button class="s-close-btn" onclick="closeModal()">✕</button>
+      <span class="s-modal-cat" id="mCat"></span>
+      <h3 class="s-modal-name" id="mName"></h3>
+      <p class="s-modal-unit" id="mUnit"></p>
+      <p class="s-modal-price" id="mPrice"></p>
+      <div id="mDescWrap" style="margin-bottom:18px;display:none;">
+        <p id="mDescSw" style="font-size:13px;line-height:1.6;color:var(--ink2);margin-bottom:8px;"></p>
+        <p id="mDescEn" style="font-size:13px;line-height:1.6;color:var(--ink3);font-style:italic;"></p>
+      </div>
+      <div id="mTakenNotice" class="s-modal-taken" style="display:none;">Bidhaa hii haipo kwa sasa</div>
+      <span class="s-attr-label">Idadi</span>
+      <div class="s-qty-picker">
+        <button class="s-qty-btn" onclick="modalQtyChange(-1)">−</button>
+        <input type="number" class="qty-val" id="mQty" value="1" min="1" onchange="modalQtySet(this.value)" onblur="modalQtySet(this.value)">
+        <button class="s-qty-btn" onclick="modalQtyChange(1)">+</button>
+      </div>
+      <button class="s-modal-add-btn" id="mAddBtn" onclick="addFromModal()">Chagua</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div class="s-login-overlay" id="loginOverlay">
+  <div class="s-login-card">
+    <p class="s-login-title">Admin Access</p>
+    <p class="s-login-sub">Ngara Huduma Company Limited</p>
+    <p class="s-login-err" id="loginErr"></p>
+    <input type="password" id="pwInput" placeholder="Weka password" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button class="btn-rg" style="width:100%" onclick="doLogin()">Ingia</button>
+    <br><br>
+    <button class="btn-outline" style="width:100%" onclick="closeLogin()">Ghairi</button>
+  </div>
+</div>
+
+<button class="s-gear-btn" onclick="openLogin()" title="Admin">⚙</button>
+
+</div><!-- /#storeApp -->
+
+<!-- ════════════════════════════════════════════════════════
+     ADMIN DASHBOARD
+════════════════════════════════════════════════════════ -->
+<div id="adminApp">
+
+<div class="a-topnav" id="aTopnav">
+  <div class="a-topnav-brand">
+    <span class="a-topnav-title">Ngara Huduma · Admin</span>
+    <button class="a-topnav-action-btn" onclick="doLogout()">Toka</button>
+  </div>
+  <div class="a-topnav-tabs" id="aTopnavTabs">
+    <button class="a-tab-btn active" data-page="dashibodi"><span class="t-icon">📊</span><span class="t-label">Dashboard</span></button>
+    <button class="a-tab-btn" data-page="maagizo"><span class="t-icon">🛎</span><span class="t-label">Order</span><span class="t-pill" id="mTopPill" style="display:none">0</span></button>
+    <button class="a-tab-btn" data-page="hifadhi"><span class="t-icon">🗃</span><span class="t-label">Bidhaa</span></button>
+    <button class="a-tab-btn" data-page="mauzo"><span class="t-icon">🧾</span><span class="t-label">Mauzo</span></button>
+    <button class="a-tab-btn" data-page="gharama"><span class="t-icon">💸</span><span class="t-label">Matumizi</span></button>
+    <button class="a-tab-btn" data-page="wateja"><span class="t-icon">💳</span><span class="t-label">Madeni</span></button>
+    <button class="a-tab-btn" data-page="wanunuzi"><span class="t-icon">📣</span><span class="t-label">Wateja</span></button>
+    <button class="a-tab-btn" data-page="kila-siku"><span class="t-icon">📅</span><span class="t-label">Siku</span></button>
+    <button class="a-tab-btn" data-page="ripoti"><span class="t-icon">📈</span><span class="t-label">Ripoti</span></button>
+  </div>
+</div>
+
+<button class="a-hamburger" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <button class="sidebar-close-btn" onclick="toggleSidebar()">✕</button>
+    <div class="brand">
+      <div class="brand-name">NGARA HUDUMA</div>
+      <div class="brand-sub">Mfumo wa Biashara</div>
+      <div class="mode-badge" id="modeBadge">✏ Meneja Mkuu</div>
+      <div class="field" id="tawiSelectWrap" style="display:none;margin-top:10px;">
+        <label style="color:rgba(255,255,255,0.4);font-size:10px;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:5px;">Tawi Unaloangalia</label>
+        <select id="tawiSelect" onchange="changeViewingTawi(this.value)" style="width:100%;padding:8px;border-radius:4px;border:1px solid rgba(255,255,255,0.15);background:#0f1d33;color:#fff;font-size:12px;">
+          <option value="yote">Matawi Yote</option>
+          <option value="ngaramjini">Ngara Mjini</option>
+          <option value="benaco">Benaco</option>
+          <option value="mugoma">Mugoma</option>
+        </select>
+      </div>
+    </div>
+    <nav class="a-nav">
+      <div class="nav-section">Muhtasari</div>
+      <button class="nav-btn active" data-page="dashibodi"><span class="icon">📊</span>Dashboard</button>
+      <div class="nav-section">Duka</div>
+      <button class="nav-btn" data-page="maagizo"><span class="icon">🛎</span>Order<span class="count-pill" id="pendingPill" style="display:none;">0</span></button>
+      <div class="nav-section">Shughuli</div>
+      <button class="nav-btn" data-page="mauzo"><span class="icon">🧾</span>Mauzo</button>
+      <button class="nav-btn" data-page="gharama"><span class="icon">💸</span>Matumizi</button>
+      <div class="nav-section">Taarifa</div>
+      <button class="nav-btn" data-page="hifadhi"><span class="icon">🗃</span>Bidhaa / Stoo (+ Manunuzi)</button>
+      <button class="nav-btn" data-page="wateja"><span class="icon">💳</span>Madeni</button>
+      <button class="nav-btn" data-page="wanunuzi"><span class="icon">📣</span>Wateja</button>
+      <button class="nav-btn" data-page="kila-siku"><span class="icon">📅</span>Summary ya Siku</button>
+      <button class="nav-btn" data-page="ripoti"><span class="icon">📈</span>Ripoti</button>
+    </nav>
+    <div class="sidebar-footer">
+      <span class="sync-dot"></span>Live · Ngara Huduma © 2026
+      <br><br>
+      <button class="btn sm secondary" style="width:100%;margin-bottom:6px;" onclick="window.open(location.href.split('#')[0],'_blank')">🏗 Tazama Duka</button>
+      <button class="btn sm secondary" style="width:100%;" onclick="doLogout()">Toka</button>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- DASHIBODI -->
+    <section id="dashibodi" class="page active">
+      <div class="topbar"><div class="topbar-left"><h2>Dashboard</h2><p>Muhtasari wa biashara ya Ngara Huduma</p></div></div>
+      <div class="cards">
+        <div class="card"><div class="c-label">Jumla ya Manunuzi</div><div class="c-value" id="cardManunuzi">—</div><span class="c-badge badge-gray">Matumizi</span></div>
+        <div class="card"><div class="c-label">Jumla ya Mauzo</div><div class="c-value" id="cardMauzo">—</div><span class="c-badge badge-green">Mapato</span></div>
+        <div class="card"><div class="c-label">Faida Halisi</div><div class="c-value" id="cardFaida">—</div><span class="c-badge" id="faidaBadge">—</span></div>
+        <div class="card"><div class="c-label">Madeni Yanayosubiri</div><div class="c-value" id="cardMadeni">—</div><span class="c-badge badge-amber">Madeni</span></div>
+        <div class="card" style="border-left:3px solid var(--a-green)"><div class="c-label">💵 Hela Cash</div><div class="c-value" id="cardCash" style="color:var(--a-green)">—</div><span class="c-badge badge-green" style="font-size:10px">Cash Net</span></div>
+      </div>
+      <div class="section" id="mauzoChartSection">
+        <div class="section-header">
+          <h3>📈 Mwenendo wa Mauzo</h3>
+          <div style="display:flex;gap:6px;">
+            <button class="btn sm secondary" id="chartRangeBtn7" onclick="setChartRange(7)">Siku 7</button>
+            <button class="btn sm gold" id="chartRangeBtn14" onclick="setChartRange(14)">Siku 14</button>
+            <button class="btn sm secondary" id="chartRangeBtn30" onclick="setChartRange(30)">Siku 30</button>
+          </div>
+        </div>
+        <div class="section-body">
+          <canvas id="mauzoTrendChart" height="90"></canvas>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="section">
+          <div class="section-header"><h3>Muhtasari wa Biashara</h3></div>
+          <div class="section-body">
+            <div class="summary-grid">
+              <div class="mini"><div class="label">Mauzo ya Taslimu</div><div class="value" id="sumTaskimu">—</div></div>
+              <div class="mini"><div class="label">Mauzo ya Deni</div><div class="value" id="sumMkopo">—</div></div>
+              <div class="mini"><div class="label">Jumla ya Matumizi</div><div class="value" id="sumGharama">—</div></div>
+              <div class="mini"><div class="label">Bidhaa Zilizobaki (jumla)</div><div class="value" id="sumStock">—</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-header"><h3>Tahadhari</h3></div>
+          <div class="section-body">
+            <div class="alert-box danger" id="alertOrders" style="display:none;"><strong>🛎 Order Mpya</strong><span id="txtOrders">—</span></div>
+            <div class="alert-box danger" id="alertHifadhi"><strong>⚠ Hifadhi Ndogo</strong><span id="txtHifadhi">Inaangalia...</span></div>
+            <div class="alert-box danger" id="alertMadeni"><strong>⚠ Madeni Yaliyokwisha Muda</strong><span id="txtMadeni">Inaangalia...</span></div>
+            <div class="alert-box" id="alertHali"><strong>📊 Hali ya Biashara</strong><span id="txtHali">—</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MAAGIZO -->
+    <section id="maagizo" class="page">
+      <div class="topbar"><div class="topbar-left"><h2>Order za Duka</h2><p>Thibitisha au kataa order za mtandaoni za wateja.</p></div></div>
+      <div class="section"><div class="section-header"><h3>🕐 Yanayosubiri Uthibitisho</h3></div>
+        <div class="section-body" id="pendingOrdersList"><div class="empty-state"><div class="icon">📭</div>Hakuna order zinazosubiri.</div></div>
+      </div>
+      <div class="section"><div class="section-header"><h3>📋 Historia ya Order</h3></div>
+        <div class="section-body"><div class="table-wrap"><table>
+          <thead><tr><th>Invoice</th><th>Tarehe</th><th>Mteja</th><th>Simu</th><th>Site/Eneo</th><th>Bidhaa</th><th>Kipimo</th><th>Idadi</th><th>Jumla</th><th>Hali</th></tr></thead>
+          <tbody id="tbody-order-history"><tr class="loading-row"><td colspan="10">Inapakia...</td></tr></tbody>
+        </table></div></div>
+      </div>
+    </section>
+
+    <!-- MAUZO -->
+    <section id="mauzo" class="page">
+      <div class="topbar"><div class="topbar-left"><h2>Mauzo</h2><p>Fuatilia mauzo ya taslimu na deni.</p></div></div>
+      <div class="section"><div class="section-header"><h3>➕ Ongeza Uuzaji</h3></div>
+        <div class="section-body">
+          <div id="notifyMauzo" class="notify"></div>
+          <div class="form-grid">
+            <div class="field"><label>Tarehe</label><input type="date" id="m-tarehe"/></div>
+            <div class="field"><label>Jina la Mteja</label><input type="text" id="m-mteja" autocomplete="off" placeholder="Mteja wa Kawaida (hiari)"/></div>
+            <div class="field"><label>Aina ya Bidhaa (chuja)</label><select id="m-aina-filter" onchange="jaziChaguoBidhaa()"><option value="">Aina zote</option><option value="mabomba">Mabomba</option><option value="fittings">Fittings</option><option value="umeme">Umeme</option><option value="saruji">Saruji</option><option value="zana">Zana</option><option value="mengineyo">Mengineyo</option></select></div>
+            <div class="field"><label>Bidhaa</label><select id="m-bidhaa"></select></div>
+            <div class="field"><label>Idadi</label><input type="number" id="m-idadi" placeholder="1" min="1"/><div class="field-error" id="err-m-idadi">Weka idadi</div></div>
+            <div class="field"><label>Simu ya Mteja (kwa madeni)</label><input type="tel" id="m-simu" placeholder="mfano: 0764 XXX XXX"/></div>
+            <div class="field"><label>Aina ya Mauzo</label><select id="m-aina" onchange="togglaMkopo()"><option value="Taslimu">Taslimu</option><option value="Mkopo">Deni</option></select></div>
+            <div class="field" id="wrap-kiasi" style="display:none"><label>Kiasi Kilicholipwa (TZS)</label><input type="number" id="m-kiasi" placeholder="0"/></div>
+            <div class="field" id="wrap-tarehe-mkopo" style="display:none"><label>Tarehe ya Mwisho wa Deni</label><input type="date" id="m-tarehe-mkopo"/></div>
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px;color:var(--a-muted);cursor:pointer;">
+            <input type="checkbox" id="m-same-invoice" style="width:15px;height:15px;accent-color:var(--a-rg);">
+            Endelea kuongeza bidhaa kwenye invoice hiyo hiyo (invoice moja, bidhaa nyingi)
+          </label>
+          <div class="field" style="margin-top:14px;max-width:360px;">
+            <label>Je, unahitaji kutoa Invoice kwa Mauzo Haya?</label>
+            <div class="pay-toggle">
+              <label><input type="radio" name="m-invoice-choice" value="ndiyo" checked><span>Ndiyo, tengeneza Invoice</span></label>
+              <label><input type="radio" name="m-invoice-choice" value="hapana"><span>Hapana, hifadhi tu</span></label>
+            </div>
+          </div>
+          <div class="controls">
+            <button class="btn gold" onclick="ongezaUuzaji()">💾 Hifadhi Uuzaji</button>
+            <button class="btn secondary" onclick="safishaMauzo()">🗑 Futa</button>
+            <button class="btn" id="malizaInvoiceBtn" style="display:none;background:var(--a-blue);color:#fff;" onclick="malizaInvoice()">🖨 Maliza na Chapisha Invoice</button>
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header"><h3>📋 Rekodi za Mauzo</h3>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <input type="text" id="search-mauzo" placeholder="Tafuta..." oninput="renderMauzo()" style="width:180px"/>
+            <select id="filter-mauzo" onchange="renderMauzo()" style="width:auto"><option value="zote">Yote</option><option value="Taslimu">Taslimu</option><option value="Mkopo">Deni</option></select>
+          </div>
+        </div>
+        <div class="section-body"><div class="table-wrap"><table>
+          <thead><tr><th>Invoice</th><th>Tarehe</th><th>Mteja</th><th>Bidhaa</th><th>Idadi</th><th class="num">Jumla</th><th>Kilicholipwa</th><th>Bakaa</th><th>Status</th><th>Kitendo</th></tr></thead>
+          <tbody id="tbody-mauzo"><tr class="loading-row"><td colspan="10">Inapakia...</td></tr></tbody>
+        </table></div></div>
+      </div>
+    </section>
+
+    <!-- GHARAMA -->
+    <section id="gharama" class="page">
+      <div class="topbar"><div class="topbar-left"><h2>Matumizi</h2><p>Rekodi matumizi ya biashara.</p></div></div>
+      <div class="section"><div class="section-header"><h3>➕ Ongeza Matumizi</h3></div>
+        <div class="section-body">
+          <div id="notifyGharama" class="notify"></div>
+          <div class="form-grid">
+            <div class="field"><label>Tarehe</label><input type="date" id="g-tarehe"/></div>
+            <div class="field"><label>Aina ya Matumizi</label><input type="text" id="g-aina" placeholder="mfano: Usafiri, Kodi"/><div class="field-error" id="err-g-aina">Aina inahitajika</div></div>
+            <div class="field"><label>Kiasi (TZS)</label><input type="number" id="g-kiasi" placeholder="0"/><div class="field-error" id="err-g-kiasi">Weka kiasi</div></div>
+            <div class="field"><label>Maelezo (hiari)</label><input type="text" id="g-maelezo" placeholder="Maelezo zaidi..."/></div>
+            <div class="field"><label>Tawi</label><select id="g-tawi"><option value="ngaramjini">Ngara Mjini</option><option value="benaco">Benaco</option><option value="mugoma">Mugoma</option></select></div>
+          </div>
+          <div class="controls">
+            <button class="btn gold" onclick="ongezaGharama()">💾 Hifadhi Matumizi</button>
+            <button class="btn secondary" onclick="safishaGharama()">🗑 Futa</button>
+          </div>
+        </div>
+      </div>
+      <div class="section"><div class="section-header"><h3>📋 Rekodi za Matumizi</h3></div>
+        <div class="section-body"><div class="table-wrap"><table>
+          <thead><tr><th>Tarehe</th><th>Aina</th><th>Kiasi</th><th>Maelezo</th><th>Kitendo</th></tr></thead>
+          <tbody id="tbody-gharama"><tr class="loading-row"><td colspan="5">Inapakia...</td></tr></tbody>
+        </table></div></div>
+      </div>
+    </section>
+
+    <!-- HIFADHI — merged with Manunuzi: purchases (stock-in) directly affect stock, so they live together -->
+    <section id="hifadhi" class="page">
+      <div class="topbar"><div class="topbar-left"><h2>Bidhaa / Stoo</h2><p>Ongeza manunuzi (huingia stoo moja kwa moja), simamia hifadhi na bidhaa zinazoonekana dukani.</p></div></div>
+      <div class="section"><div class="section-header"><h3>➕ Ongeza Ununuzi (Stock-in)</h3></div>
+        <div class="section-body">
+          <div id="notifyManunuzi" class="notify"></div>
+          <div class="form-grid">
+            <div class="field"><label>Tarehe</label><input type="date" id="t-tarehe"/></div>
+            <div class="field"><label>Aina ya Bidhaa</label><select id="t-aina" onchange="updateJinaSuggestions()"><option value="mabomba">Mabomba</option><option value="fittings">Fittings</option><option value="umeme">Umeme</option><option value="saruji">Saruji</option><option value="zana">Zana</option><option value="mengineyo">Mengineyo</option></select></div>
+            <div class="field"><label>Jina la Bidhaa (English)</label><input type="text" id="t-jina" autocomplete="off" list="t-jina-suggestions" placeholder="mfano: Pvc pipe 1.5&quot;"/><datalist id="t-jina-suggestions"></datalist><div class="field-error" id="err-t-jina">Jina linahitajika</div></div>
+            <div class="field"><label>Jina kwa Kiswahili</label><input type="text" id="t-jina-sw" autocomplete="off" placeholder="mfano: Bomba la Pvc 1.5&quot;"/></div>
+            <div class="field"><label>Kipimo</label><select id="t-kipimo"><option value="pc">Piece / Pisi</option><option value="bag">Bag / Mifuko</option><option value="roll">Roll / Rola</option><option value="meter">Meter / Mita</option><option value="litre">Litre / Lita</option><option value="kg">Kg / Kilo</option><option value="pack">Pack / Packets</option><option value="sheet">Sheet / Bati</option><option value="box">Box / Kasha</option><option value="set">Set / Seti</option><option value="pair">Pair / Jozi</option></select></div>
+            <div class="field"><label>Idadi</label><input type="number" id="t-idadi" placeholder="1" min="1"/><div class="field-error" id="err-t-idadi">Weka idadi</div></div>
+            <div class="field"><label>Bei ya Kununulia (TZS)</label><input type="number" id="t-bei-kununulia" placeholder="0"/><div class="field-error" id="err-t-bei">Weka bei</div></div>
+            <div class="field"><label>Bei ya Kuuzia (TZS)</label><input type="number" id="t-bei-kuuzia" placeholder="0"/></div>
+            <div class="field"><label>Tawi</label><select id="t-tawi"><option value="ngaramjini">Ngara Mjini</option><option value="benaco">Benaco</option><option value="mugoma">Mugoma</option></select></div>
+            <div class="field full"><label>Msambazaji</label><input type="text" id="t-msambazaji" autocomplete="off" placeholder="Jina la msambazaji (hiari)"/></div>
+          </div>
+          <div class="controls">
+            <button class="btn gold" onclick="ongezaUununuzi()">💾 Hifadhi Ununuzi</button>
+            <button class="btn secondary" onclick="safishaManunuzi()">🗑 Futa</button>
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header"><h3>📸 Ongeza Bidhaa Mpya</h3></div>
+        <div class="section-body">
+          <p style="font-size:12px;color:var(--a-muted);margin-bottom:14px;">Bidhaa hii itaonekana papo hapo kwenye duka la wateja.</p>
+          <div class="upload-box" id="uploadBox">
+            <input type="file" id="fileInput" accept="image/*,video/*" onchange="onFilePick(this)"/>
+            <div class="upload-icon-txt">🧱</div>
+            <p class="upload-hint">Bonyeza au buruta picha ya bidhaa hapa (hiari)</p>
+          </div>
+          <div class="previews" id="previews"></div>
+          <div class="form-grid">
+            <div class="field"><label>Jina la Bidhaa (English)</label><input type="text" id="p-jina" autocomplete="off" placeholder="mfano: Pvc elbow 1.5&quot;"/></div>
+            <div class="field"><label>Jina kwa Kiswahili</label><input type="text" id="p-jina-sw" autocomplete="off" placeholder="mfano: Kiungio cha Pvc 1.5&quot;"/></div>
+            <div class="field"><label>Bei ya Kuuzia (TZS)</label><input type="number" id="p-bei" placeholder="2000"/></div>
+            <div class="field"><label>Bei ya Kununulia (TZS, hiari)</label><input type="number" id="p-bei-gharama" placeholder="0"/></div>
+            <div class="field"><label>Idadi Iliyopo</label><input type="number" id="p-idadi" placeholder="1" min="1" value="1"/></div>
+            <div class="field"><label>Kipimo</label>
+              <select id="p-kipimo"><option value="pc">Piece / Pisi</option><option value="bag">Bag / Mifuko</option><option value="roll">Roll / Rola</option><option value="meter">Meter / Mita</option><option value="litre">Litre / Lita</option><option value="kg">Kg / Kilo</option><option value="pack">Pack / Packets</option><option value="sheet">Sheet / Bati</option><option value="box">Box / Kasha</option><option value="set">Set / Seti</option><option value="pair">Pair / Jozi</option></select>
+            </div>
+            <div class="field"><label>Kategoria</label>
+              <select id="p-kategoria"><option value="mabomba">Mabomba</option><option value="fittings">Fittings</option><option value="umeme">Umeme</option><option value="saruji">Saruji</option><option value="zana">Zana</option><option value="mengineyo">Mengineyo</option></select>
+            </div>
+            <div class="field"><label>Kiwango cha Chini (tahadhari)</label><input type="number" id="p-kiwango-chini" placeholder="10" value="10"></div>
+            <div class="field"><label>Tawi</label><select id="p-tawi"><option value="ngaramjini">Ngara Mjini</option><option value="benaco">Benaco</option><option value="mugoma">Mugoma</option></select></div>
+            <div class="field"><label>Lebo (hiari)</label><input type="text" id="p-badge" placeholder="mfano: Bidhaa Mpya"/></div>
+            <div class="field full"><label>Maelezo ya Bidhaa (Kiswahili)</label><textarea id="p-maelezo-sw" rows="2" placeholder="mfano: Bomba la plastiki linalotumika kwa mifumo ya maji ya nyumbani na majengo."></textarea></div>
+            <div class="field full"><label>Product Description (English)</label><textarea id="p-maelezo-en" rows="2" placeholder="e.g. Plastic pipe used for domestic and building water systems."></textarea></div>
+          </div>
+          <div class="controls">
+            <button class="btn gold" id="p-save-btn" onclick="saveProductWithPhoto()">💾 Hifadhi na Onyesha Dukani</button>
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header"><h3>📦 Taarifa ya Stoo</h3>
+          <input type="text" id="search-stock" placeholder="Tafuta..." oninput="renderStock()" style="width:200px"/>
+        </div>
+        <div class="section-body"><div class="table-wrap"><table>
+          <thead><tr><th></th><th>Bidhaa</th><th>Aina</th><th>Kipimo</th><th>Bei Kununulia</th><th>Bei Kuuzia</th><th>Faida %</th><th>Idadi</th><th>Hali</th><th>Dukani</th><th>Kitendo</th></tr></thead>
+          <tbody id="tbody-stock"><tr class="loading-row"><td colspan="11">Inapakia...</td></tr></tbody>
+        </table></div></div>
+      </div>
+      <div class="section"><div class="section-header"><h3>📋 Rekodi za Manunuzi</h3></div>
+        <div class="section-body"><div class="table-wrap"><table>
+          <thead><tr><th>Tarehe</th><th>Bidhaa</th><th>Aina</th><th>Kipimo</th><th>Idadi</th><th>Bei Kununulia</th><th>Jumla</th><th>Msambazaji</th><th>Kitendo</th></tr></thead>
+          <tbody id="tbody-manunuzi"><tr class="loading-row"><td colspan="9">Inapakia...</td></tr></tbody>
+        </table></div></div>
+      </div>
+    </section>
+
+    <!-- WATEJA / MADENI -->
+    <section id="wateja" class="page">
+      <div class="topbar"><div class="topbar-left"><h2>Madeni</h2><p>Simamia wateja wanaolipa kwa deni.</p></div></div>
+      <div class="section"><div class="section-header"><h3>💳 Wateja Wenye Madeni</h3></div>
+        <div class="section-body"><div class="table-wrap"><table>
+          <thead><tr><th>Jina</th><th>Simu</th><th>Deni Lote</th><th>Kilicholipwa</th><th>Bakaa</th><th>Tarehe ya Mwisho</th><th>Hali</th><th>Kitendo</th></tr></thead>
+          <tbody id="tbody-wateja"><tr class="loading-row"><td colspan="8">Inapakia...</td></tr></tbody>
+        </table></div></div>
+      </div>
+      <div class="section" id="malipo-history-section" style="display:none;">
+        <div class="section-header">
+          <h3>📋 Historia ya Malipo — <span id="malipo-history-jina">—</span></h3>
+          <button class="btn sm secondary" onclick="document.getElementById('malipo-history-section').style.display='none'">Funga ✕</button>
+        </div>
+        <div class="section-body" style="padding:0;"><div class="table-wrap"><table>
+          <thead><tr><th>Tarehe</th><th>Kiasi</th><th>Bakaa Baada</th><th>Maelezo</th></tr></thead>
+          <tbody id="tbody-malipo-history"></tbody>
+        </table></div></div>
+      </div>
+    </section>
+
+    <!-- WANUNUZI / BROADCAST SMS -->
+    <section id="wanunuzi" class="page">
+      <div class="topbar"><div class="topbar-left"><h2>Wateja</h2><p>Hifadhi mawasiliano ya wateja na tuma ujumbe wa biashara.</p></div></div>
+
+      <div class="section">
+        <div class="section-header"><h3>➕ Ongeza Mteja</h3></div>
+        <div class="section-body">
+          <div id="notifyWanunuzi" class="notify"></div>
+          <div class="form-grid">
+            <div class="field"><label>Jina la Mteja</label><input type="text" id="wn-jina" autocomplete="off" placeholder="mfano: Mzee Kajubi Construction"/><div class="field-error" id="err-wn-jina">Jina linahitajika</div></div>
+            <div class="field"><label>Namba ya Simu</label><input type="tel" id="wn-simu" placeholder="mfano: 0764 XXX XXX"/><div class="field-error" id="err-wn-simu">Namba inahitajika</div></div>
+            <div class="field"><label>Mahali</label><input type="text" id="wn-mahali" placeholder="mfano: Ngara, Kagera"/></div>
+            <div class="field"><label>Maelezo (hiari)</label><input type="text" id="wn-maelezo" placeholder="mfano: Mkandarasi wa kawaida"/></div>
+            <div class="field"><label>Tawi</label><select id="wn-tawi"><option value="ngaramjini">Ngara Mjini</option><option value="benaco">Benaco</option><option value="mugoma">Mugoma</option></select></div>
+          </div>
+          <div class="controls">
+            <button class="btn gold" onclick="ongezaMteja()">💾 Hifadhi Mteja</button>
+            <button class="btn secondary" onclick="safishaWanunuzi()">🗑 Futa</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header"><h3>📣 Tuma Ujumbe kwa Wateja</h3></div>
+        <div class="section-body">
+          <div id="notifyBroadcast" class="notify"></div>
+          <div class="form-grid">
+            <div class="field full">
+              <label>Ujumbe</label>
+              <textarea class="broadcast-textarea" id="bc-message" placeholder="Andika ujumbe hapa... Kiungo cha duka litaongezwa mwishoni mwa ujumbe kiotomatiki."></textarea>
+            </div>
+            <div class="field full">
+              <div class="sel-all-row">
+                <input type="checkbox" id="bc-select-all" onchange="toggleSelectAll(this)"/>
+                <label for="bc-select-all">Chagua wateja wote</label>
+                <span id="bc-selected-count" style="margin-left:auto;color:var(--a-rg);font-weight:700;"></span>
+              </div>
+              <div class="customer-select-list" id="customerSelectList">
+                <div class="empty-state"><div class="icon">👥</div>Hakuna wateja bado. Ongeza wateja kwanza.</div>
+              </div>
+            </div>
+          </div>
+          <div class="controls">
+            <button class="btn gold" onclick="tumaBroadcast()">📨 Tuma Ujumbe</button>
+            <button class="btn secondary" onclick="$('bc-message').value=''">🗑 Futa Ujumbe</button>
+          </div>
+          <p style="font-size:11px;color:var(--a-muted);margin-top:10px;">
+            ℹ Kiungo cha duka kitaongezwa mwishoni mwa kila ujumbe kiotomatiki.
+          </p>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <h3>👥 Orodha ya Wateja</h3>
+          <input type="text" id="search-wanunuzi" placeholder="Tafuta..." oninput="renderWanunuzi()" style="width:200px"/>
+        </div>
+        <div class="section-body"><div class="table-wrap"><table>
+          <thead><tr><th>Jina</th><th>Simu</th><th>Mahali</th><th>Maelezo</th><th>Tarehe</th><th>Kitendo</th></tr></thead>
+          <tbody id="tbody-wanunuzi"><tr class="loading-row"><td colspan="6">Inapakia...</td></tr></tbody>
+        </table></div></div>
+      </div>
+    </section>
+
+    <!-- KILA SIKU -->
+    <section id="kila-siku" class="page">
+      <div class="topbar"><div class="topbar-left"><h2>Taarifa ya Siku</h2><p>Muhtasari wa shughuli kwa siku maalum.</p></div></div>
+      <div class="section"><div class="section-header"><h3>📅 Chagua Tarehe</h3></div>
+        <div class="section-body">
+          <div class="controls" style="margin-top:0">
+            <input type="date" id="ks-tarehe" onchange="renderKilaSiku()" style="width:200px"/>
+            <button class="btn secondary" onclick="wekaTariheLeo()">Leo</button>
+          </div>
+        </div>
+      </div>
+      <div class="cards" style="margin-top:16px">
+        <div class="card"><div class="c-label">Manunuzi ya Siku</div><div class="c-value" id="ks-manunuzi">—</div><span class="c-badge badge-gray">Bidhaa Zilizoingia</span></div>
+        <div class="card"><div class="c-label">Mauzo ya Taslimu</div><div class="c-value" id="ks-taslimu">—</div><span class="c-badge badge-green">Cash</span></div>
+        <div class="card"><div class="c-label">Mauzo ya Deni</div><div class="c-value" id="ks-mkopo">—</div><span class="c-badge badge-amber">Deni</span></div>
+        <div class="card"><div class="c-label">Hali ya Siku</div><div class="c-value" id="ks-hali">—</div><span class="c-badge" id="ks-hali-badge">—</span></div>
+      </div>
+      <div class="grid-2">
+        <div class="section"><div class="section-header"><h3>Muhtasari</h3></div>
+          <div class="section-body">
+            <div class="summary-grid">
+              <div class="mini"><div class="label">Idadi ya Manunuzi</div><div class="value" id="ks-n-manunuzi">0</div></div>
+              <div class="mini"><div class="label">Idadi ya Mauzo</div><div class="value" id="ks-n-mauzo">0</div></div>
+              <div class="mini"><div class="label">Deni Bakaa</div><div class="value" id="ks-bakaa">—</div></div>
+              <div class="mini"><div class="label">Jumla ya Mauzo</div><div class="value" id="ks-jumla-mauzo">—</div></div>
+            </div>
+            <p style="font-size:12px;color:var(--a-muted);margin-top:12px" id="ks-maelezo">Chagua tarehe kuona muhtasari.</p>
+          </div>
+        </div>
+        <div class="section"><div class="section-header"><h3>Utendaji</h3></div>
+          <div class="section-body"><div class="alert-box" id="ks-alert"><strong>Hali</strong><span id="ks-alert-txt">Chagua tarehe kwanza.</span></div></div>
+        </div>
+      </div>
+      <div class="section"><div class="section-header"><h3>Manunuzi ya Tarehe Hii</h3></div>
+        <div class="section-body"><div class="table-wrap"><table>
+          <thead><tr><th>Tarehe</th><th>Bidhaa</th><th>Aina</th><th>Idadi</th><th>Bei</th><th>Jumla</th><th>Msambazaji</th></tr></thead>
+          <tbody id="ks-tbody-m"></tbody>
+        </table></div></div>
+      </div>
+      <div class="section"><div class="section-header"><h3>Mauzo ya Tarehe Hii</h3></div>
+        <div class="section-body"><div class="table-wrap"><table>
+          <thead><tr><th>Tarehe</th><th>Mteja</th><th>Bidhaa</th><th>Aina</th><th>Idadi</th><th>Jumla</th><th>Kilicholipwa</th><th>Bakaa</th></tr></thead>
+          <tbody id="ks-tbody-s"></tbody>
+        </table></div></div>
+      </div>
+    </section>
+
+    <!-- RIPOTI -->
+    <section id="ripoti" class="page">
+      <div class="topbar"><div class="topbar-left"><h2>Ripoti</h2><p>Muhtasari kamili wa utendaji wa biashara.</p></div></div>
+      <div class="section" style="margin-bottom:16px"><div class="section-header"><h3>🔍 Chuja kwa Kipindi</h3></div>
+        <div class="section-body">
+          <div class="controls" style="margin-top:0;flex-wrap:wrap">
+            <div class="field" style="flex:1;min-width:150px"><label>Kuanzia</label><input type="date" id="r-kuanzia"/></div>
+            <div class="field" style="flex:1;min-width:150px"><label>Hadi</label><input type="date" id="r-hadi"/></div>
+            <button class="btn gold" onclick="renderRipoti()" style="margin-top:18px">Tumia</button>
+            <button class="btn secondary" onclick="futhaChujo()" style="margin-top:18px">Wakati Wote</button>
+            <button class="btn" onclick="hamishaCsv()" style="margin-top:18px">📥 CSV</button>
+            <button class="btn" onclick="hamishaExcel()" style="margin-top:18px;background:var(--a-green);color:#fff;">📊 Excel</button>
+          </div>
+        </div>
+      </div>
+      <div class="report-grid">
+        <div class="card"><div class="c-label">Jumla ya Manunuzi</div><div class="c-value" id="rep-manunuzi">—</div></div>
+        <div class="card"><div class="c-label">Jumla ya Mauzo</div><div class="c-value" id="rep-mauzo">—</div></div>
+        <div class="card"><div class="c-label">Jumla ya Matumizi</div><div class="c-value" id="rep-gharama">—</div></div>
+        <div class="card"><div class="c-label">Faida ya Jumla</div><div class="c-value" id="rep-faida-j">—</div></div>
+        <div class="card"><div class="c-label">Faida Halisi</div><div class="c-value" id="rep-faida-h">—</div></div>
+        <div class="card"><div class="c-label">Madeni Bakaa</div><div class="c-value" id="rep-madeni">—</div></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- MODAL MALIPO -->
+<div class="modal-overlay" id="modalMalipo">
+  <div class="modal">
+    <h3>💳 Rekodi Malipo ya Deni</h3>
+    <div style="background:var(--a-bg);border-radius:var(--a-radius-sm);padding:12px 14px;margin-bottom:14px;">
+      <p style="font-size:13px;margin-bottom:4px">Mteja: <strong id="mp-jina">—</strong></p>
+      <p style="font-size:13px;margin-bottom:4px">Deni Lote: <strong id="mp-deni-lote">—</strong></p>
+      <p style="font-size:14px;color:var(--a-red)">Bakaa: <strong id="mp-bakaa">—</strong></p>
+    </div>
+    <div class="field" style="margin-bottom:10px"><label>Kiasi cha Malipo (TZS)</label><input type="number" id="mp-kiasi" placeholder="0" min="1"/></div>
+    <div class="field" style="margin-bottom:10px"><label>Tarehe ya Malipo</label><input type="date" id="mp-tarehe"/></div>
+    <div class="field"><label>Maelezo (hiari)</label><input type="text" id="mp-maelezo" placeholder="mfano: Malipo ya kwanza"/></div>
+    <div id="mp-notify" style="margin-top:10px;font-size:13px;display:none;padding:8px 12px;border-radius:8px;"></div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="fungaAdminModal()">Ghairi</button>
+      <button class="btn gold" onclick="thibitishaMalipo()">💾 Hifadhi Malipo</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FUTA -->
+<div class="modal-overlay" id="modalFuta">
+  <div class="modal">
+    <h3>⚠ Thibitisha Kufuta</h3>
+    <p style="font-size:13px;color:var(--a-muted);margin-bottom:18px">Una uhakika? Hatua hii haiwezi kurudishwa.</p>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="fungaAdminModal()">Ghairi</button>
+      <button class="btn danger" id="btn-thibitisha-futa">Futa</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL REJECT -->
+<div class="modal-overlay" id="modalRejectOrder">
+  <div class="modal">
+    <h3>❌ Kataa Agizo</h3>
+    <p style="font-size:13px;color:var(--a-muted);margin-bottom:14px">Stoo haitabadilika.</p>
+    <div class="field"><label>Sababu (hiari)</label><input type="text" id="reject-reason" placeholder="mfano: Bidhaa haipo tena"/></div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="fungaAdminModal()">Ghairi</button>
+      <button class="btn danger" id="btn-thibitisha-reject">Kataa Agizo</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /#adminApp -->
+
+<!-- INVOICE PRINT SHEET -->
+<div class="inv-overlay" id="invOverlay">
+  <div class="inv-sheet">
+    <button class="inv-close" id="invClose">&times;</button>
+    <div class="inv-title">INVOICE</div>
+    <div class="inv-co">
+      <b>NGARA HUDUMA COMPANY LIMITED</b><br>
+      TIN NO. 147-228-198 — VRN NO. 40311079R<br>
+      P.O. BOX 123 NGARA, KAGERA-TANZANIA<br>
+      Email: ngarahudumacompanylimited@gmail.com &nbsp;·&nbsp; Tel: 0764 748 447
+    </div>
+    <div class="inv-meta">
+      DATE: <span id="invDate"></span><br>
+      Invoice No. <span id="invNo"></span><br>
+      Mteja: <span id="invCustomer"></span><br>
+      Mobile No: <span id="invPhone"></span>
+    </div>
+    <table class="inv-table">
+      <thead><tr><th>S/N</th><th>Particular</th><th>Unit</th><th class="num">Qty</th><th class="num">Rate</th><th class="num">Amount</th></tr></thead>
+      <tbody id="invItemsBody"></tbody>
+      <tr class="inv-total-row"><td colspan="5" style="text-align:right;">TOTAL AMOUNT</td><td class="num" id="invTotalAmount"></td></tr>
+    </table>
+    <div class="inv-acct">
+      ACCOUNT NAME: NGARA HUDUMA CO. LTD<br>
+      Malipo: <span id="invPayStatus"></span>
+    </div>
+    <div class="inv-sign">
+      <div><div class="line">Marketing officer</div></div>
+      <div><div class="line">Sales officer</div></div>
+      <div><div class="line">General Manager</div></div>
+    </div>
+    <div class="inv-print-btn">
+      <button class="btn gold" onclick="window.print()" style="background:#C1440E;">Chapisha / Print</button>
+    </div>
+  </div>
+</div>
+
+<div class="s-toast" id="toast">—</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+// CONFIG — this MUST be a NEW Supabase project for Ngara Huduma,
+// separate from any other business system. Replace all TODOs below.
+// Branches: Ngara Mjini, Benaco, Mugoma — each Front Desk Officer logs
+// in with their branch password and only sees/manages their branch's
+// data; the General Manager password sees everything, with a branch
+// switcher in the sidebar.
+// ════════════════════════════════════════════════════════════════
+const SB_URL='https://jdldiwhplklxxkoelvhb.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkbGRpd2hwbGtseHhrb2VsdmhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyNzM3MjcsImV4cCI6MjA4OTg0OTcyN30.Xn3a3Fhie81zs5UMp71NHspQw0xBodYI5Wh4yTJHahU';
+const PASS='NgaraHuduma2026';               // General Manager (full access, all branches)
+const BRANCHES={ngaramjini:'Ngara Mjini',benaco:'Benaco',mugoma:'Mugoma'};
+const BRANCH_PASS={ngaramjini:'Ngaramjini2026!',benaco:'Benaco@3!',mugoma:'Iwachu1!'}; // Front Desk Officer per branch
+const CLD='TODO_CLOUDINARY_CLOUD_NAME';
+const PRESET='TODO_CLOUDINARY_UPLOAD_PRESET';
+const ADMIN_PHONE='0TODO';       // Admin SMS number (local format for Beem)
+const STORE_URL='https://TODO.github.io/ngarahuduma/';
+const SMS_FN_URL='https://jdldiwhplklxxkoelvhb.supabase.co/functions/v1/send-sms'; // reuse same edge function pattern as your other systems
+
+/*
+  REQUIRED SUPABASE TABLES (mirror your other systems' pattern):
+  bidhaa(id uuid pk, jina text, jina_sw text, tawi text, aina text, kipimo text, bei_kununulia int,
+    bei_kuuzia int, idadi int, kiwango_chini int, img text, media_type text,
+    category text, badge text, maelezo_sw text, maelezo_en text, onyesha_dukani bool, created_at timestamptz default now())
+  manunuzi(id uuid pk, tarehe date, jina text, tawi text, aina text, kipimo text, idadi int,
+    bei_kununulia int, jumla int, msambazaji text, created_at timestamptz default now())
+  mauzo(id uuid pk, invoice_no text, tawi text, tarehe date, mteja text, simu_mteja text, eneo text,
+    jina text, jina_sw text, kipimo text, idadi int, bei_kuuzia int, bei_kununulia int, jumla int,
+    aina text, kilicholipwa int, bakaa int, chanzo text, hali_order text,
+    bidhaa_id uuid, created_at timestamptz default now())
+  gharama(id uuid pk, tarehe date, tawi text, aina text, kiasi int, maelezo text, created_at timestamptz default now())
+  wateja(id uuid pk, jina text, tawi text, simu text, deni_lote int, kilicholipwa int, bakaa int,
+    tarehe_mwisho date, hali text, created_at timestamptz default now())
+  wanunuzi(id uuid pk, jina text, tawi text, simu text, mahali text, maelezo text, created_at timestamptz default now())
+*/
+
+const SMS_HEADERS={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
+async function sendSms(to,message){
+  try{
+    const r=await fetch(SMS_FN_URL,{method:'POST',headers:SMS_HEADERS,body:JSON.stringify({to,message})});
+    const data=await r.json();
+    if(!r.ok||!data.ok)console.warn('SMS not sent:',data);
+    return data;
+  }catch(e){console.warn('SMS send failed:',e.message);return null;}
+}
+const CAT_LABEL={mabomba:'Mabomba',fittings:'Fittings',umeme:'Umeme',saruji:'Saruji',zana:'Zana',mengineyo:'Mengineyo'};
+const KIPIMO_LABEL={pc:'Piece / Pisi',bag:'Bag / Mifuko',roll:'Roll / Rola',meter:'Meter / Mita',litre:'Litre / Lita',kg:'Kg / Kilo',pack:'Pack / Packets',sheet:'Sheet / Bati',box:'Box / Kasha',set:'Set / Seti',pair:'Pair / Jozi'};
+
+const H={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation'};
+const DB={
+  async get(t,q=''){const r=await fetch(`${SB_URL}/rest/v1/${t}?${q}`,{headers:H});return r.json();},
+  async post(t,d){const r=await fetch(`${SB_URL}/rest/v1/${t}`,{method:'POST',headers:H,body:JSON.stringify(d)});return r.json();},
+  async patch(t,f,d){const r=await fetch(`${SB_URL}/rest/v1/${t}?${f}`,{method:'PATCH',headers:H,body:JSON.stringify(d)});return r.json();},
+  async del(t,f){await fetch(`${SB_URL}/rest/v1/${t}?${f}`,{method:'DELETE',headers:H});}
+};
+
+function $(id){return document.getElementById(id);}
+function pesa(n){return new Intl.NumberFormat('en-TZ',{style:'currency',currency:'TZS',maximumFractionDigits:0}).format(n||0);}
+function leoISO(){return new Date().toISOString().slice(0,10);}
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+function sScrollTo(id){document.getElementById(id).scrollIntoView({behavior:'smooth'});}
+
+let allBidhaa=[],allManunuzi=[],allMauzo=[],allGharama=[],allWateja=[],allWanunuzi=[];
+let isAdmin=false;
+let userRole=''; // 'gm' | 'deski'
+let userTawi=null; // branch key for deski, null for gm
+let viewingTawi='yote'; // which branch's data is currently shown
+let maalipoMteja=null,deleteAction=null,rejectAction=null;
+let cart=[],curFilter='all',modalProduct=null,modalQty=1,uploadFile=null;
+let pollInterval=null,lastHash='';
+
+// ════════════════════════════════════════════════════════════════
+// BACK BUTTON SUPPORT — pushes a history entry for each meaningful
+// view change (cart open, product modal open, admin tab switch) so
+// the browser's back arrow undoes it instead of leaving the page.
+// ════════════════════════════════════════════════════════════════
+let suppressHistoryPush=false;
+function pushHistoryState(type,extra){
+  if(suppressHistoryPush)return;
+  const state=Object.assign({type},extra||{});
+  const hash='#'+type+(extra&&extra.page?'-'+extra.page:'')+(extra&&extra.id?'-'+extra.id:'');
+  history.pushState(state,'',hash);
+}
+window.addEventListener('popstate',(e)=>{
+  suppressHistoryPush=true;
+  const s=e.state||{type:'store'};
+  if(s.type!=='cart'){$('cartOverlay').classList.remove('open');$('cartSidebar').classList.remove('open');}
+  if(s.type!=='modal'){$('modalBg').classList.remove('open');}
+  if(s.type==='cart'){renderCart();$('cartOverlay').classList.add('open');$('cartSidebar').classList.add('open');}
+  if(s.type==='modal'&&s.id){openModal(s.id);}
+  if(s.type==='admin'&&isAdmin){
+    $('adminApp').classList.add('open');document.body.style.overflow='hidden';
+    switchPage(s.page||'dashibodi');
+  } else if(s.type!=='admin'&&isAdmin&&$('adminApp').classList.contains('open')){
+    $('adminApp').classList.remove('open');document.body.style.overflow='';
+    if(pollInterval)clearInterval(pollInterval);
+    pollStore();pollInterval=setInterval(pollStore,4000);
+  }
+  suppressHistoryPush=false;
+});
+
+
+// ════════════════════════════════════════════════════════════════
+// STOREFRONT
+// ════════════════════════════════════════════════════════════════
+async function pollStore(){
+  try{
+    const data=await DB.get('bidhaa','order=created_at.desc');
+    if(!Array.isArray(data))return;
+    const hash=JSON.stringify(data.map(p=>p.id+'|'+p.idadi+'|'+p.img+'|'+p.onyesha_dukani));
+    if(hash!==lastHash){lastHash=hash;allBidhaa=data;renderGrid(curFilter);if(isAdmin){renderStock();jaziChaguoBidhaa();}}
+  }catch(e){console.warn('Poll failed',e);}
+}
+async function initStore(){await pollStore();pollInterval=setInterval(pollStore,4000);initObserver();}
+let curStoreBranch='yote';
+function dukaniProducts(){return allBidhaa.filter(p=>p.onyesha_dukani&&(curStoreBranch==='yote'||p.tawi===curStoreBranch));}
+function doStoreBranch(tawi,btn){
+  curStoreBranch=tawi;
+  document.querySelectorAll('#branchFilterBar .s-filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderGrid(curFilter);
+}
+
+function renderGrid(f='all'){
+  const grid=$('productGrid');
+  const base=dukaniProducts();
+  const list=f==='all'?base:base.filter(p=>p.category===f);
+  const blank="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='225'%3E%3Crect fill='%23F3E6DE' width='300' height='225'/%3E%3C/svg%3E";
+  if(!list.length){grid.innerHTML='<div class="s-grid-state"><p style="font-size:12px;letter-spacing:1px;color:var(--ink3)">Hakuna bidhaa katika kundi hili bado.</p></div>';initObserver();return;}
+  grid.innerHTML=list.map((p,i)=>{
+    const soldOut=p.idadi<=0;
+    const ic=cart.some(c=>c.id===p.id);
+    const media=p.media_type==='video'
+      ? `<video class="s-product-media" src="${p.img}" autoplay muted loop playsinline></video>`
+      : `<img class="s-product-media" src="${p.img||blank}" alt="${p.jina}" loading="lazy" onerror="this.src='${blank}'"/>`;
+    return `<div class="s-card fade-in${soldOut?' taken':''}" style="transition-delay:${i*0.05}s">
+      <div class="s-img-wrap">
+        ${media}
+        ${p.badge?`<span class="s-badge">${p.badge}</span>`:''}
+        ${soldOut?`<div class="s-taken-stamp"><span>Imeisha</span></div>`:''}
+      </div>
+      <div class="s-card-info">
+        <p class="s-card-name">${p.jina}${p.jina_sw?` / ${p.jina_sw}`:''}</p>
+        <p class="s-card-unit">${KIPIMO_LABEL[p.kipimo]||p.kipimo||'pc'}${curStoreBranch==='yote'?` · <span style="color:var(--steel);">${BRANCHES[p.tawi]||''}</span>`:''}</p>
+        <p class="s-card-price">TZS ${Number(p.bei_kuuzia).toLocaleString()}/=</p>
+      </div>
+      <div class="s-card-actions">
+        <button class="s-add-btn${ic?' in-cart':''}" onclick="openModal('${p.id}')"${soldOut?' disabled':''}>
+          ${soldOut?'Imeisha':ic?'✓ Ipo Chaguoni':'Chagua'}
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+  initObserver();
+}
+function doFilter(cat,btn){
+  curFilter=cat;
+  document.querySelectorAll('#categoryFilterBar .s-filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');renderGrid(cat);
+}
+
+/* ─── CART ─── */
+function openCart(){$('cartOverlay').classList.add('open');$('cartSidebar').classList.add('open');renderCart();pushHistoryState('cart');}
+function closeCart(){
+  if(history.state&&history.state.type==='cart'){history.back();return;}
+  $('cartOverlay').classList.remove('open');$('cartSidebar').classList.remove('open');
+}
+function renderCart(){
+  const body=$('cartBody'),footer=$('cartFooter');
+  if(!cart.length){body.innerHTML='<div class="s-cart-empty">Chaguo chako ni tupu.<br><br>Angalia bidhaa zetu.</div>';footer.style.display='none';return;}
+  footer.style.display='block';
+  body.innerHTML=cart.map(it=>`<div class="s-cart-item">
+    ${it.media_type==='video'
+      ? `<video class="s-cart-item-img" src="${it.img}" autoplay muted loop playsinline></video>`
+      : `<img class="s-cart-item-img" src="${it.img}" alt="${it.name}" onerror="this.style.background='#F3E6DE'"/>`
+    }
+    <div class="s-cart-item-info">
+      <p class="s-cart-item-name">${it.name}</p>
+      <p class="s-cart-item-price">TZS ${Number(it.price).toLocaleString()}/= &nbsp;·&nbsp; ${KIPIMO_LABEL[it.unit]||it.unit}</p>
+      <div class="s-qty-row">
+        <button class="s-qty-btn" onclick="changeQty('${it.id}',-1)">−</button>
+        <input type="number" class="qty-val" style="min-width:48px;width:56px;font-size:14px;padding:4px;" value="${it.qty}" min="1" onchange="setQty('${it.id}',this.value)">
+        <button class="s-qty-btn" onclick="changeQty('${it.id}',1)">+</button>
+        <button class="s-rm-btn" onclick="removeItem('${it.id}')">✕</button>
+      </div>
+    </div>
+  </div>`).join('');
+  $('cartTotal').textContent='TZS '+cart.reduce((s,i)=>s+i.price*i.qty,0).toLocaleString()+'/=';
+}
+function changeQty(id,d){
+  const i=cart.find(c=>c.id===id);if(!i)return;
+  if(d>0&&i.qty>=i.maxQty){toast('Hakuna stoo zaidi ya '+i.maxQty);return;}
+  i.qty+=d;if(i.qty<=0)removeItem(id);else{updateCartUI();renderCart();}
+}
+function setQty(id,v){
+  const i=cart.find(c=>c.id===id);if(!i)return;
+  let n=parseInt(v);
+  if(isNaN(n)||n<1)n=1;
+  if(n>i.maxQty){n=i.maxQty;toast('Hakuna stoo zaidi ya '+i.maxQty);}
+  i.qty=n;updateCartUI();renderCart();
+}
+function removeItem(id){cart=cart.filter(c=>c.id!==id);updateCartUI();renderCart();renderGrid(curFilter);}
+function updateCartUI(){const n=cart.reduce((s,i)=>s+i.qty,0);$('cartCount').textContent=n;$('mCartCount').textContent=n;}
+
+/* ─── PLACE ORDER ─── */
+async function placeOrder(){
+  if(!cart.length)return;
+  const phone=$('custPhone').value.trim();
+  const eneo=$('custSite').value.trim();
+  if(!phone){toast('Tafadhali weka namba yako ya simu');$('custPhone').focus();return;}
+  const btn=document.querySelector('.s-order-btn');
+  if(btn){btn.disabled=true;btn.textContent='Inatuma...';}
+  try{
+    const tarehe=leoISO();
+    const invoiceNo=nextInvoiceNo();
+    for(const it of cart){
+      const p=allBidhaa.find(x=>x.id===it.id);if(!p)continue;
+      await DB.post('mauzo',{
+        invoice_no:invoiceNo,tawi:p.tawi,tarehe,mteja:'Mteja wa Duka',simu_mteja:phone,eneo,jina:it.name,jina_sw:p.jina_sw||'',
+        kipimo:p.kipimo||'pc',idadi:it.qty,bei_kuuzia:it.price,bei_kununulia:p.bei_kununulia,jumla:it.price*it.qty,
+        aina:'Mkopo',kilicholipwa:0,bakaa:it.price*it.qty,
+        chanzo:'Duka',hali_order:'Inasubiri',bidhaa_id:p.id
+      });
+    }
+    const itemLines=cart.map(i=>`BIDHAA: ${i.name}\nIDADI: ${i.qty} ${i.unit}\nJUMLA: TZS ${(i.price*i.qty).toLocaleString()}`).join('\n\n');
+    const jumlaYote=cart.reduce((s,i)=>s+i.price*i.qty,0);
+    const adminMsg=`AGIZO MPYA (${invoiceNo}):\nKuna ombi jipya kutoka kwa mteja mwenye namba ${phone}${eneo?`\nSITE/ENEO: ${eneo}`:''}\n\n${itemLines}\n\nJUMLA YA YOTE: TZS ${jumlaYote.toLocaleString()}`;
+    await sendSms(ADMIN_PHONE, adminMsg);
+    const customerMsg=`Habari! Karibu Ngara Huduma. Agizo lako ${invoiceNo} limepokelewa na linafanyiwa kazi, tutakurudia ndani ya muda mfupi.\n\nUnaweza kutembelea duka letu au kutembelea:\n${STORE_URL}`;
+    await sendSms(phone, customerMsg);
+    toast('✅ Agizo limetumwa! Utapokea ujumbe wa uthibitisho hivi karibuni.');
+    cart=[];updateCartUI();renderCart();closeCart();
+    $('custSite').value='';
+  }catch(e){console.error(e);toast('❌ Hitilafu. Jaribu tena.');}
+  if(btn){btn.disabled=false;btn.textContent='📦 Tuma Agizo/Ombi';}
+}
+
+/* ─── MODAL (quick view + qty) ─── */
+function openModal(id){
+  const p=allBidhaa.find(x=>x.id===id);if(!p)return;
+  modalProduct=p;modalQty=1;$('mQty').value='1';$('mQty').max=p.idadi||1;
+  $('mName').textContent=p.jina+(p.jina_sw?` / ${p.jina_sw}`:'');
+  $('mUnit').textContent='Kipimo: '+(KIPIMO_LABEL[p.kipimo]||p.kipimo||'pc');
+  $('mPrice').textContent='TZS '+Number(p.bei_kuuzia).toLocaleString()+'/=';
+  $('mCat').textContent=(CAT_LABEL[p.category]||p.category||'').toUpperCase();
+  const descWrap=$('mDescWrap'),descSw=$('mDescSw'),descEn=$('mDescEn');
+  if(p.maelezo_sw||p.maelezo_en){
+    descWrap.style.display='block';
+    descSw.textContent=p.maelezo_sw||'';descSw.style.display=p.maelezo_sw?'block':'none';
+    descEn.textContent=p.maelezo_en||'';descEn.style.display=p.maelezo_en?'block':'none';
+  } else {
+    descWrap.style.display='none';
+  }
+  const soldOut=p.idadi<=0;
+  $('mTakenNotice').style.display=soldOut?'block':'none';
+  $('mAddBtn').disabled=soldOut;
+  const blank="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Crect fill='%23F3E6DE' width='400' height='400'/%3E%3C/svg%3E";
+  const photo=$('mPhoto'),video=$('mVideo');
+  if(p.media_type==='video'){video.src=p.img;video.style.display='block';photo.style.display='none';}
+  else{photo.src=p.img||blank;photo.style.display='block';video.src='';video.style.display='none';}
+  $('modalBg').classList.add('open');
+  pushHistoryState('modal',{id});
+}
+function modalQtyChange(d){
+  if(!modalProduct)return;
+  modalQty=Math.max(1,modalQty+d);
+  if(modalQty>modalProduct.idadi){modalQty=modalProduct.idadi;toast('Hakuna stoo zaidi ya '+modalProduct.idadi);}
+  $('mQty').value=modalQty;
+}
+function modalQtySet(v){
+  if(!modalProduct)return;
+  let n=parseInt(v);
+  if(isNaN(n)||n<1)n=1;
+  if(n>modalProduct.idadi){n=modalProduct.idadi;toast('Hakuna stoo zaidi ya '+modalProduct.idadi);}
+  modalQty=n;
+  $('mQty').value=n;
+}
+function addFromModal(){
+  if(!modalProduct||modalProduct.idadi<=0)return;
+  const ex=cart.find(c=>c.id===modalProduct.id);
+  if(ex){
+    const newQty=ex.qty+modalQty;
+    ex.qty=Math.min(newQty,modalProduct.idadi);
+  } else {
+    cart.push({id:modalProduct.id,name:modalProduct.jina,price:modalProduct.bei_kuuzia,unit:modalProduct.kipimo||'pc',
+      img:modalProduct.img,media_type:modalProduct.media_type,qty:modalQty,maxQty:modalProduct.idadi});
+  }
+  updateCartUI();renderGrid(curFilter);closeModal();
+  toast(`${modalProduct.jina} (${modalQty} ${modalProduct.kipimo||'pc'}) imeongezwa kwenye chaguo`);
+}
+function closeBgModal(e){if(e.target===$('modalBg'))closeModal();}
+function closeModal(){
+  if(history.state&&history.state.type==='modal'){history.back();return;}
+  $('modalBg').classList.remove('open');
+}
+function toggleMobile(){$('mobileMenu').classList.toggle('open');}
+function closeMobile(){$('mobileMenu').classList.remove('open');}
+function initObserver(){
+  const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});},{threshold:0.08});
+  document.querySelectorAll('.fade-in:not(.visible)').forEach(el=>obs.observe(el));
+}
+
+// ════════════════════════════════════════════════════════════════
+// AUTH — two role types: gm (General Manager, sees all 3 branches),
+// deski (Front Desk Officer, locked to their own branch)
+// ════════════════════════════════════════════════════════════════
+function openLogin(){$('loginOverlay').classList.add('open');$('pwInput').value='';$('loginErr').textContent='';setTimeout(()=>$('pwInput').focus(),100);}
+function closeLogin(){$('loginOverlay').classList.remove('open');}
+function doLogin(){
+  const pw=$('pwInput').value;
+  if(pw===PASS){closeLogin();enterAdmin('gm',null);return;}
+  for(const tawi in BRANCH_PASS){
+    if(pw===BRANCH_PASS[tawi]){closeLogin();enterAdmin('deski',tawi);return;}
+  }
+  $('loginErr').textContent='Password si sahihi.';$('pwInput').value='';
+}
+function enterAdmin(role='gm',tawi=null){
+  isAdmin=true;userRole=role;userTawi=tawi;
+  viewingTawi=(role==='deski')?tawi:'yote';
+  $('adminApp').classList.add('open');
+  document.body.style.overflow='hidden';
+  if(pollInterval)clearInterval(pollInterval);
+  wekaTariheLeo();setDefaultDates();loadAll();
+  pollInterval=setInterval(loadAll,8000);
+  applyRoleUI();
+  const activePage=document.querySelector('#adminApp .page.active');
+  pushHistoryState('admin',{page:activePage?activePage.id:'dashibodi'});
+}
+// Pages each role may access. GM sees everything across all branches.
+const ROLE_PAGES={
+  gm:['dashibodi','maagizo','mauzo','gharama','hifadhi','wateja','wanunuzi','kila-siku','ripoti'],
+  deski:['dashibodi','maagizo','mauzo','gharama','hifadhi','wateja']
+};
+function applyRoleUI(){
+  const allowed=ROLE_PAGES[userRole]||ROLE_PAGES.gm;
+  const allPages=ROLE_PAGES.gm;
+  allPages.forEach(page=>{
+    const ok=allowed.includes(page);
+    document.querySelectorAll(`#adminApp .nav-btn[data-page="${page}"]`).forEach(btn=>btn.style.display=ok?'':'none');
+    document.querySelectorAll(`#adminApp .a-tab-btn[data-page="${page}"]`).forEach(btn=>btn.style.display=ok?'':'none');
+  });
+  const roleLabel=userRole==='gm'?'✏ Meneja Mkuu':`🏬 ${BRANCHES[userTawi]||''} — Front Desk`;
+  const subLabel=userRole==='gm'?'Mfumo wa Biashara — Matawi Yote':'Front Desk Officer';
+  $('modeBadge').textContent=roleLabel;
+  const sub=$('adminApp').querySelector('.brand-sub');if(sub)sub.textContent=subLabel;
+  $('adminApp').classList.toggle('role-hidden-mode',userRole!=='gm');
+  // Sales trend chart: GM only — not appropriate for a branch-level Front Desk Officer to see
+  const chartSection=$('mauzoChartSection');
+  if(chartSection)chartSection.style.display=(userRole==='gm')?'block':'none';
+  // Branch switcher: only GM gets to choose; desk officers are locked to their own branch
+  const tawiWrap=$('tawiSelectWrap');
+  if(tawiWrap)tawiWrap.style.display=(userRole==='gm')?'block':'none';
+  const tawiSel=$('tawiSelect');if(tawiSel)tawiSel.value=viewingTawi;
+  // Lock the Tawi field on every data-entry form to the desk officer's own branch
+  ['t-tawi','p-tawi','g-tawi','wn-tawi'].forEach(id=>{
+    const el=$(id);if(!el)return;
+    if(userRole==='deski'){el.value=userTawi;el.disabled=true;}
+    else{el.disabled=false;}
+  });
+  if(!allowed.includes('dashibodi'))switchPage(allowed[0]);
+}
+function changeViewingTawi(v){
+  viewingTawi=v;
+  renderAll();jaziChaguoBidhaa();updateJinaSuggestions();
+}
+function doLogout(){
+  isAdmin=false;userRole='';userTawi=null;viewingTawi='yote';
+  $('adminApp').classList.remove('open');
+  document.body.style.overflow='';
+  if(pollInterval)clearInterval(pollInterval);
+  pollStore();pollInterval=setInterval(pollStore,4000);
+  pushHistoryState('store');
+}
+// Returns arr filtered to the branch currently being viewed ('yote' = no filter)
+function filterByTawi(arr){
+  if(viewingTawi==='yote')return arr;
+  return arr.filter(x=>x.tawi===viewingTawi);
+}
+
+// ════════════════════════════════════════════════════════════════
+// ADMIN — DATA
+// ════════════════════════════════════════════════════════════════
+async function loadAll(){
+  try{
+    const [b,m,s,g,w,wn]=await Promise.all([
+      DB.get('bidhaa','order=jina.asc'),
+      DB.get('manunuzi','order=tarehe.desc,created_at.desc'),
+      DB.get('mauzo','order=tarehe.desc,created_at.desc'),
+      DB.get('gharama','order=tarehe.desc,created_at.desc'),
+      DB.get('wateja','order=created_at.desc'),
+      DB.get('wanunuzi','order=created_at.desc')
+    ]);
+    if(Array.isArray(b))allBidhaa=b;
+    if(Array.isArray(m))allManunuzi=m;
+    if(Array.isArray(s))allMauzo=s;
+    if(Array.isArray(g))allGharama=g;
+    if(Array.isArray(w))allWateja=w;
+    if(Array.isArray(wn))allWanunuzi=wn;
+    renderAll();jaziChaguoBidhaa();updateJinaSuggestions();
+  }catch(e){console.error('Load error:',e);}
+}
+function nextInvoiceNo(){
+  const nums=allMauzo.map(s=>parseInt((s.invoice_no||'').replace(/\D/g,''))||0);
+  const max=nums.length?Math.max(...nums):42289;
+  return 'NH-'+String(max+1);
+}
+
+function fungaAdminModal(){document.querySelectorAll('#adminApp .modal-overlay').forEach(m=>m.classList.remove('open'));maalipoMteja=null;deleteAction=null;rejectAction=null;}
+function showErr(id,show){const el=$(id);if(el)el.classList.toggle('show',show);}
+function arifu(id,msg,type){const el=$(id);if(!el)return;el.textContent=msg;el.className='notify '+type+' show';setTimeout(()=>el.classList.remove('show'),3500);}
+function safuTupu(cols,msg){return`<tr><td colspan="${cols}" class="empty-state"><div class="icon">📭</div>${msg}</td></tr>`;}
+function setDefaultDates(){const today=leoISO();['t-tarehe','g-tarehe','m-tarehe'].forEach(id=>{const el=$(id);if(el)el.value=today;});}
+function wekaTariheLeo(){$('ks-tarehe').value=leoISO();renderKilaSiku();}
+
+/* ─── NAV ─── */
+function switchPage(page){
+  const allowed=ROLE_PAGES[userRole]||ROLE_PAGES.gm;
+  if(!allowed.includes(page))return;
+  document.querySelectorAll('#adminApp .nav-btn,.a-tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
+  document.querySelectorAll('#adminApp .page').forEach(p=>p.classList.toggle('active',p.id===page));
+  pushHistoryState('admin',{page});
+}
+document.querySelectorAll('#adminApp .nav-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{switchPage(btn.dataset.page);if(window.innerWidth<=960){$('sidebar').classList.remove('open');$('sidebarBackdrop').classList.remove('open');}});
+});
+document.querySelectorAll('.a-tab-btn').forEach(btn=>{btn.addEventListener('click',()=>switchPage(btn.dataset.page));});
+function toggleSidebar(){const open=$('sidebar').classList.toggle('open');$('sidebarBackdrop').classList.toggle('open',open);}
+
+/* ─── HESABU ─── */
+function confirmedMauzo(){return allMauzo.filter(s=>s.hali_order!=='Inasubiri'&&s.hali_order!=='Imekataliwa');}
+function hesabu(kuanzia,hadi){
+  const ch=d=>(!kuanzia||d>=kuanzia)&&(!hadi||d<=hadi);
+  const mf=filterByTawi(confirmedMauzo()).filter(s=>ch(s.tarehe));
+  const pf=filterByTawi(allManunuzi).filter(p=>ch(p.tarehe));
+  const ef=filterByTawi(allGharama).filter(e=>ch(e.tarehe));
+  const wf=filterByTawi(allWateja);
+  const bf=filterByTawi(allBidhaa);
+  const jumla_mauzo=mf.reduce((a,b)=>a+b.jumla,0);
+  const jumla_manunuzi=pf.reduce((a,b)=>a+b.jumla,0);
+  const taslimu=mf.filter(s=>s.aina==='Taslimu').reduce((a,b)=>a+b.jumla,0);
+  const mkopo=mf.filter(s=>s.aina==='Mkopo').reduce((a,b)=>a+b.jumla,0);
+  const jumla_gharama=ef.reduce((a,b)=>a+b.kiasi,0);
+  const madeni=wf.reduce((a,b)=>a+b.bakaa,0);
+  const stock=bf.reduce((a,b)=>a+b.idadi,0);
+  const gharama_cogs=mf.reduce((a,b)=>a+(b.bei_kununulia||0)*b.idadi,0);
+  const faida_jumla=jumla_mauzo-gharama_cogs;
+  const faida_halisi=faida_jumla-jumla_gharama;
+  const malipo=wf.reduce((a,b)=>a+(b.kilicholipwa||0),0);
+  const hela_cash=taslimu+malipo-jumla_gharama-jumla_manunuzi;
+  return{jumla_mauzo,jumla_manunuzi,taslimu,mkopo,jumla_gharama,madeni,stock,faida_jumla,faida_halisi,hela_cash};
+}
+
+/* ─── FORMS: MANUNUZI ─── */
+async function ongezaUununuzi(){
+  const tarehe=$('t-tarehe').value,jina=$('t-jina').value.trim(),aina=$('t-aina').value,kipimo=$('t-kipimo').value;
+  const jina_sw=$('t-jina-sw').value.trim();
+  const tawi=$('t-tawi').value;
+  const idadi=parseInt($('t-idadi').value),bei_k=parseInt($('t-bei-kununulia').value),bei_u=parseInt($('t-bei-kuuzia').value)||0;
+  const msambazaji=$('t-msambazaji').value.trim()||'Haijasemwa';
+  let ok=true;
+  if(!jina){showErr('err-t-jina',true);ok=false;}else showErr('err-t-jina',false);
+  if(!idadi||idadi<1){showErr('err-t-idadi',true);ok=false;}else showErr('err-t-idadi',false);
+  if(!bei_k||bei_k<1){showErr('err-t-bei',true);ok=false;}else showErr('err-t-bei',false);
+  if(!ok)return;
+  try{
+    await DB.post('manunuzi',{tarehe,jina,tawi,aina,kipimo,idadi,bei_kununulia:bei_k,jumla:idadi*bei_k,msambazaji});
+    const existing=allBidhaa.find(p=>p.jina.toLowerCase()===jina.toLowerCase()&&p.tawi===tawi);
+    if(existing)await DB.patch('bidhaa',`id=eq.${existing.id}`,{idadi:existing.idadi+idadi,bei_kununulia:bei_k,...(bei_u?{bei_kuuzia:bei_u}:{}),...(jina_sw?{jina_sw}:{})});
+    else await DB.post('bidhaa',{jina,jina_sw,tawi,aina,kipimo,bei_kununulia:bei_k,bei_kuuzia:bei_u||bei_k,idadi,kiwango_chini:10,onyesha_dukani:false});
+    safishaManunuzi();arifu('notifyManunuzi',`✅ Ununuzi wa "${jina}" (${BRANCHES[tawi]}) umehifadhiwa!`,'success');await loadAll();
+  }catch(e){arifu('notifyManunuzi','❌ Hitilafu: '+e.message,'error');}
+}
+function safishaManunuzi(){['t-jina','t-jina-sw','t-idadi','t-bei-kununulia','t-bei-kuuzia','t-msambazaji'].forEach(id=>{const el=$(id);if(el)el.value='';});}
+
+/* ─── MAUZO — El Dorado-style single-line quick-add, with invoice generation ─── */
+let currentInvoiceNo=null; // set while "same invoice" continuation is active
+function jaziChaguoBidhaa(){
+  const sel=$('m-bidhaa');if(!sel)return;
+  const prev=sel.value;
+  const catFilter=$('m-aina-filter')?$('m-aina-filter').value:'';
+  let list=filterByTawi(allBidhaa);
+  if(catFilter)list=list.filter(p=>p.aina===catFilter);
+  sel.innerHTML='';
+  if(!list.length){sel.innerHTML='<option>Hakuna bidhaa</option>';return;}
+  const catOrder=['mabomba','fittings','umeme','saruji','zana','mengineyo'];
+  const groups={};
+  list.forEach(p=>{(groups[p.aina]=groups[p.aina]||[]).push(p);});
+  Object.values(groups).forEach(g=>g.sort((a,b)=>a.jina.localeCompare(b.jina)));
+  const cats=catOrder.filter(c=>groups[c]&&groups[c].length).concat(Object.keys(groups).filter(c=>!catOrder.includes(c)));
+  cats.forEach(cat=>{
+    const og=document.createElement('optgroup');
+    og.label=`${CAT_LABEL[cat]||cat} (${groups[cat].length})`;
+    groups[cat].forEach(p=>{
+      const o=document.createElement('option');o.value=p.id;
+      o.textContent=`${p.jina}${p.jina_sw?' / '+p.jina_sw:''}${viewingTawi==='yote'?' · '+(BRANCHES[p.tawi]||''):''}`;
+      og.appendChild(o);
+    });
+    sel.appendChild(og);
+  });
+  if(prev&&list.some(p=>p.id===prev))sel.value=prev;
+}
+function togglaMkopo(){const v=$('m-aina').value==='Mkopo';$('wrap-kiasi').style.display=v?'block':'none';$('wrap-tarehe-mkopo').style.display=v?'block':'none';}
+async function ongezaUuzaji(){
+  const tarehe=$('m-tarehe').value,mteja=$('m-mteja').value.trim()||'Mteja wa Kawaida';
+  const bidId=$('m-bidhaa').value,idadi=parseInt($('m-idadi').value);
+  const simu=$('m-simu').value.trim();
+  const aina=$('m-aina').value,kiasiLipwa=parseInt($('m-kiasi').value||0);
+  const tareheMkopo=$('m-tarehe-mkopo').value;
+  const samaInvoice=$('m-same-invoice').checked;
+  const wantsInvoice=document.querySelector('input[name=m-invoice-choice]:checked').value==='ndiyo';
+  if(!idadi||idadi<1){showErr('err-m-idadi',true);return;}showErr('err-m-idadi',false);
+  const p=allBidhaa.find(x=>x.id===bidId);
+  if(!p){arifu('notifyMauzo','❌ Chagua bidhaa kwanza','error');return;}
+  if(idadi>p.idadi){arifu('notifyMauzo',`❌ Hifadhi haitoshi! ${p.idadi} tu zilizobaki.`,'error');return;}
+  const jumla=idadi*p.bei_kuuzia;
+  const kilicholipwa=aina==='Taslimu'?jumla:Math.min(kiasiLipwa,jumla);
+  const bakaa=jumla-kilicholipwa;
+  const invoiceNo=(samaInvoice&&currentInvoiceNo)?currentInvoiceNo:nextInvoiceNo();
+  try{
+    await DB.post('mauzo',{invoice_no:invoiceNo,tawi:p.tawi,tarehe,mteja,simu_mteja:simu,jina:p.jina,jina_sw:p.jina_sw||'',kipimo:p.kipimo||'pc',
+      idadi,bei_kuuzia:p.bei_kuuzia,bei_kununulia:p.bei_kununulia,jumla,aina,kilicholipwa,bakaa,
+      chanzo:'Mkono',hali_order:'Imethibitishwa',bidhaa_id:p.id});
+    await DB.patch('bidhaa',`id=eq.${p.id}`,{idadi:p.idadi-idadi});
+    if(aina==='Mkopo'&&mteja!=='Mteja wa Kawaida'){
+      const c=allWateja.find(x=>x.jina.toLowerCase()===mteja.toLowerCase()&&x.tawi===p.tawi);
+      if(c)await DB.patch('wateja',`id=eq.${c.id}`,{deni_lote:c.deni_lote+jumla,kilicholipwa:c.kilicholipwa+kilicholipwa,bakaa:c.bakaa+bakaa,tarehe_mwisho:tareheMkopo||c.tarehe_mwisho,hali:c.bakaa+bakaa===0?'Amelipa Kamili':c.kilicholipwa+kilicholipwa>0?'Amelipa Sehemu':'Hajalipa'});
+      else await DB.post('wateja',{jina:mteja,tawi:p.tawi,simu:simu||'Haijasemwa',deni_lote:jumla,kilicholipwa,bakaa,tarehe_mwisho:tareheMkopo||null,hali:bakaa===0?'Amelipa Kamili':kilicholipwa>0?'Amelipa Sehemu':'Hajalipa'});
+    }
+    if(samaInvoice){
+      currentInvoiceNo=invoiceNo;$('malizaInvoiceBtn').style.display='inline-flex';
+      arifu('notifyMauzo',`✅ "${p.jina}" imeongezwa kwenye Invoice ${invoiceNo}. Endelea kuongeza au bonyeza "Maliza na Chapisha".`,'success');
+    } else if(wantsInvoice){
+      currentInvoiceNo=null;$('malizaInvoiceBtn').style.display='none';
+      arifu('notifyMauzo',`✅ Uuzaji wa "${p.jina}" umehifadhiwa (Invoice ${invoiceNo})!`,'success');
+      showInvoiceFromInvoiceNo(invoiceNo);
+    } else {
+      currentInvoiceNo=null;$('malizaInvoiceBtn').style.display='none';
+      arifu('notifyMauzo',`✅ Uuzaji wa "${p.jina}" umehifadhiwa kwa kawaida (bila invoice).`,'success');
+    }
+    safishaMauzo(true);
+    await loadAll();
+  }catch(e){arifu('notifyMauzo','❌ Hitilafu: '+e.message,'error');}
+}
+function malizaInvoice(){
+  if(!currentInvoiceNo){toast('Hakuna invoice inayoendelea');return;}
+  showInvoiceFromInvoiceNo(currentInvoiceNo);
+  currentInvoiceNo=null;$('malizaInvoiceBtn').style.display='none';
+}
+function safishaMauzo(keepInvoiceToggle){
+  ['m-mteja','m-idadi','m-simu','m-kiasi','m-tarehe-mkopo'].forEach(id=>{const el=$(id);if(el)el.value='';});
+  $('m-aina').value='Taslimu';togglaMkopo();
+  if(!keepInvoiceToggle)$('m-same-invoice').checked=false;
+  const dflt=document.querySelector('input[name=m-invoice-choice][value=ndiyo]');if(dflt)dflt.checked=true;
+}
+async function futaMauzo(id){
+  funguaModalFuta(async()=>{
+    const s=allMauzo.find(x=>x.id===id);
+    if(s){const b=allBidhaa.find(x=>x.id===s.bidhaa_id)||allBidhaa.find(x=>x.jina===s.jina&&x.tawi===s.tawi);if(b)await DB.patch('bidhaa',`id=eq.${b.id}`,{idadi:b.idadi+s.idadi});
+      if(s.aina==='Mkopo'){const c=allWateja.find(x=>x.jina.toLowerCase()===s.mteja.toLowerCase()&&x.tawi===s.tawi);if(c)await DB.patch('wateja',`id=eq.${c.id}`,{deni_lote:Math.max(0,c.deni_lote-s.jumla),bakaa:Math.max(0,c.bakaa-s.bakaa)});}
+    }
+    await DB.del('mauzo',`id=eq.${id}`);toast('Rekodi imefutwa');await loadAll();
+  });
+}
+function renderMauzo(){
+  const tafuta=($('search-mauzo').value||'').toLowerCase(),filterV=$('filter-mauzo').value;
+  const list=filterByTawi(allMauzo).filter(s=>s.hali_order!=='Inasubiri'&&`${s.mteja} ${s.jina} ${s.invoice_no||''}`.toLowerCase().includes(tafuta)&&(filterV==='zote'||s.aina===filterV));
+  list.sort((a,b)=>(b.tarehe||'').localeCompare(a.tarehe||''));
+  $('tbody-mauzo').innerHTML=list.length?list.map(s=>{
+    const statusCls=s.bakaa===0?'pill-green':s.kilicholipwa>0?'pill-amber':'pill-red';
+    const statusLbl=s.bakaa===0?'Amelipa':s.kilicholipwa>0?'Sehemu':'Hajalipa';
+    return`<tr><td>${s.invoice_no||'—'}</td><td>${s.tarehe}</td><td>${s.mteja}</td><td>${s.jina}</td><td>${s.idadi} ${s.kipimo||'pc'}</td><td class="num"><strong>${pesa(s.jumla)}</strong></td><td>${pesa(s.kilicholipwa)}</td><td>${pesa(s.bakaa)}</td><td><span class="pill ${statusCls}">${statusLbl}</span></td><td style="display:flex;gap:4px;flex-wrap:wrap;"><button class="btn sm secondary" onclick="showInvoiceFromInvoiceNo('${s.invoice_no}')">🖨</button><button class="btn sm danger" onclick="futaMauzo('${s.id}')">Futa</button></td></tr>`;
+  }).join(''):safuTupu(10,'Bado hakuna mauzo.');
+}
+
+/* ─── INVOICE PRINT ─── */
+function showInvoiceFromInvoiceNo(invoiceNo){
+  const rows=allMauzo.filter(s=>s.invoice_no===invoiceNo);
+  if(!rows.length){toast('Invoice haikupatikana');return;}
+  const total=rows.reduce((a,r)=>a+r.jumla,0);
+  showInvoiceFromRows(rows,{invoice_no:invoiceNo,tarehe:rows[0].tarehe,mteja:rows[0].mteja,simu_mteja:rows[0].simu_mteja,aina:rows[0].aina,jumla:total});
+}
+function showInvoiceFromRows(items,meta){
+  $('invDate').textContent=meta.tarehe;
+  $('invNo').textContent=meta.invoice_no;
+  $('invCustomer').textContent=meta.mteja||'Mteja wa Kawaida';
+  $('invPhone').textContent=meta.simu_mteja||'—';
+  $('invItemsBody').innerHTML=items.map((it,idx)=>`
+    <tr><td>${idx+1}</td><td>${it.jina}${it.jina_sw?` / ${it.jina_sw}`:''}</td><td>${it.kipimo||'pc'}</td><td class="num">${it.idadi}</td><td class="num">${Number(it.bei_kuuzia).toLocaleString()}.00</td><td class="num">${Number(it.idadi*it.bei_kuuzia).toLocaleString()}.00</td></tr>`).join('');
+  $('invTotalAmount').textContent=Number(meta.jumla).toLocaleString()+'.00';
+  $('invPayStatus').textContent=meta.aina==='Taslimu'?'Imelipwa taslimu':'Deni (haijalipwa kikamilifu)';
+  $('invOverlay').classList.add('open');
+}
+$('invClose') && $('invClose').addEventListener('click',()=>$('invOverlay').classList.remove('open'));
+
+/* ─── GHARAMA ─── */
+async function ongezaGharama(){
+  const tarehe=$('g-tarehe').value,aina=$('g-aina').value.trim(),kiasi=parseInt($('g-kiasi').value),maelezo=$('g-maelezo').value.trim();
+  const tawi=$('g-tawi').value;
+  let ok=true;
+  if(!aina){showErr('err-g-aina',true);ok=false;}else showErr('err-g-aina',false);
+  if(!kiasi||kiasi<1){showErr('err-g-kiasi',true);ok=false;}else showErr('err-g-kiasi',false);
+  if(!ok)return;
+  try{await DB.post('gharama',{tarehe,tawi,aina,kiasi,maelezo});safishaGharama();arifu('notifyGharama','✅ Matumizi yamehifadhiwa!','success');await loadAll();}
+  catch(e){arifu('notifyGharama','❌ Hitilafu: '+e.message,'error');}
+}
+function safishaGharama(){['g-aina','g-kiasi','g-maelezo'].forEach(id=>{const el=$(id);if(el)el.value='';});}
+
+function funguaModalFuta(fn){deleteAction=fn;$('modalFuta').classList.add('open');$('btn-thibitisha-futa').onclick=async()=>{await fn();fungaAdminModal()};}
+async function futaManunuzi(id){funguaModalFuta(async()=>{const p=allManunuzi.find(x=>x.id===id);if(p){const b=allBidhaa.find(x=>x.jina.toLowerCase()===p.jina.toLowerCase());if(b)await DB.patch('bidhaa',`id=eq.${b.id}`,{idadi:Math.max(0,b.idadi-p.idadi)});}await DB.del('manunuzi',`id=eq.${id}`);toast('Rekodi imefutwa');await loadAll();});}
+async function futaGharama(id){funguaModalFuta(async()=>{await DB.del('gharama',`id=eq.${id}`);toast('Rekodi imefutwa');await loadAll();});}
+async function futaBidhaa(id){
+  const p=allBidhaa.find(x=>x.id===id);if(!p)return;
+  funguaModalFuta(async()=>{await DB.del('bidhaa',`id=eq.${id}`);toast(`Bidhaa "${p.jina}" imefutwa`);await loadAll();});
+}
+
+function funguaMalipo(id){
+  const c=allWateja.find(x=>x.id===id);if(!c)return;
+  maalipoMteja=id;
+  $('mp-jina').textContent=c.jina;$('mp-deni-lote').textContent=pesa(c.deni_lote);$('mp-bakaa').textContent=pesa(c.bakaa);
+  $('mp-kiasi').value='';$('mp-maelezo').value='';$('mp-tarehe').value=leoISO();
+  $('mp-notify').style.display='none';$('modalMalipo').classList.add('open');
+}
+async function thibitishaMalipo(){
+  const kiasi=parseFloat($('mp-kiasi').value),tarehe=$('mp-tarehe').value,maelezo=$('mp-maelezo').value.trim();
+  const mpN=$('mp-notify');
+  if(!kiasi||kiasi<=0){mpN.style.display='block';mpN.style.background='var(--a-red-light)';mpN.style.color='var(--a-red)';mpN.textContent='❌ Weka kiasi sahihi.';return;}
+  const c=allWateja.find(x=>x.id===maalipoMteja);if(!c)return;
+  const halisi=Math.min(kiasi,c.bakaa);
+  const nLipwa=c.kilicholipwa+halisi,nBakaa=c.bakaa-halisi;
+  await DB.patch('wateja',`id=eq.${c.id}`,{kilicholipwa:nLipwa,bakaa:nBakaa,hali:nBakaa<=0?'Amelipa Kamili':nLipwa>0?'Amelipa Sehemu':'Hajalipa'});
+  let hist=[];try{hist=JSON.parse(localStorage.getItem('ngarahuduma_malipo')||'[]');}catch(e){}
+  hist.unshift({id:Date.now(),mteja_id:c.id,mteja:c.jina,kiasi:halisi,tarehe,maelezo:maelezo||'Malipo ya deni',bakaa_baada:nBakaa});
+  localStorage.setItem('ngarahuduma_malipo',JSON.stringify(hist));
+  fungaAdminModal();toast(`✅ Malipo ya ${pesa(halisi)} yamehifadhiwa!`);await loadAll();
+}
+
+/* ─── MAAGIZO ─── */
+function pendingOrders(){return filterByTawi(allMauzo).filter(s=>s.hali_order==='Inasubiri');}
+function renderMaagizo(){
+  const grouped={};
+  pendingOrders().forEach(s=>{
+    const key=s.invoice_no||s.id;
+    if(!grouped[key])grouped[key]={invoice_no:s.invoice_no,tarehe:s.tarehe,mteja:s.mteja,simu_mteja:s.simu_mteja,eneo:s.eneo,rows:[],jumla:0};
+    grouped[key].rows.push(s);grouped[key].jumla+=s.jumla;
+  });
+  const pending=Object.values(grouped);
+  [$('pendingPill'),$('mTopPill')].forEach(el=>{if(!el)return;el.style.display=pending.length?'inline-flex':'none';el.textContent=pending.length;});
+  const alertBox=$('alertOrders');
+  if(pending.length){alertBox.style.display='block';$('txtOrders').textContent=`Order ${pending.length} zinazosubiri uthibitisho.`;}
+  else alertBox.style.display='none';
+  $('pendingOrdersList').innerHTML=pending.length?pending.map(o=>`
+    <div class="order-card pending">
+      <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:8px;">
+        <div>
+          <strong>${o.invoice_no}</strong> — ${o.mteja}<br>
+          <span style="font-size:12px;color:var(--a-muted)">${o.rows.map(r=>`${r.jina} x${r.idadi}`).join(', ')}</span><br>
+          <span style="font-size:12px;color:var(--a-muted)">${pesa(o.jumla)} · ${o.tarehe} · 📞 ${o.simu_mteja||'Haijasemwa'}${o.eneo?` · 📍 ${o.eneo}`:''}</span>
+        </div>
+        <div style="display:flex;gap:6px;align-items:flex-start;">
+          <button class="btn sm success" onclick="thibitishaOrder('${o.invoice_no}')">✓ Thibitisha</button>
+          <button class="btn sm danger" onclick="funguaRejectOrder('${o.invoice_no}')">✕ Kataa</button>
+        </div>
+      </div>
+    </div>`).join(''):'<div class="empty-state"><div class="icon">📭</div>Hakuna order zinazosubiri.</div>';
+  const hist=filterByTawi(allMauzo).filter(s=>s.chanzo==='Duka');
+  $('tbody-order-history').innerHTML=hist.length?hist.map(o=>{
+    const cls=o.hali_order==='Imethibitishwa'?'pill-green':o.hali_order==='Imekataliwa'?'pill-red':'pill-amber';
+    return`<tr><td>${o.invoice_no||'—'}</td><td>${o.tarehe}</td><td>${o.mteja}</td><td>${o.simu_mteja||'—'}</td><td>${o.eneo||'—'}</td><td>${o.jina}</td><td>${o.kipimo||'pc'}</td><td>${o.idadi}</td><td>${pesa(o.jumla)}</td><td><span class="pill ${cls}">${o.hali_order}</span></td></tr>`;
+  }).join(''):safuTupu(10,'Bado hakuna order kutoka dukani.');
+}
+async function thibitishaOrder(invoiceNo){
+  const rows=allMauzo.filter(s=>s.invoice_no===invoiceNo);
+  for(const o of rows){
+    const b=allBidhaa.find(x=>x.id===o.bidhaa_id)||allBidhaa.find(x=>x.jina===o.jina);
+    if(!b)continue;
+    if(o.idadi>b.idadi){toast(`❌ Hifadhi haitoshi kwa "${o.jina}"! ${b.idadi} tu zilizobaki.`);return;}
+  }
+  try{
+    for(const o of rows){
+      const b=allBidhaa.find(x=>x.id===o.bidhaa_id)||allBidhaa.find(x=>x.jina===o.jina);
+      if(b)await DB.patch('bidhaa',`id=eq.${b.id}`,{idadi:b.idadi-o.idadi});
+      await DB.patch('mauzo',`id=eq.${o.id}`,{hali_order:'Imethibitishwa'});
+    }
+    toast(`✅ Agizo ${invoiceNo} limethibitishwa.`);await loadAll();
+  }catch(e){toast('❌ Hitilafu: '+e.message);}
+}
+function funguaRejectOrder(invoiceNo){
+  rejectAction=invoiceNo;$('reject-reason').value='';$('modalRejectOrder').classList.add('open');
+  $('btn-thibitisha-reject').onclick=async()=>{
+    const rows=allMauzo.filter(s=>s.invoice_no===invoiceNo);
+    for(const o of rows)await DB.patch('mauzo',`id=eq.${o.id}`,{hali_order:'Imekataliwa',bakaa:0});
+    toast('Agizo limekataliwa');fungaAdminModal();await loadAll();
+  };
+}
+
+/* ─── PHOTO UPLOAD (optional, single image) ─── */
+function isVideoFile(file){return file&&file.type.startsWith('video/');}
+function uploadPhoto(file){
+  return new Promise((resolve,reject)=>{
+    const fd=new FormData();fd.append('file',file);fd.append('upload_preset',PRESET);fd.append('cloud_name',CLD);
+    const endpoint=`https://api.cloudinary.com/v1_1/${CLD}/auto/upload`;
+    const xhr=new XMLHttpRequest();xhr.open('POST',endpoint,true);xhr.timeout=120000;
+    xhr.onload=()=>{try{const d=JSON.parse(xhr.responseText);if(d.secure_url)resolve({url:d.secure_url,type:d.resource_type});else reject(new Error(d.error?.message||'Upload failed'));}catch(e){reject(new Error('Invalid response'));}};
+    xhr.onerror=()=>reject(new Error('Network error'));xhr.ontimeout=()=>reject(new Error('Upload timed out'));
+    xhr.send(fd);
+  });
+}
+function onFilePick(input){uploadFile=input.files[0]||null;renderPreviews();}
+function renderPreviews(){
+  if(!uploadFile){$('previews').innerHTML='';return;}
+  const url=URL.createObjectURL(uploadFile);const isVid=isVideoFile(uploadFile);
+  $('previews').innerHTML=`<div class="preview-item">${isVid?`<video src="${url}" autoplay muted loop playsinline></video>`:`<img src="${url}"/>`}<button class="preview-rm" onclick="removePreview()">✕</button></div>`;
+}
+function removePreview(){uploadFile=null;$('fileInput').value='';renderPreviews();}
+const ub=$('uploadBox');
+if(ub){
+  ub.addEventListener('dragover',e=>{e.preventDefault();ub.classList.add('drag');});
+  ub.addEventListener('dragleave',()=>ub.classList.remove('drag'));
+  ub.addEventListener('drop',e=>{e.preventDefault();ub.classList.remove('drag');const f=Array.from(e.dataTransfer.files).find(f=>f.type.startsWith('image/'));if(f){uploadFile=f;renderPreviews();}});
+}
+
+async function saveProductWithPhoto(){
+  const jina=$('p-jina').value.trim(),jina_sw=$('p-jina-sw').value.trim(),bei=$('p-bei').value.trim();
+  const beiGharama=parseInt($('p-bei-gharama').value)||0,idadi=parseInt($('p-idadi').value)||1;
+  const category=$('p-kategoria').value,kipimo=$('p-kipimo').value,badge=$('p-badge').value.trim();
+  const kiwango_chini=parseInt($('p-kiwango-chini').value)||10;
+  const tawi=$('p-tawi').value;
+  const maelezo_sw=$('p-maelezo-sw').value.trim(),maelezo_en=$('p-maelezo-en').value.trim();
+  if(!jina){toast('Weka jina la bidhaa');return;}
+  if(!bei){toast('Weka bei ya kuuzia');return;}
+  const btn=$('p-save-btn');btn.disabled=true;btn.textContent='Inahifadhi...';
+  try{
+    let img='',media_type='image';
+    if(uploadFile){const up=await uploadPhoto(uploadFile);img=up.url;media_type=up.type==='video'?'video':'image';}
+    const bei_u=parseInt(bei),bei_k=beiGharama||bei_u;
+    const bidhaaRes=await DB.post('bidhaa',{jina,jina_sw,tawi,aina:category,kipimo,bei_kununulia:bei_k,bei_kuuzia:bei_u,idadi,kiwango_chini,img,media_type,category,badge,maelezo_sw,maelezo_en,onyesha_dukani:true});
+    if(bidhaaRes&&bidhaaRes.code){throw new Error('DB error: '+bidhaaRes.message);}
+    await DB.post('manunuzi',{tarehe:leoISO(),jina,tawi,aina:category,kipimo,idadi,bei_kununulia:bei_k,jumla:bei_k*idadi,msambazaji:'Stoo ya Awali'});
+    toast(`✅ "${jina}" imehifadhiwa na inaonekana Dukani!`);
+    ['p-jina','p-jina-sw','p-bei','p-bei-gharama','p-badge','p-maelezo-sw','p-maelezo-en'].forEach(id=>$(id).value='');
+    $('p-idadi').value='1';$('p-kiwango-chini').value='10';$('fileInput').value='';uploadFile=null;
+    renderPreviews();await loadAll();
+  }catch(e){console.error('saveProductWithPhoto error:',e);toast('❌ '+e.message);}
+  btn.disabled=false;btn.textContent='💾 Hifadhi na Onyesha Dukani';
+}
+async function toggleDukani(id){
+  const p=allBidhaa.find(x=>x.id===id);if(!p)return;
+  await DB.patch('bidhaa',`id=eq.${id}`,{onyesha_dukani:!p.onyesha_dukani});
+  toast(p.onyesha_dukani?'Imeondolewa Dukani':'Inaonekana Dukani sasa');await loadAll();
+}
+
+/* ─── RENDER FUNCTIONS ─── */
+function renderDashibodi(){
+  const t=hesabu();
+  $('cardManunuzi').textContent=pesa(t.jumla_manunuzi);$('cardMauzo').textContent=pesa(t.jumla_mauzo);
+  $('cardFaida').textContent=pesa(t.faida_halisi);$('cardMadeni').textContent=pesa(t.madeni);
+  $('cardCash').textContent=pesa(Math.max(0,t.hela_cash));
+  $('sumTaskimu').textContent=pesa(t.taslimu);$('sumMkopo').textContent=pesa(t.mkopo);
+  $('sumGharama').textContent=pesa(t.jumla_gharama);$('sumStock').textContent=t.stock;
+  const bf=filterByTawi(allBidhaa),wf=filterByTawi(allWateja);
+  const ndogo=bf.filter(p=>p.idadi>0&&p.idadi<=p.kiwango_chini).map(p=>p.jina);
+  const zimekwisha=bf.filter(p=>p.idadi===0).map(p=>p.jina);
+  let h=[];if(zimekwisha.length)h.push('Zimekwisha: '+zimekwisha.join(', '));if(ndogo.length)h.push('Ndogo: '+ndogo.join(', '));
+  $('txtHifadhi').textContent=h.length?h.join(' | '):'Viwango vyote ni vizuri ✓';
+  const leo=new Date();leo.setHours(0,0,0,0);
+  const zp=wf.filter(c=>c.bakaa>0&&c.tarehe_mwisho&&new Date(c.tarehe_mwisho)<leo).map(c=>c.jina);
+  $('txtMadeni').textContent=zp.length?zp.join(', '):'Hakuna madeni yaliyokwisha muda ✓';
+  const fb=$('faidaBadge'),th=$('txtHali'),ab=$('alertHali');
+  if(t.faida_halisi>0){fb.className='c-badge badge-green';fb.textContent='Faida ✓';th.textContent='Faida ipo — biashara inakua vizuri!';ab.className='alert-box success';}
+  else if(t.faida_halisi<0){fb.className='c-badge badge-red';fb.textContent='Hasara ⚠';th.textContent='Kuna hasara — angalia gharama.';ab.className='alert-box danger';}
+  else{fb.className='c-badge badge-gray';fb.textContent='Usawa';th.textContent='Mauzo yanafunika gharama.';ab.className='alert-box';}
+  renderMauzoChart();
+}
+let mauzoChartInstance=null;
+let chartRangeDays=14;
+function setChartRange(days){
+  chartRangeDays=days;
+  [7,14,30].forEach(d=>{const btn=$('chartRangeBtn'+d);if(btn)btn.className='btn sm '+(d===days?'gold':'secondary');});
+  renderMauzoChart();
+}
+function renderMauzoChart(){
+  if(userRole!=='gm')return;
+  const canvas=$('mauzoTrendChart');
+  if(!canvas||typeof Chart==='undefined')return;
+  const days=[];
+  for(let i=chartRangeDays-1;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    days.push(d.toISOString().slice(0,10));
+  }
+  const sales=filterByTawi(confirmedMauzo());
+  const totals=days.map(d=>sales.filter(s=>s.tarehe===d).reduce((a,s)=>a+s.jumla,0));
+  const labels=days.map(d=>{const dt=new Date(d+'T00:00:00');return dt.getDate()+'/'+(dt.getMonth()+1);});
+  if(mauzoChartInstance)mauzoChartInstance.destroy();
+  mauzoChartInstance=new Chart(canvas.getContext('2d'),{
+    type:'line',
+    data:{labels,datasets:[{
+      label:'Mauzo (TZS)',data:totals,
+      borderColor:'#C1440E',backgroundColor:'rgba(193,68,14,0.12)',
+      fill:true,tension:0.3,pointRadius:3,pointBackgroundColor:'#C1440E'
+    }]},
+    options:{
+      responsive:true,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'TZS '+c.parsed.y.toLocaleString()}}},
+      scales:{y:{min:0,ticks:{callback:v=>Number(v).toLocaleString()},grid:{color:'#E4E0D4'}},x:{grid:{display:false}}}
+    }
+  });
+}
+function renderManunuzi(){
+  const list=filterByTawi(allManunuzi);
+  $('tbody-manunuzi').innerHTML=list.length?list.map(p=>`<tr><td>${p.tarehe}</td><td><strong>${p.jina}</strong></td><td>${CAT_LABEL[p.aina]||p.aina}</td><td>${p.kipimo||'pc'}</td><td>${p.idadi}</td><td>${pesa(p.bei_kununulia)}</td><td><strong>${pesa(p.jumla)}</strong></td><td>${p.msambazaji}</td><td><button class="btn sm danger" onclick="futaManunuzi('${p.id}')">Futa</button></td></tr>`).join(''):safuTupu(9,'Bado hakuna manunuzi.');
+}
+function renderGharama(){
+  const list=filterByTawi(allGharama);
+  $('tbody-gharama').innerHTML=list.length?list.map(e=>`<tr><td>${e.tarehe}</td><td><strong>${e.aina}</strong></td><td>${pesa(e.kiasi)}</td><td>${e.maelezo||'—'}</td><td><button class="btn sm danger" onclick="futaGharama('${e.id}')">Futa</button></td></tr>`).join(''):safuTupu(5,'Bado hakuna matumizi.');
+}
+function updateJinaSuggestions(){
+  const dl=$('t-jina-suggestions');if(!dl)return;
+  const cat=$('t-aina').value;
+  const names=[...new Set(allBidhaa.filter(p=>p.aina===cat).map(p=>p.jina))].sort();
+  dl.innerHTML=names.map(n=>`<option value="${n}"></option>`).join('');
+}
+function renderStock(){
+  const tafuta=($('search-stock').value||'').toLowerCase();
+  const list=filterByTawi(allBidhaa).filter(p=>`${p.jina} ${p.jina_sw||''} ${p.aina}`.toLowerCase().includes(tafuta));
+  const blank="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Crect fill='%23F3E6DE' width='40' height='40'/%3E%3C/svg%3E";
+  if(!list.length){$('tbody-stock').innerHTML=safuTupu(11,'Hakuna bidhaa.');return;}
+  const catOrder=['mabomba','fittings','umeme','saruji','zana','mengineyo'];
+  const groups={};
+  list.forEach(p=>{const cat=p.aina||'mengineyo';(groups[cat]=groups[cat]||[]).push(p);});
+  Object.values(groups).forEach(g=>g.sort((a,b)=>a.jina.localeCompare(b.jina)));
+  const cats=catOrder.filter(c=>groups[c]&&groups[c].length).concat(Object.keys(groups).filter(c=>!catOrder.includes(c)));
+  $('tbody-stock').innerHTML=cats.map(cat=>{
+    const rows=groups[cat].map(p=>{
+      const fp=p.bei_kuuzia>0?Math.round(((p.bei_kuuzia-p.bei_kununulia)/p.bei_kuuzia)*100):0;
+      const badge=p.idadi===0?'<span class="pill pill-red">Imekwisha</span>':p.idadi<=p.kiwango_chini?'<span class="pill pill-amber">Ndogo</span>':'<span class="pill pill-green">Ipo ✓</span>';
+      return`<tr><td><img src="${p.img||blank}" style="width:34px;height:34px;object-fit:cover;border-radius:4px"/></td><td><strong>${p.jina}${p.jina_sw?` / ${p.jina_sw}`:''}</strong></td><td>${CAT_LABEL[p.aina]||p.aina}</td><td>${p.kipimo||'pc'}</td><td>${pesa(p.bei_kununulia)}</td><td>${pesa(p.bei_kuuzia)}</td><td><span class="pill ${fp>=30?'pill-green':fp>=15?'pill-amber':'pill-red'}">${fp}%</span></td><td><strong>${p.idadi}</strong></td><td>${badge}</td><td><div class="toggle-wrap"><div class="toggle${p.onyesha_dukani?' on':''}" onclick="toggleDukani('${p.id}')"></div></div></td><td><button class="btn sm danger" onclick="futaBidhaa('${p.id}')">🗑 Futa</button></td></tr>`;
+    }).join('');
+    return `<tr class="cat-group-row"><td colspan="11">${CAT_LABEL[cat]||cat} <span class="cat-count">(${groups[cat].length})</span></td></tr>${rows}`;
+  }).join('');
+}
+function renderWateja(){
+  const list=filterByTawi(allWateja);
+  $('tbody-wateja').innerHTML=list.length?list.map(c=>{
+    const cls=c.hali==='Hajalipa'?'pill-red':c.hali==='Amelipa Sehemu'?'pill-amber':'pill-green';
+    const haliLabel=c.hali==='Hajalipa'?'Hajalipa':c.hali==='Amelipa Sehemu'?'Inaendelea':'Imelipwa ✓';
+    const prog=c.deni_lote>0?Math.round((c.kilicholipwa/c.deni_lote)*100):0;
+    return`<tr><td><strong>${c.jina}</strong><br><div style="margin-top:4px;height:4px;background:var(--a-line);border-radius:2px;width:80px"><div style="height:100%;width:${prog}%;background:${prog===100?'var(--a-green)':'var(--a-rg)'};border-radius:2px"></div></div><span style="font-size:10px;color:var(--a-muted)">${prog}% imelipwa</span></td><td>${c.simu}</td><td>${pesa(c.deni_lote)}</td><td style="color:var(--a-green);font-weight:600">${pesa(c.kilicholipwa)}</td><td style="color:${c.bakaa>0?'var(--a-red)':'var(--a-green)'};font-weight:700">${pesa(c.bakaa)}</td><td>${c.tarehe_mwisho||'—'}</td><td><span class="pill ${cls}">${haliLabel}</span></td><td style="display:flex;gap:4px;flex-wrap:wrap;">${c.bakaa>0?`<button class="btn sm gold" onclick="funguaMalipo('${c.id}')">💳 Lipa</button>`:''}<button class="btn sm secondary" onclick="oneshaHistoriaMalipo('${c.id}','${c.jina.replace(/'/g,"\\'")}')">📋</button></td></tr>`;
+  }).join(''):safuTupu(8,'Hakuna wateja wa madeni.');
+}
+function oneshaHistoriaMalipo(mteja_id,jina){
+  $('malipo-history-jina').textContent=jina;$('malipo-history-section').style.display='block';
+  let hist=[];try{hist=JSON.parse(localStorage.getItem('ngarahuduma_malipo')||'[]');}catch(e){}
+  const mine=hist.filter(h=>h.mteja_id===mteja_id);
+  $('tbody-malipo-history').innerHTML=mine.length?mine.map(h=>`<tr><td>${h.tarehe}</td><td style="color:var(--a-green);font-weight:700">${pesa(h.kiasi)}</td><td style="color:${h.bakaa_baada>0?'var(--a-red)':'var(--a-green)'};font-weight:600">${pesa(h.bakaa_baada)}</td><td>${h.maelezo||'—'}</td></tr>`).join(''):`<tr><td colspan="4" class="empty-state">Bado hakuna historia ya malipo.</td></tr>`;
+  $('malipo-history-section').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function renderKilaSiku(){
+  const sel=$('ks-tarehe').value;if(!sel)return;
+  const mp=filterByTawi(allManunuzi).filter(p=>p.tarehe===sel),ms=filterByTawi(confirmedMauzo()).filter(s=>s.tarehe===sel);
+  const taslimu=ms.filter(s=>s.aina==='Taslimu').reduce((a,b)=>a+b.jumla,0);
+  const mkopo=ms.filter(s=>s.aina==='Mkopo').reduce((a,b)=>a+b.jumla,0);
+  const jumla_mauzo=ms.reduce((a,b)=>a+b.jumla,0),jumla_manunuzi=mp.reduce((a,b)=>a+b.jumla,0);
+  const net=jumla_mauzo-jumla_manunuzi;
+  $('ks-manunuzi').textContent=pesa(jumla_manunuzi);$('ks-taslimu').textContent=pesa(taslimu);$('ks-mkopo').textContent=pesa(mkopo);$('ks-hali').textContent=pesa(net);
+  $('ks-n-manunuzi').textContent=mp.length;$('ks-n-mauzo').textContent=ms.length;
+  $('ks-bakaa').textContent=pesa(ms.filter(s=>s.aina==='Mkopo').reduce((a,b)=>a+b.bakaa,0));
+  $('ks-jumla-mauzo').textContent=pesa(jumla_mauzo);
+  $('ks-maelezo').textContent=mp.length===0&&ms.length===0?'Hakuna shughuli tarehe hii.':`Manunuzi ${mp.length}, Mauzo ${ms.length}.`;
+  const badge=$('ks-hali-badge'),alert=$('ks-alert'),txt=$('ks-alert-txt');
+  if(net>0){badge.className='c-badge badge-green';badge.textContent='Nzuri ✓';txt.textContent='Siku nzuri!';alert.className='alert-box success';}
+  else if(net<0){badge.className='c-badge badge-amber';badge.textContent='Manunuzi Zaidi';txt.textContent='Manunuzi yamezidi mauzo.';alert.className='alert-box';}
+  else{badge.className='c-badge badge-gray';badge.textContent='Usawa';txt.textContent='Mauzo na manunuzi vimesawazika.';alert.className='alert-box';}
+  $('ks-tbody-m').innerHTML=mp.length?mp.map(p=>`<tr><td>${p.tarehe}</td><td>${p.jina}</td><td>${CAT_LABEL[p.aina]||p.aina}</td><td>${p.idadi}</td><td>${pesa(p.bei_kununulia)}</td><td>${pesa(p.jumla)}</td><td>${p.msambazaji}</td></tr>`).join(''):safuTupu(7,'Hakuna manunuzi.');
+  $('ks-tbody-s').innerHTML=ms.length?ms.map(s=>{const ac=s.aina==='Taslimu'?'pill-green':'pill-amber';return`<tr><td>${s.tarehe}</td><td>${s.mteja}</td><td>${s.jina}</td><td><span class="pill ${ac}">${s.aina}</span></td><td>${s.idadi}</td><td>${pesa(s.jumla)}</td><td>${pesa(s.kilicholipwa)}</td><td>${pesa(s.bakaa)}</td></tr>`;}).join(''):safuTupu(8,'Hakuna mauzo.');
+}
+function renderRipoti(){
+  const k=$('r-kuanzia').value,h=$('r-hadi').value,t=hesabu(k,h);
+  $('rep-manunuzi').textContent=pesa(t.jumla_manunuzi);$('rep-mauzo').textContent=pesa(t.jumla_mauzo);
+  $('rep-gharama').textContent=pesa(t.jumla_gharama);$('rep-faida-j').textContent=pesa(t.faida_jumla);
+  $('rep-faida-h').textContent=pesa(t.faida_halisi);$('rep-madeni').textContent=pesa(t.madeni);
+}
+function futhaChujo(){$('r-kuanzia').value='';$('r-hadi').value='';renderRipoti();}
+function hamishaCsv(){
+  const k=$('r-kuanzia').value,h=$('r-hadi').value,ch=d=>(!k||d>=k)&&(!h||d<=h);
+  let csv='Aina,Tarehe,Maelezo,Kiasi\n';
+  filterByTawi(allManunuzi).filter(p=>ch(p.tarehe)).forEach(p=>csv+=`Ununuzi,${p.tarehe},"${p.jina} x${p.idadi}",${p.jumla}\n`);
+  filterByTawi(confirmedMauzo()).filter(s=>ch(s.tarehe)).forEach(s=>csv+=`Uuzaji,${s.tarehe},"${s.jina} x${s.idadi} kwa ${s.mteja} (${s.invoice_no||''})",${s.jumla}\n`);
+  filterByTawi(allGharama).filter(e=>ch(e.tarehe)).forEach(e=>csv+=`Matumizi,${e.tarehe},"${e.aina}: ${e.maelezo}",${e.kiasi}\n`);
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);a.download=`ngarahuduma-ripoti-${leoISO()}.csv`;a.click();
+}
+function hamishaExcel(){
+  if(typeof XLSX==='undefined'){toast('❌ Excel library haijapakia — angalia mtandao wako.');return;}
+  const k=$('r-kuanzia').value,h=$('r-hadi').value,ch=d=>(!k||d>=k)&&(!h||d<=h);
+  const t=hesabu(k,h);
+  const mauzoRows=filterByTawi(confirmedMauzo()).filter(s=>ch(s.tarehe)).map(s=>({
+    Invoice:s.invoice_no||'',Tarehe:s.tarehe,Mteja:s.mteja,Bidhaa:s.jina,Kipimo:s.kipimo||'pc',
+    Idadi:s.idadi,'Bei/Unit':s.bei_kuuzia,Jumla:s.jumla,Aina:s.aina,Kilicholipwa:s.kilicholipwa,Bakaa:s.bakaa,
+    Tawi:BRANCHES[s.tawi]||s.tawi||''
+  }));
+  const manunuziRows=filterByTawi(allManunuzi).filter(p=>ch(p.tarehe)).map(p=>({
+    Tarehe:p.tarehe,Bidhaa:p.jina,Aina:CAT_LABEL[p.aina]||p.aina,Kipimo:p.kipimo||'pc',Idadi:p.idadi,
+    'Bei Kununulia':p.bei_kununulia,Jumla:p.jumla,Msambazaji:p.msambazaji,Tawi:BRANCHES[p.tawi]||p.tawi||''
+  }));
+  const matumiziRows=filterByTawi(allGharama).filter(e=>ch(e.tarehe)).map(e=>({
+    Tarehe:e.tarehe,Aina:e.aina,Kiasi:e.kiasi,Maelezo:e.maelezo||'',Tawi:BRANCHES[e.tawi]||e.tawi||''
+  }));
+  const muhtasariRows=[
+    {Kipimo:'Jumla ya Manunuzi',Thamani:t.jumla_manunuzi},
+    {Kipimo:'Jumla ya Mauzo',Thamani:t.jumla_mauzo},
+    {Kipimo:'Mauzo ya Taslimu',Thamani:t.taslimu},
+    {Kipimo:'Mauzo ya Deni',Thamani:t.mkopo},
+    {Kipimo:'Jumla ya Matumizi',Thamani:t.jumla_gharama},
+    {Kipimo:'Faida ya Jumla',Thamani:t.faida_jumla},
+    {Kipimo:'Faida Halisi',Thamani:t.faida_halisi},
+    {Kipimo:'Madeni Bakaa',Thamani:t.madeni},
+    {Kipimo:'Tawi',Thamani:viewingTawi==='yote'?'Matawi Yote':(BRANCHES[viewingTawi]||viewingTawi)},
+    {Kipimo:'Kipindi',Thamani:(k||'Mwanzo')+' hadi '+(h||'Leo')}
+  ];
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(muhtasariRows),'Muhtasari');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(mauzoRows),'Mauzo');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(manunuziRows),'Manunuzi');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(matumiziRows),'Matumizi');
+  XLSX.writeFile(wb,`ngarahuduma-ripoti-${leoISO()}.xlsx`);
+}
+function renderAll(){renderDashibodi();renderMaagizo();renderManunuzi();renderMauzo();renderGharama();renderStock();renderWateja();renderWanunuzi();renderRipoti();renderKilaSiku();renderGrid(curFilter);}
+
+/* ─── WANUNUZI — broadcast ─── */
+async function ongezaMteja(){
+  const jina=$('wn-jina').value.trim(),simu=$('wn-simu').value.trim(),mahali=$('wn-mahali').value.trim(),maelezo=$('wn-maelezo').value.trim();
+  const tawi=$('wn-tawi').value;
+  let ok=true;
+  if(!jina){showErr('err-wn-jina',true);ok=false;}else showErr('err-wn-jina',false);
+  if(!simu){showErr('err-wn-simu',true);ok=false;}else showErr('err-wn-simu',false);
+  if(!ok)return;
+  try{await DB.post('wanunuzi',{jina,tawi,simu,mahali,maelezo});safishaWanunuzi();arifu('notifyWanunuzi',`✅ ${jina} amehifadhiwa!`,'success');await loadAll();}
+  catch(e){arifu('notifyWanunuzi','❌ Hitilafu: '+e.message,'error');}
+}
+function safishaWanunuzi(){['wn-jina','wn-simu','wn-mahali','wn-maelezo'].forEach(id=>{const el=$(id);if(el)el.value='';});}
+async function futaMteja(id){funguaModalFuta(async()=>{await DB.del('wanunuzi',`id=eq.${id}`);toast('Mteja amefutwa');await loadAll();});}
+function renderWanunuzi(){
+  const tafuta=($('search-wanunuzi')?$('search-wanunuzi').value||'':'').toLowerCase();
+  const list=filterByTawi(allWanunuzi).filter(c=>`${c.jina} ${c.simu} ${c.mahali}`.toLowerCase().includes(tafuta));
+  const tbody=$('tbody-wanunuzi');
+  if(tbody){
+    tbody.innerHTML=list.length?list.map(c=>`
+      <tr><td><strong>${c.jina}</strong></td><td>${c.simu}</td><td>${c.mahali||'—'}</td><td>${c.maelezo||'—'}</td><td style="font-size:11px;color:var(--a-muted)">${(c.created_at||'').slice(0,10)}</td><td><button class="btn sm danger" onclick="futaMteja('${c.id}')">Futa</button></td></tr>`).join(''):safuTupu(6,'Hakuna wateja bado. Ongeza mteja wa kwanza!');
+  }
+  const selList=$('customerSelectList');
+  if(selList){
+    const existing=selList.querySelectorAll('.bc-customer-chk');
+    const scopedCount=filterByTawi(allWanunuzi).length;
+    if(existing.length!==scopedCount){
+      const checkedIds=new Set(Array.from(existing).filter(c=>c.checked).map(c=>c.value));
+      const scoped=filterByTawi(allWanunuzi);
+      selList.innerHTML=scoped.length?scoped.map(c=>`
+        <div class="customer-select-item">
+          <input type="checkbox" class="bc-customer-chk" value="${c.id}" data-simu="${c.simu}" data-jina="${c.jina}" onchange="updateSelectedCount()" ${checkedIds.has(c.id)?'checked':''}/>
+          <span><strong>${c.jina}</strong> &nbsp;·&nbsp; ${c.simu}${c.mahali?' &nbsp;·&nbsp; '+c.mahali:''}</span>
+        </div>`).join(''):'<div class="empty-state"><div class="icon">👥</div>Hakuna wateja bado.</div>';
+    }
+  }
+  updateSelectedCount();
+}
+function toggleSelectAll(chk){document.querySelectorAll('.bc-customer-chk').forEach(c=>c.checked=chk.checked);updateSelectedCount();}
+function updateSelectedCount(){
+  const checked=document.querySelectorAll('.bc-customer-chk:checked');
+  const el=$('bc-selected-count');if(el)el.textContent=checked.length?`${checked.length} wamechaguliwa`:'';
+  const all=document.querySelectorAll('.bc-customer-chk');const selAll=$('bc-select-all');
+  if(selAll&&all.length)selAll.checked=checked.length===all.length;
+}
+async function tumaBroadcast(){
+  const msg=$('bc-message').value.trim();
+  if(!msg){toast('Andika ujumbe kwanza');$('bc-message').focus();return;}
+  const checked=Array.from(document.querySelectorAll('.bc-customer-chk:checked'));
+  if(!checked.length){toast('Chagua wateja angalau mmoja');return;}
+  const btn=document.querySelector('button[onclick="tumaBroadcast()"]');
+  if(btn){btn.disabled=true;btn.textContent='Inatuma...';}
+  let sent=0,failed=0;const total=checked.length;
+  for(let i=0;i<checked.length;i++){
+    const c=checked[i];
+    const personalMsg=`${msg.replace('{jina}',c.dataset.jina)}\n\nUnaweza kutembelea duka letu kupitia:\n${STORE_URL}`;
+    arifu('notifyBroadcast',`Inatuma... ${i+1}/${total}`,'success');
+    try{const res=await sendSms(c.dataset.simu,personalMsg);if(res&&res.ok)sent++;else failed++;}catch(e){failed++;}
+  }
+  arifu('notifyBroadcast',failed===0?`✅ Ujumbe umetumwa kwa wateja wote ${sent}!`:`⚠ Imetumwa: ${sent}/${total}. Haikufika: ${failed}.`,'success');
+  $('bc-message').value='';document.querySelectorAll('.bc-customer-chk').forEach(c=>c.checked=false);
+  const selAll=$('bc-select-all');if(selAll)selAll.checked=false;updateSelectedCount();
+  if(btn){btn.disabled=false;btn.textContent='📨 Tuma Ujumbe';}
+}
+
+/* ─── INIT ─── */
+if(!history.state)history.replaceState({type:'store'},'','#store');
+initStore();
+</script>
+</body>
+</html>
