@@ -584,14 +584,9 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;font-family:'IBM 
     <p class="s-login-title">Admin Access</p>
     <p class="s-login-sub">Ngara Huduma Company Limited</p>
     <p class="s-login-err" id="loginErr"></p>
-    <select id="loginRole">
-      <option value="gm">Meneja Mkuu</option>
-      <option value="ngaramjini">Ngara Mjini</option>
-      <option value="benaco">Benaco</option>
-      <option value="mugoma">Mugoma</option>
-    </select>
-    <input type="password" id="pwInput" placeholder="Weka password" onkeydown="if(event.key==='Enter')doLogin()"/>
-    <button class="btn-rg" style="width:100%" onclick="doLogin()">Ingia</button>
+    <input type="email" id="loginEmail" autocomplete="off" placeholder="Barua pepe" onkeydown="if(event.key==='Enter')document.getElementById('pwInput').focus()"/>
+    <input type="password" id="pwInput" autocomplete="off" placeholder="Weka password" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button class="btn-rg" id="loginBtn" style="width:100%" onclick="doLogin()">Ingia</button>
     <br><br>
     <button class="btn-outline" style="width:100%" onclick="closeLogin()">Ghairi</button>
   </div>
@@ -626,7 +621,7 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;font-family:'IBM 
     <button class="a-tab-btn" data-page="wanunuzi"><span class="t-icon">📣</span><span class="t-label">Wateja</span></button>
     <button class="a-tab-btn" data-page="kila-siku"><span class="t-icon">📅</span><span class="t-label">Siku</span></button>
     <button class="a-tab-btn" data-page="ripoti"><span class="t-icon">📈</span><span class="t-label">Ripoti</span></button>
-    <button class="a-tab-btn" data-page="takataka"><span class="t-icon">🗑</span><span class="t-label">Takataka</span></button>
+    <button class="a-tab-btn" data-page="takataka"><span class="t-icon">🗑</span><span class="t-label">Zilizofutwa</span></button>
   </div>
 </div>
 
@@ -664,7 +659,7 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;font-family:'IBM 
       <button class="nav-btn" data-page="wanunuzi"><span class="icon">📣</span>Wateja</button>
       <button class="nav-btn" data-page="kila-siku"><span class="icon">📅</span>Summary ya Siku</button>
       <button class="nav-btn" data-page="ripoti"><span class="icon">📈</span>Ripoti</button>
-      <button class="nav-btn" data-page="takataka"><span class="icon">🗑</span>Takataka</button>
+      <button class="nav-btn" data-page="takataka"><span class="icon">🗑</span>Zilizofutwa</button>
     </nav>
     <div class="sidebar-footer">
       <span class="sync-dot"></span>Live · Ngara Huduma © 2026
@@ -1046,7 +1041,7 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;font-family:'IBM 
 
     <!-- TAKATAKA (TRASH / RESTORE) — GM only -->
     <section id="takataka" class="page">
-      <div class="topbar"><div class="topbar-left"><h2>Takataka</h2><p>Rekodi zilizofutwa — zinaweza kurudishwa wakati wowote.</p></div></div>
+      <div class="topbar"><div class="topbar-left"><h2>Zilizofutwa</h2><p>Rekodi zilizofutwa — zinaweza kurudishwa wakati wowote.</p></div></div>
       <div class="section">
         <div class="section-header">
           <h3>🗑 Vitu Vilivyofutwa</h3>
@@ -1194,6 +1189,10 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;font-family:'IBM 
 const SB_URL='https://jdldiwhplklxxkoelvhb.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkbGRpd2hwbGtseHhrb2VsdmhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyNzM3MjcsImV4cCI6MjA4OTg0OTcyN30.Xn3a3Fhie81zs5UMp71NHspQw0xBodYI5Wh4yTJHahU';
 const BRANCHES={ngaramjini:'Ngara Mjini',benaco:'Benaco',mugoma:'Mugoma'};
+// Front Desk Officer SMS number per branch — fill in once known.
+// Order notifications route here instead of a single generic admin number,
+// so the right branch hears about their own orders directly.
+const BRANCH_PHONE={ngaramjini:'0695541568',benaco:'0755863325',mugoma:'0614652702'};
 // Login passwords are no longer stored here — see SECURITY_SETUP notes:
 // each staff member's password lives only in Supabase Auth, never in this file.
 const CLD='TODO_CLOUDINARY_CLOUD_NAME';
@@ -1235,8 +1234,6 @@ const KIPIMO_LABEL={pc:'Piece / Pisi',bag:'Bag / Mifuko',roll:'Roll / Rola',mete
 const sbClient=supabase.createClient(SB_URL,SB_KEY);
 // Official company email per role — staff only ever pick the branch
 // name and type a password; the underlying email is resolved here.
-const ROLE_EMAIL={gm:'generalmanager@ngarahuduma.com',ngaramjini:'ngaramjini@ngarahuduma.com',benaco:'benaco@ngarahuduma.com',mugoma:'mugoma@ngarahuduma.com'};
-
 async function authHeaders(){
   const {data:{session}}=await sbClient.auth.getSession();
   const token=session?session.access_token:SB_KEY;
@@ -1466,9 +1463,27 @@ async function placeOrder(){
         chanzo:'Duka',hali_order:'Inasubiri',bidhaa_id:p.id
       });
     }
-    const itemLines=cart.map(i=>`BIDHAA: ${i.name}\nIDADI: ${i.qty} ${i.unit}\nJUMLA: TZS ${(i.price*i.qty).toLocaleString()}`).join('\n\n');
+    // Group items by branch — a cart can span more than one branch when
+    // browsing "Matawi Yote", so each branch's Front Desk Officer only
+    // gets notified about their own items, not the whole mixed order.
+    const byBranch={};
+    cart.forEach(it=>{
+      const p=allBidhaa.find(x=>x.id===it.id);if(!p)return;
+      (byBranch[p.tawi]=byBranch[p.tawi]||[]).push(it);
+    });
     const jumlaYote=cart.reduce((s,i)=>s+i.price*i.qty,0);
-    const adminMsg=`AGIZO MPYA (${invoiceNo}):\nKuna ombi jipya kutoka kwa mteja mwenye namba ${phone}${eneo?`\nSITE/ENEO: ${eneo}`:''}\n\n${itemLines}\n\nJUMLA YA YOTE: TZS ${jumlaYote.toLocaleString()}`;
+    for(const tawi of Object.keys(byBranch)){
+      const items=byBranch[tawi];
+      const itemLines=items.map(i=>`BIDHAA: ${i.name}\nIDADI: ${i.qty} ${i.unit}\nJUMLA: TZS ${(i.price*i.qty).toLocaleString()}`).join('\n\n');
+      const jumlaTawi=items.reduce((s,i)=>s+i.price*i.qty,0);
+      const deskMsg=`AGIZO MPYA (${invoiceNo}) — ${BRANCHES[tawi]||tawi}:\nKuna ombi jipya kutoka kwa mteja mwenye namba ${phone}${eneo?`\nSITE/ENEO: ${eneo}`:''}\n\n${itemLines}\n\nJUMLA (${BRANCHES[tawi]||tawi}): TZS ${jumlaTawi.toLocaleString()}`;
+      const deskPhone=BRANCH_PHONE[tawi];
+      if(deskPhone&&!deskPhone.includes('TODO'))await sendSms(deskPhone,deskMsg);
+    }
+    // GM/admin still gets the full combined order for now, until the
+    // wider inter-communication setup between GM and branches is in place.
+    const itemLinesAll=cart.map(i=>`BIDHAA: ${i.name}\nIDADI: ${i.qty} ${i.unit}\nJUMLA: TZS ${(i.price*i.qty).toLocaleString()}`).join('\n\n');
+    const adminMsg=`AGIZO MPYA (${invoiceNo}):\nKuna ombi jipya kutoka kwa mteja mwenye namba ${phone}${eneo?`\nSITE/ENEO: ${eneo}`:''}\n\n${itemLinesAll}\n\nJUMLA YA YOTE: TZS ${jumlaYote.toLocaleString()}`;
     await sendSms(ADMIN_PHONE, adminMsg);
     const customerMsg=`Habari! Karibu Ngara Huduma. Agizo lako ${invoiceNo} limepokelewa na linafanyiwa kazi, tutakurudia ndani ya muda mfupi.\n\nUnaweza kutembelea duka letu au kutembelea:\n${STORE_URL}`;
     await sendSms(phone, customerMsg);
@@ -1548,30 +1563,33 @@ function initObserver(){
 // AUTH — two role types: gm (General Manager, sees all 3 branches),
 // deski (Front Desk Officer, locked to their own branch)
 // ════════════════════════════════════════════════════════════════
-function openLogin(){$('loginOverlay').classList.add('open');$('pwInput').value='';$('loginErr').textContent='';setTimeout(()=>$('pwInput').focus(),100);}
+function openLogin(){$('loginOverlay').classList.add('open');$('loginEmail').value='';$('pwInput').value='';$('loginErr').textContent='';const btn=$('loginBtn');btn.disabled=false;btn.style.opacity='1';setTimeout(()=>$('loginEmail').focus(),100);}
 function closeLogin(){$('loginOverlay').classList.remove('open');}
 async function doLogin(){
-  const roleKey=$('loginRole').value; // gm | ngaramjini | benaco | mugoma
+  const email=$('loginEmail').value.trim();
   const pw=$('pwInput').value;
-  const email=ROLE_EMAIL[roleKey];
-  if(!email||!pw){$('loginErr').textContent='Weka password.';return;}
+  if(!email||!pw){$('loginErr').textContent='Weka barua pepe na password.';return;}
   if(!navigator.onLine){
     $('loginErr').textContent='Huwezi kuingia ukiwa hauna mtandao. Tafadhali unganisha mtandao kisha jaribu tena.';
     return;
   }
-  $('loginErr').textContent='Inaingia...';
+  $('loginErr').textContent='';
+  const btn=$('loginBtn');btn.disabled=true;btn.style.opacity='0.7';
   let data,error;
   try{
     ({data,error}=await sbClient.auth.signInWithPassword({email,password:pw}));
   }catch(networkErr){
+    btn.disabled=false;btn.style.opacity='1';
     $('loginErr').textContent='Imeshindikana kuunganisha na mtandao. Tafadhali angalia mtandao wako kisha jaribu tena.';
     return;
   }
   if(error||!data.session){
+    btn.disabled=false;btn.style.opacity='1';
     $('loginErr').textContent='Password si sahihi.';$('pwInput').value='';return;
   }
   const {data:profile,error:profErr}=await sbClient.from('profiles').select('role,tawi').eq('id',data.user.id).single();
   if(profErr||!profile){
+    btn.disabled=false;btn.style.opacity='1';
     $('loginErr').textContent='Akaunti hii haina wasifu (profile) uliosanidiwa. Wasiliana na msimamizi.';
     await sbClient.auth.signOut();return;
   }
@@ -1899,7 +1917,7 @@ async function futaMauzo(id){
     if(s){const b=allBidhaa.find(x=>x.id===s.bidhaa_id)||allBidhaa.find(x=>x.jina===s.jina&&x.tawi===s.tawi);if(b)await DB.patch('bidhaa',`id=eq.${b.id}`,{idadi:b.idadi+s.idadi});
       if(s.aina==='Mkopo'){const c=allWateja.find(x=>x.jina.toLowerCase()===s.mteja.toLowerCase()&&x.tawi===s.tawi);if(c)await DB.patch('wateja',`id=eq.${c.id}`,{deni_lote:Math.max(0,c.deni_lote-s.jumla),bakaa:Math.max(0,c.bakaa-s.bakaa)});}
     }
-    await DB.patch('mauzo',`id=eq.${id}`,{deleted_at:new Date().toISOString()});toast('Rekodi imefutwa (bado inaweza kurudishwa kwenye Takataka)');await loadAll();
+    await DB.patch('mauzo',`id=eq.${id}`,{deleted_at:new Date().toISOString()});toast('Rekodi imefutwa (bado inaweza kurudishwa kwenye Zilizofutwa)');await loadAll();
   });
 }
 function renderMauzo(){
@@ -1958,11 +1976,11 @@ async function ongezaGharama(){
 function safishaGharama(){['g-aina','g-kiasi','g-maelezo'].forEach(id=>{const el=$(id);if(el)el.value='';});}
 
 function funguaModalFuta(fn){deleteAction=fn;$('modalFuta').classList.add('open');$('btn-thibitisha-futa').onclick=async()=>{await fn();fungaAdminModal()};}
-async function futaManunuzi(id){funguaModalFuta(async()=>{const p=allManunuzi.find(x=>x.id===id);if(p){const b=allBidhaa.find(x=>x.jina.toLowerCase()===p.jina.toLowerCase());if(b)await DB.patch('bidhaa',`id=eq.${b.id}`,{idadi:Math.max(0,b.idadi-p.idadi)});}await DB.patch('manunuzi',`id=eq.${id}`,{deleted_at:new Date().toISOString()});toast('Rekodi imefutwa (bado inaweza kurudishwa kwenye Takataka)');await loadAll();});}
-async function futaGharama(id){funguaModalFuta(async()=>{await DB.patch('gharama',`id=eq.${id}`,{deleted_at:new Date().toISOString()});toast('Rekodi imefutwa (bado inaweza kurudishwa kwenye Takataka)');await loadAll();});}
+async function futaManunuzi(id){funguaModalFuta(async()=>{const p=allManunuzi.find(x=>x.id===id);if(p){const b=allBidhaa.find(x=>x.jina.toLowerCase()===p.jina.toLowerCase());if(b)await DB.patch('bidhaa',`id=eq.${b.id}`,{idadi:Math.max(0,b.idadi-p.idadi)});}await DB.patch('manunuzi',`id=eq.${id}`,{deleted_at:new Date().toISOString()});toast('Rekodi imefutwa (bado inaweza kurudishwa kwenye Zilizofutwa)');await loadAll();});}
+async function futaGharama(id){funguaModalFuta(async()=>{await DB.patch('gharama',`id=eq.${id}`,{deleted_at:new Date().toISOString()});toast('Rekodi imefutwa (bado inaweza kurudishwa kwenye Zilizofutwa)');await loadAll();});}
 async function futaBidhaa(id){
   const p=allBidhaa.find(x=>x.id===id);if(!p)return;
-  funguaModalFuta(async()=>{await DB.patch('bidhaa',`id=eq.${id}`,{deleted_at:new Date().toISOString()});toast(`Bidhaa "${p.jina}" imefutwa (bado inaweza kurudishwa kwenye Takataka)`);await loadAll();});
+  funguaModalFuta(async()=>{await DB.patch('bidhaa',`id=eq.${id}`,{deleted_at:new Date().toISOString()});toast(`Bidhaa "${p.jina}" imefutwa (bado inaweza kurudishwa kwenye Zilizofutwa)`);await loadAll();});
 }
 
 function funguaMalipo(id){
@@ -2359,15 +2377,15 @@ async function loadTakataka(){
     tbody.innerHTML=rows.length?rows.map(r=>`
       <tr><td><span class="pill pill-gray">${r.label}</span></td><td>${r.desc}</td><td>${r.deleted_at?new Date(r.deleted_at).toLocaleString('sw-TZ'):'—'}</td>
       <td><button class="btn sm success" onclick="rudishaKipengele('${r.table}','${r.id}')">♻️ Rudisha</button></td></tr>`).join('')
-      :safuTupu(4,'Hakuna kitu kwenye takataka.');
-  }catch(e){tbody.innerHTML=safuTupu(4,'Hitilafu kupakia takataka.');}
+      :safuTupu(4,'Hakuna kitu kilichofutwa.');
+  }catch(e){tbody.innerHTML=safuTupu(4,'Hitilafu kupakia zilizofutwa.');}
 }
 async function rudishaKipengele(table,id){
   await DB.patch(table,`id=eq.${id}`,{deleted_at:null});
   toast('✅ Kimerudishwa!');
   await loadTakataka();await loadAll();
 }
-async function futaMteja(id){funguaModalFuta(async()=>{await DB.patch('wanunuzi',`id=eq.${id}`,{deleted_at:new Date().toISOString()});toast('Mteja amefutwa (bado anaweza kurudishwa kwenye Takataka)');await loadAll();});}
+async function futaMteja(id){funguaModalFuta(async()=>{await DB.patch('wanunuzi',`id=eq.${id}`,{deleted_at:new Date().toISOString()});toast('Mteja amefutwa (bado anaweza kurudishwa kwenye Zilizofutwa)');await loadAll();});}
 function renderWanunuzi(){
   const tafuta=($('search-wanunuzi')?$('search-wanunuzi').value||'':'').toLowerCase();
   const list=filterByTawi(allWanunuzi).filter(c=>`${c.jina} ${c.simu} ${c.mahali}`.toLowerCase().includes(tafuta));
