@@ -1924,8 +1924,10 @@ window.addEventListener('popstate',(e)=>{
   const s=e.state||{type:'store'};
   if(s.type!=='cart'){$('cartOverlay').classList.remove('open');$('cartSidebar').classList.remove('open');}
   if(s.type!=='modal'){$('modalBg').classList.remove('open');}
+  if(s.type!=='sheet'){document.querySelectorAll('.inv-overlay.open').forEach(o=>o.classList.remove('open'));}
   if(s.type==='cart'){renderCart();$('cartOverlay').classList.add('open');$('cartSidebar').classList.add('open');}
   if(s.type==='modal'&&s.id){openModal(s.id);}
+  if(s.type==='sheet'&&s.id){const el=$(s.id);if(el)el.classList.add('open');}
   if(s.type==='admin'&&isAdmin){
     $('adminApp').classList.add('open');document.body.style.overflow='hidden';
     switchPage(s.page||'dashibodi');
@@ -1936,6 +1938,15 @@ window.addEventListener('popstate',(e)=>{
   }
   suppressHistoryPush=false;
 });
+// Print-sheet overlays (Invoice, Transfer Form, Receiving Form, Purchase Form,
+// Monthly Closing, Discount, Bank Payments, Matumizi Ledger) all share this
+// open/close pair so the physical back button undoes opening one instead of
+// leaving the whole app — same pattern as the working cart above.
+function openSheet(id){const el=$(id);if(!el)return;el.classList.add('open');pushHistoryState('sheet',{id});}
+function closeSheet(id){
+  if(history.state&&history.state.type==='sheet'&&history.state.id===id){history.back();return;}
+  const el=$(id);if(el)el.classList.remove('open');
+}
 
 
 // ════════════════════════════════════════════════════════════════
@@ -2425,7 +2436,7 @@ function chapishaPurchaseForm(id){
   $('ppTotalAmount').textContent=pesa(p.jumla);
   $('ppDriverName').textContent=p.jina_dereva||dots;
   $('ppTruckNo').textContent=p.namba_gari||dots;
-  $('ppOverlay').classList.add('open');
+  openSheet('ppOverlay');
 }
 
 /* ─── MAUZO — El Dorado-style single-line quick-add, with invoice generation ─── */
@@ -2806,7 +2817,7 @@ function chapishaTransferForm(id){
   $('tfDriverName').value=u.jina_dereva||'';
   $('tfHandoverDate').value=u.tarehe_kukabidhi||u.tarehe;
   setWaPhone('tfOverlay',BRANCH_PHONE[u.tawi_muombaji]);
-  $('tfOverlay').classList.add('open');
+  openSheet('tfOverlay');
 }
 async function pokeaUhamishoBatch(groupKey){
   const group=allUhamisho.filter(u=>(u.ombi_no||u.id)===groupKey&&u.hali==='Imethibitishwa');
@@ -2838,7 +2849,7 @@ function chapishaReceivingForm(id){
   $('rfTruckNo').textContent=u.namba_gari||dots;
   $('rfFrom').textContent=BRANCHES[u.tawi_chanzo]||u.tawi_chanzo;
   setWaPhone('rfOverlay',BRANCH_PHONE[u.tawi_chanzo]);
-  $('rfOverlay').classList.add('open');
+  openSheet('rfOverlay');
 }
 
 /* ─── MAFUTA — petrol station sales/purchases (separate from hardware stock) ─── */
@@ -3088,10 +3099,10 @@ function showInvoiceFromRows(items,meta){
   $('invTotalAmount').textContent=Number(meta.jumla).toLocaleString()+'.00';
   $('invPayStatus').textContent=meta.aina==='Taslimu'?'Imelipwa taslimu':'Deni (haijalipwa kikamilifu)';
   setWaPhone('invOverlay',meta.simu_mteja);
-  $('invOverlay').classList.add('open');
+  openSheet('invOverlay');
 }
-$('invClose') && $('invClose').addEventListener('click',()=>$('invOverlay').classList.remove('open'));
-$('mzClose') && $('mzClose').addEventListener('click',()=>$('mzOverlay').classList.remove('open'));
+$('invClose') && $('invClose').addEventListener('click',()=>closeSheet('invOverlay'));
+$('mzClose') && $('mzClose').addEventListener('click',()=>closeSheet('mzOverlay'));
 
 // ─── Download / Share any open form as an image ───
 // Works generically across every print sheet (Invoice, Transfer, Receiving,
@@ -3177,12 +3188,12 @@ async function shirikiFomu(){
     toast('📥 Kivinjari hiki hakiwezi kunakili/kutuma moja kwa moja — fomu imepakuliwa, sasa iambatanishe kwenye WhatsApp.');
   },'image/png');
 }
-$('tfClose') && $('tfClose').addEventListener('click',()=>$('tfOverlay').classList.remove('open'));
-$('rfClose') && $('rfClose').addEventListener('click',()=>$('rfOverlay').classList.remove('open'));
-$('ppClose') && $('ppClose').addEventListener('click',()=>$('ppOverlay').classList.remove('open'));
-$('mcClose') && $('mcClose').addEventListener('click',()=>$('mcOverlay').classList.remove('open'));
-$('dcClose') && $('dcClose').addEventListener('click',()=>$('dcOverlay').classList.remove('open'));
-$('bpClose') && $('bpClose').addEventListener('click',()=>$('bpOverlay').classList.remove('open'));
+$('tfClose') && $('tfClose').addEventListener('click',()=>closeSheet('tfOverlay'));
+$('rfClose') && $('rfClose').addEventListener('click',()=>closeSheet('rfOverlay'));
+$('ppClose') && $('ppClose').addEventListener('click',()=>closeSheet('ppOverlay'));
+$('mcClose') && $('mcClose').addEventListener('click',()=>closeSheet('mcOverlay'));
+$('dcClose') && $('dcClose').addEventListener('click',()=>closeSheet('dcOverlay'));
+$('bpClose') && $('bpClose').addEventListener('click',()=>closeSheet('bpOverlay'));
 
 /* ─── GHARAMA ─── */
 async function ongezaGharama(){
@@ -3535,7 +3546,7 @@ function chapishaMatumiziRipoti(){
   $('mzPrevBalance').textContent=pesa(ledger.prevBalance);
   $('mzFinalBalance').textContent=pesa(ledger.finalBalance);
   setWaPhone('mzOverlay',ADMIN_PHONE);
-  $('mzOverlay').classList.add('open');
+  openSheet('mzOverlay');
 }
 function updateJinaSuggestions(){
   const dl=$('t-jina-suggestions');if(!dl)return;
@@ -3668,7 +3679,7 @@ async function generateMonthlyClosingForm(){
   $('mcSalesTotal').textContent=pesa(salesTotal);
   $('mcClosing').textContent=pesa(closing);
   setWaPhone('mcOverlay',ADMIN_PHONE);
-  $('mcOverlay').classList.add('open');
+  openSheet('mcOverlay');
   arifu('notifyMonthly','✅ Fomu imetengenezwa! Salio la kufunga limehifadhiwa kwa mwezi ujao.','success');
 }
 async function generateDiscountForm(){
@@ -3696,7 +3707,7 @@ async function generateDiscountForm(){
   $('dcTotalDiscount').textContent=pesa(totalDiscount);
   $('dcTotalAfter').textContent=pesa(totalAfter);
   setWaPhone('dcOverlay',ADMIN_PHONE);
-  $('dcOverlay').classList.add('open');
+  openSheet('dcOverlay');
 }
 async function generateBankPaymentsForm(){
   const tawi=viewingTawi;
@@ -3718,7 +3729,7 @@ async function generateBankPaymentsForm(){
   const total=list.reduce((a,s)=>a+(s.jumla||0),0);
   $('bpTotal').textContent=pesa(total);
   setWaPhone('bpOverlay',ADMIN_PHONE);
-  $('bpOverlay').classList.add('open');
+  openSheet('bpOverlay');
 }
 function renderRipoti(){
   const k=$('r-kuanzia').value,h=$('r-hadi').value,t=hesabu(k,h);
