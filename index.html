@@ -4,16 +4,16 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>NGARA HUDUMA — Duka la Vifaa vya Ujenzi, Kagera Tanzania</title>
-<meta name="description" content="Ngara Huduma Company Limited — duka la vifaa vya ujenzi lenye matawi Ngara Mjini, Benaco na Mugoma, Kagera. Mabomba, Fittings, Umeme, Saruji, Zana na zaidi."/>
+<meta name="description" content="Ngara Huduma Company Limited — duka la vifaa vya ujenzi lenye matawi Ngara Mjini, Benaco na Ushirombo, Kagera. Mabomba, Fittings, Umeme, Saruji, Zana na zaidi."/>
 <link rel="canonical" href="https://ngarahuduma.com/"/>
 <meta property="og:type" content="website"/>
 <meta property="og:site_name" content="Ngara Huduma"/>
 <meta property="og:title" content="NGARA HUDUMA — Duka la Vifaa vya Ujenzi"/>
-<meta property="og:description" content="Mabomba, Fittings, Umeme, Saruji na Zana za ujenzi — matawi Ngara Mjini, Benaco na Mugoma, Kagera."/>
+<meta property="og:description" content="Mabomba, Fittings, Umeme, Saruji na Zana za ujenzi — matawi Ngara Mjini, Benaco na Ushirombo, Kagera."/>
 <meta property="og:url" content="https://ngarahuduma.com/"/>
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="NGARA HUDUMA — Duka la Vifaa vya Ujenzi"/>
-<meta name="twitter:description" content="Mabomba, Fittings, Umeme, Saruji na Zana za ujenzi — matawi Ngara Mjini, Benaco na Mugoma, Kagera."/>
+<meta name="twitter:description" content="Mabomba, Fittings, Umeme, Saruji na Zana za ujenzi — matawi Ngara Mjini, Benaco na Ushirombo, Kagera."/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%230A0E18'/%3E%3Cpath d='M4 30L20 8L36 30' stroke='%23FF7A45' stroke-width='3.4' stroke-linejoin='round' fill='none'/%3E%3Cpath d='M11 30L20 17L29 30' stroke='%236EA8FF' stroke-width='2.6' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E"/>
 <script type="application/ld+json">
 {
@@ -34,7 +34,7 @@
   "department": [
     {"@type":"HardwareStore","name":"Ngara Huduma — Ngara Mjini"},
     {"@type":"HardwareStore","name":"Ngara Huduma — Benaco"},
-    {"@type":"HardwareStore","name":"Ngara Huduma — Mugoma"}
+    {"@type":"HardwareStore","name":"Ngara Huduma"}
   ]
 }
 </script>
@@ -222,6 +222,7 @@ footer{padding:28px 5%;border-top:1px solid var(--line);text-align:center;font-s
 footer b{color:var(--rg);font-weight:600;}
 
 /* ─── LOGIN OVERLAY (glass) ─── */
+#storeApp{display:none;} /* Public storefront disabled for now — admin-only access. Remove this line to bring it back. */
 .s-login-overlay{position:fixed;inset:0;background:rgba(5,7,12,0.85);backdrop-filter:blur(8px);z-index:6000;display:none;align-items:center;justify-content:center;}
 .s-login-overlay.open{display:flex;}
 .s-login-card{background:rgba(16,21,36,0.88);backdrop-filter:var(--glass-blur);padding:40px 36px;width:min(380px,92vw);text-align:center;border-radius:20px;border:1px solid rgba(255,255,255,0.12);box-shadow:0 30px 80px rgba(0,0,0,0.5);}
@@ -230,6 +231,13 @@ footer b{color:var(--rg);font-weight:600;}
 .s-login-err{font-size:11px;color:#FF8A8A;margin-bottom:12px;min-height:16px;}
 .s-login-card input,.s-login-card select{width:100%;background:rgba(255,255,255,0.06);border:1px solid var(--line);color:var(--ink);padding:11px 14px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;outline:none;border-radius:10px;margin-bottom:12px;text-align:center;}
 .s-login-card input:focus{border-color:var(--rg);}
+/* Full-page login (no storefront behind it) */
+.s-login-overlay{background:radial-gradient(ellipse 900px 700px at 10% -10%,rgba(255,122,69,0.16),transparent 60%),radial-gradient(ellipse 800px 640px at 105% 0%,rgba(110,168,255,0.16),transparent 60%),linear-gradient(180deg,#0A0E18 0%,#111A2E 50%,#0A0E18 100%) !important;backdrop-filter:none !important;}
+#bootSplash{position:fixed;inset:0;z-index:9000;background:#0A0E18;display:flex;align-items:center;justify-content:center;}
+#bootSplash.hide{display:none;}
+.boot-spin{width:34px;height:34px;border-radius:50%;border:3px solid rgba(255,255,255,0.15);border-top-color:#FF7A45;animation:bootspin .8s linear infinite;}
+@keyframes bootspin{to{transform:rotate(360deg)}}
+
 
 /* ─── GEAR BTN ─── */
 .s-gear-btn{position:fixed;bottom:24px;left:24px;background:rgba(16,21,36,0.7);backdrop-filter:blur(14px);border:1px solid var(--line);color:var(--ink3);width:42px;height:42px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;z-index:500;transition:all 0.3s;box-shadow:var(--shadow);}
@@ -272,6 +280,11 @@ footer b{color:var(--rg);font-weight:600;}
 #adminApp .brand{padding:22px 18px 16px;border-bottom:1px solid rgba(255,255,255,0.08);}
 #adminApp .brand-name{font-family:'Big Shoulders Display',serif;font-weight:800;font-size:18px;color:#fff;line-height:1.2;letter-spacing:0.01em;}
 #adminApp .brand-sub{font-size:11px;color:rgba(255,255,255,0.4);margin-top:3px;}
+#adminApp .user-card{display:flex;align-items:center;gap:10px;margin-top:14px;padding:9px 10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:12px;}
+#adminApp .user-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--a-rg),#8a2e07);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0;font-family:'Big Shoulders Display',serif;box-shadow:0 2px 6px rgba(0,0,0,0.25);}
+#adminApp .user-info{min-width:0;flex:1;}
+#adminApp .user-name{font-size:13.5px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#adminApp .user-role{font-size:11px;color:rgba(255,255,255,0.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
 #adminApp .mode-badge{display:inline-flex;align-items:center;gap:5px;margin-top:8px;background:rgba(255,122,69,0.18);color:var(--a-rg);border:1px solid rgba(255,122,69,0.35);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
 #adminApp .a-nav{padding:10px 8px;flex:1;}
 #adminApp .nav-section{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.28);padding:12px 10px 6px;font-weight:600;}
@@ -604,8 +617,8 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;}
 <div class="s-modal-bg" id="modalBg" onclick="closeBgModal(event)">
   <div class="s-modal-box">
     <div id="mMediaWrap" style="position:relative;min-height:300px;background:var(--rg-pale);">
-      <img class="s-modal-photo" id="mPhoto" src="" alt="" style="display:block;"/>
-      <video class="s-modal-photo" id="mVideo" src="" autoplay muted loop playsinline style="display:none;"></video>
+      <img class="s-modal-photo" id="mPhoto" alt="" style="display:block;"/>
+      <video class="s-modal-photo" id="mVideo" autoplay muted loop playsinline style="display:none;"></video>
     </div>
     <div class="s-modal-info">
       <button class="s-close-btn" onclick="closeModal()">✕</button>
@@ -629,23 +642,24 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;}
   </div>
 </div>
 
-<!-- LOGIN -->
+</div><!-- /#storeApp -->
+
+<!-- BOOT SPLASH: shown while we check for an existing session, so nothing flashes -->
+<div id="bootSplash"><div class="boot-spin"></div></div>
+
+<!-- LOGIN (lives outside #storeApp so it is never hidden with the storefront) -->
 <div class="s-login-overlay" id="loginOverlay">
-  <div class="s-login-card">
-    <p class="s-login-title">Admin Access</p>
-    <p class="s-login-sub">Ngara Huduma Company Limited</p>
+  <form class="s-login-card" onsubmit="event.preventDefault();doLogin();" autocomplete="on">
+    <p class="s-login-title">Ngara Huduma</p>
+    <p class="s-login-sub">Ingia kwenye mfumo</p>
     <p class="s-login-err" id="loginErr"></p>
-    <input type="email" id="loginEmail" autocomplete="off" placeholder="Barua pepe" onkeydown="if(event.key==='Enter')document.getElementById('pwInput').focus()"/>
-    <input type="password" id="pwInput" autocomplete="off" placeholder="Weka password" onkeydown="if(event.key==='Enter')doLogin()"/>
-    <button class="btn-rg" id="loginBtn" style="width:100%" onclick="doLogin()">Ingia</button>
-    <br><br>
-    <button class="btn-outline" style="width:100%" onclick="closeLogin()">Ghairi</button>
-  </div>
+    <input type="email" id="loginEmail" name="username" autocomplete="username" placeholder="Barua pepe" required/>
+    <input type="password" id="pwInput" name="password" autocomplete="current-password" placeholder="Weka password" required/>
+    <button type="submit" class="btn-rg" id="loginBtn" style="width:100%">Ingia</button>
+  </form>
 </div>
 
-<button class="s-gear-btn" onclick="openLogin()" title="Admin">⚙</button>
 
-</div><!-- /#storeApp -->
 
 <!-- ════════════════════════════════════════════════════════
      ADMIN DASHBOARD
@@ -664,9 +678,9 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;}
   </div>
   <div class="a-topnav-tabs" id="aTopnavTabs">
     <button class="a-tab-btn active" data-page="dashibodi"><span class="t-icon">📊</span><span class="t-label">Dashboard</span></button>
-    <button class="a-tab-btn" data-page="maagizo"><span class="t-icon">🛎</span><span class="t-label">Order</span><span class="t-pill" id="mTopPill" style="display:none">0</span></button>
-    <button class="a-tab-btn" data-page="hifadhi"><span class="t-icon">🗃</span><span class="t-label">Bidhaa</span></button>
-    <button class="a-tab-btn" data-page="mauzo"><span class="t-icon">🧾</span><span class="t-label">Mauzo</span></button>
+    <button class="a-tab-btn" data-page="hifadhi"><span class="t-icon">🛒</span><span class="t-label">Purchase</span></button>
+    <button class="a-tab-btn" data-page="hifadhi"><span class="t-icon">🗃</span><span class="t-label">Stock</span></button>
+    <button class="a-tab-btn" data-page="mauzo"><span class="t-icon">🧾</span><span class="t-label">Sales</span></button>
     <button class="a-tab-btn" data-page="uhamisho"><span class="t-icon">🔄</span><span class="t-label">Transfer</span><span class="t-pill" id="uhTopPill" style="display:none">0</span></button>
     <button class="a-tab-btn" data-page="serikali"><span class="t-icon">🏛</span><span class="t-label">Serikali</span></button>
     <button class="a-tab-btn" data-page="serikali-wateja"><span class="t-icon">💳</span><span class="t-label">Wateja</span></button>
@@ -691,7 +705,13 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;}
     <div class="brand">
       <div class="brand-name">NGARA HUDUMA</div>
       <div class="brand-sub">Mfumo wa Biashara</div>
-      <div class="mode-badge" id="modeBadge">✏ Meneja Mkuu</div>
+      <div class="user-card" id="userCard">
+        <div class="user-avatar" id="userAvatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="userName">—</div>
+          <div class="user-role" id="userRoleLabel">—</div>
+        </div>
+      </div>
       <div class="field" id="tawiSelectWrap" style="display:none;margin-top:10px;">
         <label style="color:rgba(255,255,255,0.4);font-size:10px;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:5px;">Tawi Unaloangalia</label>
         <select id="tawiSelect" onchange="changeViewingTawi(this.value)" style="width:100%;padding:8px;border-radius:4px;border:1px solid rgba(255,255,255,0.15);background:#0f1d33;color:#fff;font-size:12px;">
@@ -702,9 +722,9 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;}
       <div class="nav-section">Muhtasari</div>
       <button class="nav-btn active" data-page="dashibodi"><span class="icon">📊</span>Dashboard</button>
       <div class="nav-section">Duka</div>
-      <button class="nav-btn" data-page="maagizo"><span class="icon">🛎</span>Order<span class="count-pill" id="pendingPill" style="display:none;">0</span></button>
+      <button class="nav-btn" data-page="hifadhi"><span class="icon">🛒</span>Purchase</button>
       <div class="nav-section">Shughuli</div>
-      <button class="nav-btn" data-page="mauzo"><span class="icon">🧾</span>Mauzo</button>
+      <button class="nav-btn" data-page="mauzo"><span class="icon">🧾</span>Sales</button>
       <button class="nav-btn" data-page="uhamisho"><span class="icon">🔄</span>Transfer<span class="count-pill" id="uhPendingPill" style="display:none;">0</span></button>
       <button class="nav-btn" data-page="serikali"><span class="icon">🏛</span>Mauzo ya Serikali</button>
       <button class="nav-btn" data-page="serikali-mafuta"><span class="icon">🏛</span>Mauzo ya Serikali (Mafuta)</button>
@@ -712,7 +732,7 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;}
       <button class="nav-btn" data-page="marekebisho"><span class="icon">✏️</span>Marekebisho<span class="count-pill" id="marekPill" style="display:none;">0</span></button>
       <button class="nav-btn" data-page="gharama"><span class="icon">💸</span>Matumizi</button>
       <div class="nav-section">Taarifa</div>
-      <button class="nav-btn" data-page="hifadhi"><span class="icon">🗃</span>Bidhaa / Stoo (+ Manunuzi)</button>
+      <button class="nav-btn" data-page="hifadhi"><span class="icon">🗃</span>Stock</button>
       <button class="nav-btn" data-page="wateja"><span class="icon">💳</span>Madeni</button>
       <button class="nav-btn" data-page="wanunuzi"><span class="icon">📣</span>Wateja</button>
       <button class="nav-btn" data-page="kila-siku"><span class="icon">📅</span>Summary ya Siku</button>
@@ -724,7 +744,11 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;}
     <div class="sidebar-footer">
       <span class="sync-dot"></span>Live · Ngara Huduma © 2026
       <br><br>
-      <button class="btn sm secondary" style="width:100%;margin-bottom:6px;" onclick="window.open(location.href.split('#')[0],'_blank')">🏗 Tazama Duka</button>
+      <!-- "Tazama Duka" removed: the storefront it opened is disabled, and under
+           file:// this exact window.open(location.href...) call is what was
+           throwing "'file:' URLs are treated as unique security origins" —
+           matching the hash-free URL in the error (location.href.split('#')[0]
+           strips the hash, which is exactly what the screenshot showed missing). -->
       <button class="btn sm secondary" style="width:100%;" onclick="doLogout()">Toka</button>
     </div>
   </aside>
@@ -735,14 +759,19 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;}
     <section id="dashibodi" class="page active">
       <div class="topbar"><div class="topbar-left"><h2>Dashboard</h2><p>Muhtasari wa biashara ya Ngara Huduma</p><p id="dashKaribu" style="display:none;font-weight:600;color:var(--a-rg);margin-top:4px;"></p></div></div>
       <div id="dashHardwareView">
+      <div class="controls" style="margin-bottom:12px;">
+        <label style="font-size:11px;color:var(--a-muted);text-transform:uppercase;align-self:center;">Taarifa ya Tarehe:</label>
+        <input type="date" id="dash-tarehe" onchange="renderDashibodi()"/>
+        <button class="btn sm secondary" onclick="$('dash-tarehe').value=leoISO();renderDashibodi();">Leo</button>
+      </div>
       <div class="cards">
         <div class="card"><div class="c-label">Jumla ya Manunuzi</div><div class="c-value" id="cardManunuzi">—</div><span class="c-badge badge-gray">Matumizi</span></div>
         <div class="card"><div class="c-label">Jumla ya Mauzo</div><div class="c-value" id="cardMauzo">—</div><span class="c-badge badge-green">Mapato</span></div>
-        <div class="card"><div class="c-label">Faida Halisi</div><div class="c-value" id="cardFaida">—</div><span class="c-badge" id="faidaBadge">—</span></div>
+        <div class="card" id="cardFaidaWrap"><div class="c-label">Faida Halisi</div><div class="c-value" id="cardFaida">—</div><span class="c-badge" id="faidaBadge">—</span></div>
         <div class="card"><div class="c-label">Madeni</div><div class="c-value" id="cardMadeni">—</div><span class="c-badge badge-amber">Madeni</span></div>
         <div class="card" style="border-left:3px solid var(--a-green)"><div class="c-label">💵 Hela Cash</div><div class="c-value" id="cardCash" style="color:var(--a-green)">—</div><span class="c-badge badge-green" style="font-size:10px">Cash Net</span></div>
       </div>
-      <div class="section" id="mauzoChartSection">
+      <div class="section" id="mauzoChartSection" style="display:none;">
         <div class="section-header">
           <h3>📈 Mwenendo wa Mauzo</h3>
           <div style="display:flex;gap:6px;">
@@ -755,7 +784,7 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;}
           <canvas id="mauzoTrendChart" height="90"></canvas>
         </div>
       </div>
-      <div class="grid-2">
+      <div class="grid-2" id="dashGrid2">
         <div class="section">
           <div class="section-header"><h3>Muhtasari wa Biashara</h3></div>
           <div class="section-body">
@@ -767,7 +796,7 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;}
             </div>
           </div>
         </div>
-        <div class="section">
+        <div class="section" id="dashTahadhariSection">
           <div class="section-header"><h3>Tahadhari</h3></div>
           <div class="section-body">
             <div class="alert-box danger" id="alertOrders" style="display:none;"><strong>🛎 Order Mpya</strong><span id="txtOrders">—</span></div>
@@ -801,12 +830,30 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;}
           </div>
           <div class="section-body"><canvas id="mafutaTrendChart" height="90"></canvas></div>
         </div>
-        <div class="section">
+        <!-- Per-attendant breakdown retired — see the Mafuta page note; stations
+             now have one manager each, not separate attendants to compare. -->
+        <div class="section" style="display:none;">
           <div class="section-header"><h3>👥 Wafanyakazi — Mwezi Huu</h3></div>
           <div class="section-body"><div class="table-wrap"><table>
             <thead><tr><th>Mfanyakazi</th><th class="num">Lita</th><th class="num">Mapato Yanayotarajiwa</th><th class="num">Aliyowasilisha</th><th class="num">Tofauti</th></tr></thead>
             <tbody id="tbody-dash-wafanyakazi"></tbody>
           </table></div></div>
+        </div>
+      </div>
+      <div class="section" id="dashStationsReportSection" style="display:none;">
+        <div class="section-header"><h3>⛽ Ripoti ya Vituo vya Mafuta</h3></div>
+        <div class="section-body">
+          <div class="controls" style="margin-bottom:14px;flex-wrap:wrap;">
+            <select id="sr-kipindi" onchange="renderStationsReport()"><option value="siku">Kila Siku</option><option value="mwezi">Kila Mwezi</option></select>
+            <input type="date" id="sr-tarehe" onchange="renderStationsReport()"/>
+            <input type="month" id="sr-mwezi" style="display:none" onchange="renderStationsReport()"/>
+            <select id="sr-kituo" onchange="renderStationsReport()"><option value="yote">Vituo Vyote</option></select>
+          </div>
+          <div class="cards" id="sr-cards" style="margin-bottom:14px;"></div>
+          <div class="table-wrap"><table>
+            <thead id="sr-thead"></thead>
+            <tbody id="tbody-stations-report"></tbody>
+          </table></div>
         </div>
       </div>
     </section>
@@ -827,7 +874,7 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;}
 
     <!-- MAUZO -->
     <section id="mauzo" class="page">
-      <div class="topbar"><div class="topbar-left"><h2>Mauzo</h2><p>Fuatilia mauzo ya taslimu na deni.</p></div></div>
+      <div class="topbar"><div class="topbar-left"><h2>Sales</h2><p>Fuatilia mauzo ya taslimu na deni.</p></div></div>
       <div class="section" style="display:none;">
         <div class="section-header"><h3>🏛 Maombi ya Serikali Yanayosubiri Idhini Yako</h3></div>
         <div class="section-body"><p style="font-size:12px;color:var(--a-muted);margin-bottom:10px;">Afisa wa Mauzo ya Serikali anaomba bidhaa kutoka tawi lako. Bidhaa haitapunguzwa mpaka uthibitishe.</p>
@@ -836,14 +883,14 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;}
           <tbody id="tbody-maombi-stock-mauzo"></tbody>
         </table></div></div>
       </div>
-      <div class="section" id="mauzoEntrySection"><div class="section-header"><h3>➕ Ongeza Uuzaji</h3></div>
+      <div class="section" id="mauzoEntrySection"><div class="section-header"><h3>➕ Ingiza Mauzo / Sales</h3></div>
         <div class="section-body">
           <div id="notifyMauzo" class="notify"></div>
           <div class="form-grid">
             <div class="field"><label>Tarehe</label><input type="date" id="m-tarehe"/></div>
             <div class="field"><label>Jina la Mteja</label><input type="text" id="m-mteja" autocomplete="off" placeholder="Mteja wa Kawaida (hiari)"/></div>
-            <div class="field"><label>Aina ya Bidhaa (chuja)</label><select id="m-aina-filter" onchange="jaziChaguoBidhaa()"><option value="">Aina zote</option><option value="mabomba">Mabomba</option><option value="fittings">Fittings</option><option value="umeme">Umeme</option><option value="saruji">Saruji</option><option value="zana">Zana</option><option value="mengineyo">Mengineyo</option></select></div>
-            <div class="field"><label>Bidhaa</label><select id="m-bidhaa" onchange="updateBeiSummary()"></select></div>
+            <div class="field full"><label>Tafuta Bidhaa</label><input type="text" id="m-bidhaa-search" autocomplete="off" list="m-bidhaa-suggestions" placeholder="Andika jina la bidhaa..." oninput="onBidhaaSearchInput()"/><datalist id="m-bidhaa-suggestions"></datalist></div>
+            <div class="field full"><label>Bidhaa Iliyochaguliwa</label><select id="m-bidhaa" onchange="onBidhaaSelectChange()"></select></div>
             <div class="field"><label>Idadi</label><input type="number" id="m-idadi" placeholder="1" min="1" oninput="updateBeiSummary()"/><div class="field-error" id="err-m-idadi">Weka idadi</div></div>
             <div class="field"><label>Simu ya Mteja (kwa madeni)</label><input type="tel" id="m-simu" placeholder="mfano: 0764 XXX XXX"/></div>
             <div class="field"><label>Aina ya Mauzo</label><select id="m-aina" onchange="togglaMkopo()"><option value="Taslimu">Taslimu</option><option value="Mkopo">Deni</option></select></div>
@@ -1011,24 +1058,24 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;}
 
     <!-- HIFADHI — merged with Manunuzi: purchases (stock-in) directly affect stock, so they live together -->
     <section id="hifadhi" class="page">
-      <div class="topbar"><div class="topbar-left"><h2>Bidhaa / Stoo</h2><p>Ongeza manunuzi (huingia stoo moja kwa moja), simamia hifadhi na bidhaa zinazoonekana dukani.</p></div></div>
+      <div class="topbar"><div class="topbar-left"><h2>Stock</h2><p>Bidhaa zote zilizopo stoo — ongeza manunuzi (huingia stoo moja kwa moja) na simamia hifadhi.</p></div></div>
       <div class="section" id="manunuziEntrySection"><div class="section-header"><h3>➕ Ongeza Ununuzi (Stock-in)</h3></div>
         <div class="section-body">
           <div id="notifyManunuzi" class="notify"></div>
           <div class="form-grid">
             <div class="field"><label>Tarehe</label><input type="date" id="t-tarehe"/></div>
-            <div class="field"><label>Aina ya Bidhaa</label><select id="t-aina" onchange="updateJinaSuggestions()"><option value="mabomba">Mabomba</option><option value="fittings">Fittings</option><option value="umeme">Umeme</option><option value="saruji">Saruji</option><option value="zana">Zana</option><option value="mengineyo">Mengineyo</option></select></div>
-            <div class="field"><label>Jina la Bidhaa (English)</label><input type="text" id="t-jina" autocomplete="off" list="t-jina-suggestions" placeholder="mfano: Pvc pipe 1.5&quot;"/><datalist id="t-jina-suggestions"></datalist><div class="field-error" id="err-t-jina">Jina linahitajika</div></div>
-            <div class="field"><label>Jina kwa Kiswahili</label><input type="text" id="t-jina-sw" autocomplete="off" placeholder="mfano: Bomba la Pvc 1.5&quot;"/></div>
-            <div class="field"><label>Kipimo</label><select id="t-kipimo"><option value="pc">Piece / Pisi</option><option value="bag">Bag / Mifuko</option><option value="roll">Roll / Rola</option><option value="meter">Meter / Mita</option><option value="litre">Litre / Lita</option><option value="kg">Kg / Kilo</option><option value="pack">Pack / Packets</option><option value="sheet">Sheet / Bati</option><option value="box">Box / Kasha</option><option value="set">Set / Seti</option><option value="pair">Pair / Jozi</option></select></div>
-            <div class="field"><label>Idadi</label><input type="number" id="t-idadi" placeholder="1" min="1"/><div class="field-error" id="err-t-idadi">Weka idadi</div></div>
-            <div class="field"><label>Bei ya Kununulia (TZS)</label><input type="number" id="t-bei-kununulia" placeholder="0"/><div class="field-error" id="err-t-bei">Weka bei</div></div>
+            <input type="hidden" id="t-aina" value="Mengineyo"/>
+            <div class="field full"><label>Particulars (Bidhaa Uliyonunua)</label><input type="text" id="t-jina" autocomplete="off" list="t-jina-suggestions" placeholder="Andika kama unavyoiita — mfano: Pvc pipe 1.5&quot;"/><datalist id="t-jina-suggestions"></datalist><div class="field-error" id="err-t-jina">Weka particulars</div></div>
+            <input type="hidden" id="t-jina-sw" value=""/>
+            <div class="field"><label>UNIT</label><select id="t-kipimo"><option value="pc">Piece / Pisi</option><option value="bag">Bag / Mifuko</option><option value="roll">Roll / Rola</option><option value="meter">Meter / Mita</option><option value="litre">Litre / Lita</option><option value="kg">Kg / Kilo</option><option value="pack">Pack / Packets</option><option value="sheet">Sheet / Bati</option><option value="box">Box / Kasha</option><option value="set">Set / Seti</option><option value="pair">Pair / Jozi</option></select></div>
+            <div class="field"><label>QTY</label><input type="number" id="t-idadi" placeholder="1" min="1"/><div class="field-error" id="err-t-idadi">Weka QTY</div></div>
+            <div class="field"><label>RATE (TZS)</label><input type="number" id="t-bei-kununulia" placeholder="0"/><div class="field-error" id="err-t-bei">Weka RATE</div></div>
             <div class="field"><label>Bei ya Kuuzia (TZS)</label><input type="number" id="t-bei-kuuzia" placeholder="0"/></div>
             <div class="field"><label>Tawi</label><select id="t-tawi"></select></div>
-            <div class="field full"><label>Msambazaji</label><input type="text" id="t-msambazaji" autocomplete="off" placeholder="Jina la msambazaji (hiari)"/></div>
+            <input type="hidden" id="t-msambazaji" value=""/>
             <div class="field"><label>Jina Lako (Uliyepokea)</label><input type="text" id="t-jina-muhusika" autocomplete="off" placeholder="Jina la mmiliki/muhusika wa duka"/><div class="field-error" id="err-t-jina-muhusika">Jina linahitajika</div></div>
-            <div class="field"><label>Jina la Dereva</label><input type="text" id="t-jina-dereva" autocomplete="off" placeholder="Jina la dereva"/></div>
-            <div class="field"><label>Namba ya Gari</label><input type="text" id="t-namba-gari" autocomplete="off" placeholder="mfano: T.972 DPB"/></div>
+            <div class="field"><label>Name of Driver</label><input type="text" id="t-jina-dereva" autocomplete="off" placeholder="Jina la dereva"/></div>
+            <div class="field"><label>Truck Number</label><input type="text" id="t-namba-gari" autocomplete="off" placeholder="mfano: T.972 DPB"/></div>
           </div>
           <div class="controls">
             <button class="btn gold" onclick="ongezaUununuzi()">💾 Hifadhi Ununuzi</button>
@@ -1039,13 +1086,7 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;}
       <div class="section" id="bidhaaMpyaEntrySection">
         <div class="section-header"><h3>📸 Ongeza Bidhaa Mpya</h3></div>
         <div class="section-body">
-          <p style="font-size:12px;color:var(--a-muted);margin-bottom:14px;">Bidhaa hii itaonekana papo hapo kwenye duka la wateja.</p>
-          <div class="upload-box" id="uploadBox">
-            <input type="file" id="fileInput" accept="image/*,video/*" onchange="onFilePick(this)"/>
-            <div class="upload-icon-txt">🧱</div>
-            <p class="upload-hint">Bonyeza au buruta picha ya bidhaa hapa (hiari)</p>
-          </div>
-          <div class="previews" id="previews"></div>
+          
           <div class="form-grid">
             <div class="field"><label>Jina la Bidhaa (English)</label><input type="text" id="p-jina" autocomplete="off" placeholder="mfano: Pvc elbow 1.5&quot;"/></div>
             <div class="field"><label>Jina kwa Kiswahili</label><input type="text" id="p-jina-sw" autocomplete="off" placeholder="mfano: Kiungio cha Pvc 1.5&quot;"/></div>
@@ -1055,9 +1096,7 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;}
             <div class="field"><label>Kipimo</label>
               <select id="p-kipimo"><option value="pc">Piece / Pisi</option><option value="bag">Bag / Mifuko</option><option value="roll">Roll / Rola</option><option value="meter">Meter / Mita</option><option value="litre">Litre / Lita</option><option value="kg">Kg / Kilo</option><option value="pack">Pack / Packets</option><option value="sheet">Sheet / Bati</option><option value="box">Box / Kasha</option><option value="set">Set / Seti</option><option value="pair">Pair / Jozi</option></select>
             </div>
-            <div class="field"><label>Kategoria</label>
-              <select id="p-kategoria"><option value="mabomba">Mabomba</option><option value="fittings">Fittings</option><option value="umeme">Umeme</option><option value="saruji">Saruji</option><option value="zana">Zana</option><option value="mengineyo">Mengineyo</option></select>
-            </div>
+            <input type="hidden" id="p-kategoria" value="mengineyo"/>
             <div class="field"><label>Kiwango cha Chini (tahadhari)</label><input type="number" id="p-kiwango-chini" placeholder="10" value="10"></div>
             <div class="field"><label>Tawi</label><select id="p-tawi"></select></div>
             <div class="field"><label>Lebo (hiari)</label><input type="text" id="p-badge" placeholder="mfano: Bidhaa Mpya"/></div>
@@ -1074,13 +1113,13 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;}
           <input type="text" id="search-stock" placeholder="Tafuta..." oninput="renderStock()" style="width:200px"/>
         </div>
         <div class="section-body"><div class="table-wrap"><table>
-          <thead><tr><th></th><th>Bidhaa</th><th>Aina</th><th>Kipimo</th><th>Bei Kununulia</th><th>Bei Kuuzia</th><th>Faida %</th><th>Idadi</th><th>Hali</th><th>Dukani</th><th>Kitendo</th></tr></thead>
-          <tbody id="tbody-stock"><tr class="loading-row"><td colspan="11">Inapakia...</td></tr></tbody>
+          <thead><tr><th></th><th>Bidhaa</th><th>UNIT</th><th>RATE</th><th>Bei Kuuzia</th><th>Faida %</th><th>QTY</th><th>Hali</th><th>Dukani</th><th>Kitendo</th></tr></thead>
+          <tbody id="tbody-stock"><tr class="loading-row"><td colspan="10">Inapakia...</td></tr></tbody>
         </table></div></div>
       </div>
       <div class="section"><div class="section-header"><h3>📋 Rekodi za Manunuzi</h3></div>
         <div class="section-body"><div class="table-wrap"><table>
-          <thead><tr><th>Tarehe</th><th>Bidhaa</th><th>Aina</th><th>Kipimo</th><th>Idadi</th><th>Bei Kununulia</th><th>Jumla</th><th>Msambazaji</th><th>Kitendo</th></tr></thead>
+          <thead><tr><th>Tarehe</th><th>Bidhaa</th><th>UNIT</th><th>QTY</th><th>RATE</th><th>Jumla</th><th>Msambazaji</th><th>Kitendo</th></tr></thead>
           <tbody id="tbody-manunuzi"><tr class="loading-row"><td colspan="9">Inapakia...</td></tr></tbody>
         </table></div></div>
       </div>
@@ -1269,6 +1308,24 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;}
           </div>
         </div>
       </div>
+      <div class="section">
+        <div class="section-header"><h3>🧾 Fomu ya Manunuzi (Purchase Form)</h3></div>
+        <div class="section-body"><div class="table-wrap"><table>
+          <thead><tr><th>Tarehe</th><th>Bidhaa</th><th>QTY</th><th>Jumla</th><th>Fomu</th></tr></thead>
+          <tbody id="tbody-fomu-manunuzi"><tr class="loading-row"><td colspan="5">Inapakia...</td></tr></tbody>
+        </table></div></div>
+      </div>
+      <div class="section" style="margin-top:16px">
+        <div class="section-header"><h3>📋 Bin Card</h3></div>
+        <div class="section-body">
+          <p style="font-size:12px;color:var(--a-muted);margin-bottom:10px;">Historia kamili ya bidhaa moja — kila ulichonunua na kuuza, kwa mpangilio wa tarehe, na salio linalobadilika kila muamala.</p>
+          <div class="form-grid">
+            <div class="field full"><label>Tafuta Bidhaa</label><input type="text" id="bc-search" autocomplete="off" list="bc-suggestions" placeholder="Andika jina la bidhaa..." oninput="onBinCardSearchInput()"/><datalist id="bc-suggestions"></datalist></div>
+            <input type="hidden" id="bc-bidhaa-id"/>
+          </div>
+          <button class="btn gold" onclick="generateBinCard()">🖨 Tengeneza Bin Card</button>
+        </div>
+      </div>
       <div class="section" style="margin-top:16px"><div class="section-header"><h3>🏷 Discount Form</h3></div>
         <div class="section-body">
           <div id="notifyDiscount" class="notify"></div>
@@ -1302,6 +1359,10 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;}
     <!-- MAFUTA (petrol stations — separate from hardware stock system) -->
     <section id="mafuta" class="page">
       <div class="topbar"><div class="topbar-left"><h2>Mafuta</h2><p>Mauzo na manunuzi ya mafuta — Petroli na Dizeli.</p><p id="mafutaKaribu" style="display:none;font-weight:600;color:var(--a-rg);margin-top:4px;"></p></div></div>
+      <div class="cards" style="grid-template-columns:repeat(2,1fr);display:none;" id="mfManagerCards">
+        <div class="card"><div class="c-label">Mauzo ya Kituo Leo</div><div class="c-value" id="mfKituoMauzoLeo">—</div><span class="c-badge badge-amber" id="mfKituoLitaLeo">0.0 L</span></div>
+        <div class="card"><div class="c-label">Mauzo ya Kituo Mwezi Huu</div><div class="c-value" id="mfKituoMauzoMwezi">—</div><span class="c-badge badge-amber" id="mfKituoLitaMwezi">0.0 L</span></div>
+      </div>
       <div class="cards" style="grid-template-columns:repeat(2,1fr);" id="mfSalioCards">
         <div class="card"><div class="c-label">Salio la Petroli (makadirio)</div><div class="c-value" id="mfPetroliSalio">—</div><span class="c-badge badge-amber">Lita</span></div>
         <div class="card"><div class="c-label">Salio la Dizeli (makadirio)</div><div class="c-value" id="mfDizeliSalio">—</div><span class="c-badge badge-amber">Lita</span></div>
@@ -1316,12 +1377,12 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;}
           <div class="form-grid">
             <div class="field"><label>Tarehe</label><input type="date" id="mf-m-tarehe"/></div>
             <div class="field"><label>Aina ya Mafuta</label><select id="mf-m-aina"><option value="Petroli">Petroli</option><option value="Dizeli">Dizeli</option></select></div>
-            <div class="field"><label>Pampu (hiari)</label><input type="text" id="mf-m-pampu" placeholder="mfano: Pampu 1"/></div>
-            <div class="field"><label>Kusoma Awali (Lita)</label><input type="number" step="0.01" id="mf-m-awali" placeholder="0" oninput="hesabuLitaMauzo()"/></div>
-            <div class="field"><label>Kusoma Mwisho (Lita)</label><input type="number" step="0.01" id="mf-m-mwisho" placeholder="0" oninput="hesabuLitaMauzo()"/></div>
+            <div class="field"><label>Lita za Mwanzo</label><input type="number" step="0.01" id="mf-m-awali" placeholder="0" oninput="hesabuLitaMauzo()"/></div>
+            <div class="field"><label>Lita Zilizobaki</label><input type="number" step="0.01" id="mf-m-mwisho" placeholder="0" oninput="hesabuLitaMauzo()"/></div>
             <div class="field"><label>Lita Zilizouzwa (kiotomatiki)</label><input type="number" step="0.01" id="mf-m-lita" readonly/></div>
             <div class="field"><label>Bei kwa Lita (TZS)</label><input type="number" id="mf-m-bei" placeholder="0" oninput="hesabuLitaMauzo()"/></div>
-            <div class="field"><label>Jumla (TZS, kiotomatiki)</label><input type="text" id="mf-m-jumla" readonly/></div>
+            <div class="field"><label>JUMLA</label><input type="text" id="mf-m-jumla" readonly/></div>
+            <div class="field" id="mf-m-mfanyakazi-wrap"><label>Mfanyakazi</label><input type="text" id="mf-m-mfanyakazi" autocomplete="off" list="mf-m-mfanyakazi-list" placeholder="Jina la aliyeleta fedha"/><datalist id="mf-m-mfanyakazi-list"></datalist></div>
             <div class="field"><label>Kiasi cha Fedha Kilichowasilishwa (TZS)</label><input type="number" id="mf-m-wasilisho" placeholder="fedha halisi aliyoleta"/></div>
             <div class="field"><label>Tawi</label><select id="mf-tawi"></select></div>
           </div>
@@ -1333,8 +1394,8 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;}
       </div>
       <div class="section"><div class="section-header"><h3>📋 Rekodi za Mauzo ya Mafuta</h3></div>
         <div class="section-body"><div class="table-wrap"><table>
-          <thead><tr><th>Tarehe</th><th>Tawi</th><th>Mfanyakazi</th><th>Aina</th><th>Pampu</th><th class="num">Lita</th><th class="num">Bei/Lita</th><th class="num">Jumla</th><th class="num">Aliyowasilisha</th><th class="num">Tofauti</th><th>Kitendo</th></tr></thead>
-          <tbody id="tbody-mafuta-mauzo"><tr class="loading-row"><td colspan="11">Inapakia...</td></tr></tbody>
+          <thead><tr><th>Tarehe</th><th>Tawi</th><th>Mfanyakazi</th><th>Aina</th><th class="num">Lita</th><th class="num">Bei/Lita</th><th class="num">Jumla</th><th class="num">Aliyowasilisha</th><th class="num">Tofauti</th><th>Kitendo</th></tr></thead>
+          <tbody id="tbody-mafuta-mauzo"><tr class="loading-row"><td colspan="10">Inapakia...</td></tr></tbody>
         </table></div></div>
       </div>
       <div class="section" id="mfWafanyakaziSection" style="display:none;">
@@ -1430,7 +1491,7 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;}
         </table></div></div>
       </div>
       <div class="section">
-        <div class="section-header"><h3>📋 Invoice za Serikali</h3><button class="btn sm secondary" onclick="loadAll()">🔄 Onyesha upya</button></div>
+        <div class="section-header"><h3>📋 Invoice za Serikali</h3></div>
         <div class="section-body">
           <div id="sk-summary"></div>
           <div class="table-wrap"><table>
@@ -1484,7 +1545,7 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;}
         </table></div></div>
       </div>
       <div class="section">
-        <div class="section-header"><h3>📋 Invoice za Mafuta za Serikali</h3><button class="btn sm secondary" onclick="loadAll()">🔄 Onyesha upya</button></div>
+        <div class="section-header"><h3>📋 Invoice za Mafuta za Serikali</h3></div>
         <div class="section-body">
           <div id="skm-summary"></div>
           <div class="table-wrap"><table>
@@ -1498,7 +1559,7 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;}
     <section id="serikali-wateja" class="page">
       <div class="topbar"><div class="topbar-left"><h2>Wateja wa Serikali / Kampuni Kubwa</h2></div></div>
       <div class="section">
-        <div class="section-header"><h3>💳 Orodha ya Wateja wenye Deni</h3><button class="btn sm secondary" onclick="loadAll()">🔄 Onyesha upya</button></div>
+        <div class="section-header"><h3>💳 Orodha ya Wateja wenye Deni</h3></div>
         <div class="section-body">
           <div class="summary-row" style="display:flex;gap:28px;flex-wrap:wrap;margin-bottom:14px;">
             <div><span style="font-size:11px;color:var(--a-muted);text-transform:uppercase;">Jumla ya Deni</span><br><strong id="sk-w-jumla" style="font-size:18px;">TZS 0</strong></div>
@@ -1516,7 +1577,7 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;}
     <section id="marekebisho" class="page">
       <div class="topbar"><div class="topbar-left"><h2>Marekebisho</h2><p id="marekSub"></p></div></div>
       <div class="section">
-        <div class="section-header"><h3>✏️ Maombi ya Marekebisho</h3><button class="btn sm secondary" onclick="loadAll()">🔄 Onyesha upya</button></div>
+        <div class="section-header"><h3>✏️ Maombi ya Marekebisho</h3></div>
         <div class="section-body"><div class="table-wrap"><table>
           <thead><tr><th>Tarehe</th><th>Tawi / Mwombaji</th><th>Aina</th><th>Rekodi</th><th>Maelezo ya Mwombaji</th><th>Hali</th><th>Kitendo</th></tr></thead>
           <tbody id="tbody-marekebisho"></tbody>
@@ -1529,7 +1590,6 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;}
       <div class="section">
         <div class="section-header">
           <h3>🗑 Vitu Vilivyofutwa</h3>
-          <button class="btn sm secondary" onclick="loadTakataka()">🔄 Onyesha upya</button>
         </div>
         <div class="section-body"><div class="table-wrap"><table>
           <thead><tr><th>Aina</th><th>Kilichofutwa</th><th>Tarehe ya Kufuta</th><th>Kitendo</th></tr></thead>
@@ -1641,12 +1701,6 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;}
   <div class="modal wide">
     <h3>✏️ Hariri Bidhaa</h3>
     <div id="notifyEditBidhaa" class="notify"></div>
-    <div class="upload-box" id="editUploadBox">
-      <input type="file" id="editFileInput" accept="image/*,video/*" onchange="onEditFilePick(this)"/>
-      <div class="upload-icon-txt">🧱</div>
-      <p class="upload-hint">Bonyeza kubadilisha picha ya bidhaa (hiari)</p>
-    </div>
-    <div class="previews" id="editPreviews"></div>
     <div class="form-grid">
       <div class="field"><label>Jina la Bidhaa (English)</label><input type="text" id="e-jina" autocomplete="off"/></div>
       <div class="field"><label>Jina kwa Kiswahili</label><input type="text" id="e-jina-sw" autocomplete="off"/></div>
@@ -1656,7 +1710,7 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;}
         <select id="e-kipimo"><option value="pc">Piece / Pisi</option><option value="bag">Bag / Mifuko</option><option value="roll">Roll / Rola</option><option value="meter">Meter / Mita</option><option value="litre">Litre / Lita</option><option value="kg">Kg / Kilo</option><option value="pack">Pack / Packets</option><option value="sheet">Sheet / Bati</option><option value="box">Box / Kasha</option><option value="set">Set / Seti</option><option value="pair">Pair / Jozi</option></select>
       </div>
       <div class="field"><label>Kategoria</label>
-        <select id="e-kategoria"><option value="mabomba">Mabomba</option><option value="fittings">Fittings</option><option value="umeme">Umeme</option><option value="saruji">Saruji</option><option value="zana">Zana</option><option value="mengineyo">Mengineyo</option></select>
+        <input type="hidden" id="e-kategoria" value=""/>
       </div>
       <div class="field"><label>Kiwango cha Chini</label><input type="number" id="e-kiwango-chini"/></div>
       <div class="field"><label>Lebo (hiari)</label><input type="text" id="e-badge"/></div>
@@ -1875,6 +1929,34 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;}
 </div>
 
 <!-- MONTHLY CLOSING STOCK FORM PRINT SHEET -->
+<div class="inv-overlay" id="bcOverlay">
+  <div class="inv-sheet" style="width:900px;">
+    <button class="inv-close" id="bcClose">&times;</button>
+    <div class="inv-header"><div class="inv-logo"></div></div>
+    <div class="inv-co">
+      <b>NGARA HUDUMA COMPANY LIMITED</b><br>
+      TIN NO. 147-228-198 &nbsp;·&nbsp; VRN NO. 40311079R<br>
+      P.O. BOX 123 NGARA, KAGERA-TANZANIA<br>
+      Email: ngarahudumacompanylimited@gmail.com &nbsp;·&nbsp; Mobile: 0764 748 447
+    </div>
+    <div class="inv-title" style="margin-top:10px;">......BIN CARD NGARA HUDUMA COMPANY LIMITED......</div>
+    <div class="inv-meta" style="margin-top:6px;display:flex;gap:28px;flex-wrap:wrap;">
+      <div>ITEM CODE: <span class="inv-dotline"></span></div>
+      <div>ITEM NAME: <span class="inv-dotline" id="bcItemName"></span></div>
+      <div>TAWI: <span class="inv-dotline" id="bcTawi"></span></div>
+    </div>
+    <table class="inv-table" style="margin-top:10px;font-size:11px;">
+      <thead><tr><th>DATE</th><th class="num">IN</th><th class="num">OUT</th><th class="num">BALANCE</th><th class="num">PRICE</th><th class="num">CASH SALES</th><th class="num">ORDER SALES</th><th class="num">PURCHASE</th><th>NAME</th><th class="num">CLOSING STOCK</th></tr></thead>
+      <tbody id="bcRows"></tbody>
+    </table>
+    <div class="inv-print-btn" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="fomu-btn primary" onclick="window.print()">🖨 Chapisha / Print</button>
+      <button class="fomu-btn secondary" onclick="pakuaFomu()">⬇️ Pakua</button>
+      <button class="fomu-btn secondary" onclick="shirikiFomu()">📤 Shiriki (WhatsApp)</button>
+    </div>
+  </div>
+</div>
+
 <div class="inv-overlay" id="mcOverlay">
   <div class="inv-sheet" style="width:760px;">
     <button class="inv-close" id="mcClose">&times;</button>
@@ -1989,7 +2071,7 @@ table.inv-table td.num,table.inv-table th.num{text-align:right;}
 // ════════════════════════════════════════════════════════════════
 // CONFIG — this MUST be a NEW Supabase project for Ngara Huduma,
 // separate from any other business system. Replace all TODOs below.
-// Branches: Ngara Mjini, Benaco, Mugoma — each Front Desk Officer logs
+// Branches: Ngara Mjini, Benaco, Ushirombo and more — each branch officer logs
 // in with their branch password and only sees/manages their branch's
 // data; the General Manager password sees everything, with a branch
 // switcher in the sidebar.
@@ -2001,9 +2083,8 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 // (a subset) since the two petrol stations don't stock PVC pipes etc;
 // they run their own separate fuel module (see PETROL_BRANCHES below).
 const BRANCHES={
-  ngaramjini:'Stand',
+  ngaramjini:'Main Shop',
   benaco:'Benaco',
-  mugoma:'Mugoma',
   godownabel:'Nakatunga Godown — Abel',
   godownjonathan:'Nakatunga Godown — Jonathan',
   godownsubira:'Nakatunga Godown — Subira',
@@ -2011,11 +2092,11 @@ const BRANCHES={
   runzeweduka:'Runzewe — Duka',
   runzewestore:'Runzewe — Store',
   ushirombo:'Ushirombo',
-  citycentre:'Ngara Mjini (Duka)',
+  citycentre:"Diana's Shop",
   ngaramjinipetrol:'Ngara Mjini Petrol Station',
   ushirombopetrol:'Ushirombo Petrol Station'
 };
-const HARDWARE_BRANCHES={ngaramjini:'Stand',benaco:'Benaco',mugoma:'Mugoma',godownabel:'Nakatunga Godown — Abel',godownjonathan:'Nakatunga Godown — Jonathan',godownsubira:'Nakatunga Godown — Subira',nakatunga:'Nakatunga',runzeweduka:'Runzewe — Duka',runzewestore:'Runzewe — Store',ushirombo:'Ushirombo',citycentre:'Ngara Mjini (Duka)'};
+const HARDWARE_BRANCHES={ngaramjini:'Main Shop',benaco:'Benaco',godownabel:'Nakatunga Godown — Abel',godownjonathan:'Nakatunga Godown — Jonathan',godownsubira:'Nakatunga Godown — Subira',nakatunga:'Nakatunga',runzeweduka:'Runzewe — Duka',runzewestore:'Runzewe — Store',ushirombo:'Ushirombo',citycentre:"Diana's Shop"};
 const PETROL_BRANCHES={ngaramjinipetrol:'Ngara Mjini Petrol Station',ushirombopetrol:'Ushirombo Petrol Station'};
 function populateBranchSelect(id,branchMap,withAllOption){
   const sel=document.getElementById(id);if(!sel)return;
@@ -2032,19 +2113,25 @@ function populateAllBranchSelects(){
 // Order notifications route here instead of a single generic admin number,
 // so the right branch hears about their own orders directly.
 const BRANCH_PHONE={
-  ngaramjini:'0695541568',benaco:'0755863325',mugoma:'0614652702',
-  godownabel:'0TODO_GODOWN_ABEL',godownjonathan:'0TODO_GODOWN_JONATHAN',godownsubira:'0TODO_GODOWN_SUBIRA',
-  nakatunga:'0TODO_NAKATUNGA',
-  runzeweduka:'0TODO_RUNZEWE_DUKA',runzewestore:'0TODO_RUNZEWE_STORE',
-  ushirombo:'0TODO_USHIROMBO',
-  citycentre:'0TODO_CITYCENTRE'
+  ngaramjini:'0684000659',   // Neema
+  benaco:'0783834557',       // Morena
+  godownabel:'0762450768',   // Abel
+  godownjonathan:'0765894406', // Jonathan
+  godownsubira:'0679882083', // Subira
+  nakatunga:'0695448392',    // Josephina
+  runzeweduka:'0758595401',  // Suleimani
+  runzewestore:'0741144845', // Aniceth
+  ushirombo:'0789957464',    // Peruse
+  citycentre:'0768664074',   // Diana
+  ngaramjinipetrol:'0676152595', // Jemima — station manager
+  ushirombopetrol:'0744175894'   // Jamal — station manager
 };
 // Sales officer of each stock point. Every officer manages their OWN stock — at
 // Nakatunga Godown that means three separate stock points (Abel, Jonathan, Subira),
 // and at Runzewe the Duka and the Store are separate too. Nothing is shared.
 const BRANCH_OFFICER={
   ngaramjini:'Neema',citycentre:'Diana',benaco:'Morena',
-  runzewestore:'Aniceth',runzeweduka:'Suleiman',ushirombo:'Peruse',nakatunga:'Josephina',
+  runzewestore:'Aniceth',runzeweduka:'Suleimani',ushirombo:'Peruse',nakatunga:'Josephina',
   godownabel:'Abel',godownjonathan:'Jonathan',godownsubira:'Subira',
   ushirombopetrol:'Jamal',ngaramjinipetrol:'Jemima'
 };
@@ -2063,8 +2150,8 @@ function myOfficerName(){
 // each staff member's password lives only in Supabase Auth, never in this file.
 const CLD='TODO_CLOUDINARY_CLOUD_NAME';
 const PRESET='TODO_CLOUDINARY_UPLOAD_PRESET';
-const ADMIN_PHONE='0755863325';  // Admin SMS number (local format for Beem)
-const MADENI_OFFICER_PHONE='0695541568'; // Credit Officer's SMS number (testing)
+const ADMIN_PHONE='0755863325';  // Admin SMS number (local format for Beem) — GM's own number not given in the staff roster, left as-is
+const MADENI_OFFICER_PHONE='0748544034'; // Abdul
 const STORE_URL='https://ngarahuduma.com/';
 const SMS_FN_URL='https://jdldiwhplklxxkoelvhb.supabase.co/functions/v1/send-sms'; // reuse same edge function pattern as your other systems
 
@@ -2216,41 +2303,16 @@ let pollInterval=null,lastHash='';
 // view change (cart open, product modal open, admin tab switch) so
 // the browser's back arrow undoes it instead of leaving the page.
 // ════════════════════════════════════════════════════════════════
-let suppressHistoryPush=false;
-function pushHistoryState(type,extra){
-  if(suppressHistoryPush)return;
-  const state=Object.assign({type},extra||{});
-  const hash='#'+type+(extra&&extra.page?'-'+extra.page:'')+(extra&&extra.id?'-'+extra.id:'');
-  history.pushState(state,'',hash);
-}
-window.addEventListener('popstate',(e)=>{
-  suppressHistoryPush=true;
-  const s=e.state||{type:'store'};
-  if(s.type!=='cart'){$('cartOverlay').classList.remove('open');$('cartSidebar').classList.remove('open');}
-  if(s.type!=='modal'){$('modalBg').classList.remove('open');}
-  if(s.type!=='sheet'){document.querySelectorAll('.inv-overlay.open').forEach(o=>o.classList.remove('open'));}
-  if(s.type==='cart'){renderCart();$('cartOverlay').classList.add('open');$('cartSidebar').classList.add('open');}
-  if(s.type==='modal'&&s.id){openModal(s.id);}
-  if(s.type==='sheet'&&s.id){const el=$(s.id);if(el)el.classList.add('open');}
-  if(s.type==='admin'&&isAdmin){
-    $('adminApp').classList.add('open');document.body.style.overflow='hidden';
-    switchPage(s.page||'dashibodi');
-  } else if(s.type!=='admin'&&isAdmin&&$('adminApp').classList.contains('open')){
-    $('adminApp').classList.remove('open');document.body.style.overflow='';
-    if(pollInterval)clearInterval(pollInterval);
-    pollStore();pollInterval=setInterval(pollStore,4000);
-  }
-  suppressHistoryPush=false;
-});
 // Print-sheet overlays (Invoice, Transfer Form, Receiving Form, Purchase Form,
 // Monthly Closing, Discount, Bank Payments, Matumizi Ledger) all share this
-// open/close pair so the physical back button undoes opening one instead of
-// leaving the whole app — same pattern as the working cart above.
-function openSheet(id){const el=$(id);if(!el)return;el.classList.add('open');pushHistoryState('sheet',{id});}
-function closeSheet(id){
-  if(history.state&&history.state.type==='sheet'&&history.state.id===id){history.back();return;}
-  const el=$(id);if(el)el.classList.remove('open');
-}
+// open/close pair. No browser history tracking here on purpose — opening this
+// file directly (file://...) rather than through real hosting makes the
+// browser refuse any history.pushState/replaceState call at all ("'file:'
+// URLs are treated as unique security origins"), which was silently breaking
+// startup. Plain class toggling, like the rest of the app's modals already
+// use, needs no such API and can never hit that wall.
+function openSheet(id){const el=$(id);if(!el)return;el.classList.add('open');}
+function closeSheet(id){const el=$(id);if(el)el.classList.remove('open');}
 
 
 // ════════════════════════════════════════════════════════════════
@@ -2316,9 +2378,8 @@ function doFilter(cat,btn){
 }
 
 /* ─── CART ─── */
-function openCart(){$('cartOverlay').classList.add('open');$('cartSidebar').classList.add('open');renderCart();pushHistoryState('cart');}
+function openCart(){$('cartOverlay').classList.add('open');$('cartSidebar').classList.add('open');renderCart();}
 function closeCart(){
-  if(history.state&&history.state.type==='cart'){history.back();return;}
   $('cartOverlay').classList.remove('open');$('cartSidebar').classList.remove('open');
 }
 function renderCart(){
@@ -2409,7 +2470,6 @@ function openModal(id){
   if(p.media_type==='video'){video.src=p.img;video.style.display='block';photo.style.display='none';}
   else{photo.src=p.img||blank;photo.style.display='block';video.src='';video.style.display='none';}
   $('modalBg').classList.add('open');
-  pushHistoryState('modal',{id});
 }
 function modalQtyChange(d){
   if(!modalProduct)return;
@@ -2440,7 +2500,6 @@ function addFromModal(){
 }
 function closeBgModal(e){if(e.target===$('modalBg'))closeModal();}
 function closeModal(){
-  if(history.state&&history.state.type==='modal'){history.back();return;}
   $('modalBg').classList.remove('open');
 }
 function toggleMobile(){$('mobileMenu').classList.toggle('open');}
@@ -2454,7 +2513,7 @@ function initObserver(){
 // AUTH — two role types: gm (General Manager, sees all 3 branches),
 // deski (Front Desk Officer, locked to their own branch)
 // ════════════════════════════════════════════════════════════════
-function openLogin(){$('loginOverlay').classList.add('open');$('loginEmail').value='';$('pwInput').value='';$('loginErr').textContent='';const btn=$('loginBtn');btn.disabled=false;btn.style.opacity='1';setTimeout(()=>$('loginEmail').focus(),100);}
+function openLogin(){hideSplash();$('loginOverlay').classList.add('open');$('loginEmail').value='';$('pwInput').value='';$('loginErr').textContent='';const btn=$('loginBtn');btn.disabled=false;btn.style.opacity='1';setTimeout(()=>$('loginEmail').focus(),100);}
 function closeLogin(){$('loginOverlay').classList.remove('open');}
 async function doLogin(){
   const email=$('loginEmail').value.trim();
@@ -2465,48 +2524,64 @@ async function doLogin(){
     return;
   }
   $('loginErr').textContent='';
-  const btn=$('loginBtn');btn.disabled=true;btn.style.opacity='0.7';
+  const btn=$('loginBtn');
+  const busy=(on)=>{btn.disabled=on;btn.style.opacity=on?'0.7':'1';};
+  busy(true);
+  const t0=performance.now();
   let data,error;
   try{
     ({data,error}=await sbClient.auth.signInWithPassword({email,password:pw}));
   }catch(networkErr){
-    btn.disabled=false;btn.style.opacity='1';
+    busy(false);
     $('loginErr').textContent='Imeshindikana kuunganisha na mtandao. Tafadhali angalia mtandao wako kisha jaribu tena.';
     return;
   }
   if(error||!data.session){
-    btn.disabled=false;btn.style.opacity='1';
+    busy(false);
     $('loginErr').textContent='Password si sahihi.';$('pwInput').value='';return;
   }
+  const tAuth=performance.now();
+  // Signed in — start loading the data NOW, side by side with the profile lookup,
+  // instead of waiting for the profile first and only then starting the data.
+  _prefetch=fetchAllTables();_prefetch.catch(()=>{});
   const {data:profile,error:profErr}=await sbClient.from('profiles').select('role,tawi,jina').eq('id',data.user.id).single();
   if(profErr||!profile){
-    btn.disabled=false;btn.style.opacity='1';
+    _prefetch=null;busy(false);
     $('loginErr').textContent='Akaunti hii haina wasifu (profile) uliosanidiwa. Wasiliana na msimamizi.';
     await sbClient.auth.signOut();return;
   }
   try{localStorage.setItem('nh_cached_profile',JSON.stringify({role:profile.role,tawi:profile.tawi||null,jina:profile.jina||''}));}catch(e){}
+  console.info(`[login] sign-in ${Math.round(tAuth-t0)}ms · profile ${Math.round(performance.now()-tAuth)}ms`);
   closeLogin();
   enterAdmin(profile.role,profile.tawi||null,profile.jina||'');
 }
+function hideSplash(){const sp=$('bootSplash');if(sp)sp.classList.add('hide');}
 async function tryRestoreSession(){
-  const {data:{session}}=await sbClient.auth.getSession();
-  if(!session)return;
   try{
-    const {data:profile,error}=await sbClient.from('profiles').select('role,tawi,jina').eq('id',session.user.id).single();
-    if(error)throw error;
-    if(profile){
-      localStorage.setItem('nh_cached_profile',JSON.stringify({role:profile.role,tawi:profile.tawi||null,jina:profile.jina||''}));
-      enterAdmin(profile.role,profile.tawi||null,profile.jina||'');
+    const {data:{session}}=await sbClient.auth.getSession();
+    if(session){
+      _prefetch=fetchAllTables();_prefetch.catch(()=>{});   // same head start when the site is opened already signed in
+      try{
+        const {data:profile,error}=await sbClient.from('profiles').select('role,tawi,jina').eq('id',session.user.id).single();
+        if(error)throw error;
+        if(profile){
+          localStorage.setItem('nh_cached_profile',JSON.stringify({role:profile.role,tawi:profile.tawi||null,jina:profile.jina||''}));
+          enterAdmin(profile.role,profile.tawi||null,profile.jina||'');
+        }
+      }catch(e){
+        // Couldn't reach Supabase (e.g. offline on reload) — fall back to the
+        // last-known role/branch for this session.
+        try{
+          const cached=JSON.parse(localStorage.getItem('nh_cached_profile')||'null');
+          if(cached)enterAdmin(cached.role,cached.tawi||null,cached.jina||'');
+        }catch(e2){}
+      }
     }
-  }catch(e){
-    // Couldn't reach Supabase (e.g. offline on reload) — fall back to the
-    // last-known role/branch for this session, rather than locking someone
-    // out of a panel they were already validly logged into.
-    try{
-      const cached=JSON.parse(localStorage.getItem('nh_cached_profile')||'null');
-      if(cached)enterAdmin(cached.role,cached.tawi||null,cached.jina||'');
-    }catch(e2){}
-  }
+  }catch(e){}
+  // Admin-only system: if nobody ended up logged in (no session, or any error
+  // above), land directly on the login page.
+  hideSplash();
+  if(!isAdmin)openLogin();
 }
 function enterAdmin(role='gm',tawi=null,jina=''){
   isAdmin=true;userRole=role;userTawi=tawi;userJina=jina;
@@ -2516,12 +2591,10 @@ function enterAdmin(role='gm',tawi=null,jina=''){
   document.body.style.overflow='hidden';
   if(pollInterval)clearInterval(pollInterval);
   wekaTariheLeo();setDefaultDates();loadAll();
-  pollInterval=setInterval(loadAll,8000);
+  pollInterval=setInterval(loadAllPoll,8000);
   applyRoleUI();
   updateOfflineBanner();
   processPendingQueue();
-  const activePage=document.querySelector('#adminApp .page.active');
-  pushHistoryState('admin',{page:activePage?activePage.id:'dashibodi'});
 }
 // Pages each role may access. GM sees everything across all branches.
 const ROLE_PAGES={
@@ -2529,7 +2602,7 @@ const ROLE_PAGES={
   deski:['dashibodi','maagizo','mauzo','uhamisho','hifadhi','fomu','marekebisho'],
   matumizi:['gharama'],
   madeni:['wateja'],
-  cashier:['dashibodi','mauzo','gharama','wateja','kila-siku','ripoti','serikali','serikali-mafuta','serikali-wateja','mafuta'],
+  cashier:['dashibodi','mauzo','kila-siku','mafuta'],
   serikali:['serikali','serikali-wateja','marekebisho'],
   serikali_mafuta:['serikali-mafuta','serikali-wateja','marekebisho'],
   petroli:['mafuta'],
@@ -2546,7 +2619,13 @@ function applyRoleUI(){
   const _nm=myOfficerName(),brName=(BRANCHES[userTawi]||'').replace(new RegExp('\\s+[—-]\\s+'+_nm+'$'),'');
   const roleLabels={gm:'✏ Meneja Mkuu',deski:`🏬 ${brName} — Msimamizi`,matumizi:'💸 Afisa Matumizi',madeni:'💳 Afisa Madeni',petroli_mauzo:'⛽ Afisa Mauzo wa Mafuta',cashier:'💰 Cashier',serikali_mafuta:'🏛⛽ Afisa wa Serikali (Mafuta)',serikali:'🏛 Afisa wa Mauzo ya Serikali',petroli:`⛽ ${brName}`};
   const subLabels={gm:'Mfumo wa Biashara — Matawi Yote',deski:'Msimamizi',matumizi:'Matumizi — Matawi Yote',madeni:'Madeni — Matawi Yote',petroli_mauzo:'Anaingiza mauzo yake tu — meneja wa kituo ndiye anayeona wote',cashier:'Cashier — Hali ya Fedha (Kuangalia Tu)',serikali_mafuta:'Mauzo ya Mafuta kwa Serikali/Kampuni Kubwa',serikali:'Mauzo ya Serikali',petroli:'Afisa wa Kituo cha Mafuta'};
-  $('modeBadge').textContent=(roleLabels[userRole]||roleLabels.gm)+(myOfficerName()?` · ${myOfficerName()}`:'');
+  {
+    const roleTxt=roleLabels[userRole]||roleLabels.gm;
+    const displayName=(userJina||'').trim()||roleTxt.replace(/^\S+\s*/,'');
+    $('userName').textContent=displayName;
+    $('userRoleLabel').textContent=subLabels[userRole]||subLabels.gm;
+    $('userAvatar').textContent=(displayName.trim().charAt(0)||'?').toUpperCase();
+  }
   const jinaLaJukumu=userRole==='petroli'?'Meneja wa Kituo':userRole==='petroli_mauzo'?'Afisa Mauzo':'Msimamizi';
   const karibu=myOfficerName()?`👤 ${myOfficerName()} — ${jinaLaJukumu} wa ${brName}`:'';
   ['dashKaribu','mafutaKaribu'].forEach(id=>{const el=$(id);if(el){el.textContent=karibu;el.style.display=karibu?'':'none';}});
@@ -2560,7 +2639,11 @@ function applyRoleUI(){
   const salioAwaliEntry=$('salioAwaliEntrySection');if(salioAwaliEntry)salioAwaliEntry.style.display=(userRole==='gm'||userRole==='cashier')?'none':'';
   const wanunuziEntry=$('wanunuziEntrySection');if(wanunuziEntry)wanunuziEntry.style.display=(userRole==='gm'||userRole==='cashier')?'none':'';
   const manunuziEntry=$('manunuziEntrySection');if(manunuziEntry)manunuziEntry.style.display=(userRole==='gm'||userRole==='cashier')?'none':'';
-  const bidhaaMpyaEntry=$('bidhaaMpyaEntrySection');if(bidhaaMpyaEntry)bidhaaMpyaEntry.style.display=(userRole==='gm'||userRole==='cashier')?'none':'';
+  // "Ongeza Bidhaa Mpya" retired — Ongeza Ununuzi (Purchase) already creates a
+  // brand-new product automatically the first time it's bought, and tops up
+  // its stock on every purchase after that. A separate "new product" step is
+  // no longer needed for anyone.
+  const bidhaaMpyaEntry=$('bidhaaMpyaEntrySection');if(bidhaaMpyaEntry)bidhaaMpyaEntry.style.display='none';
   const skEntry=$('serikaliEntrySection');if(skEntry)skEntry.style.display=(userRole==='serikali')?'':'none'; // only the Government officer creates gov invoices
   const skmEntry=$('serikaliMafutaEntrySection');if(skmEntry)skmEntry.style.display=(userRole==='serikali_mafuta')?'':'none'; // only the Fuel Government officer creates these
   // Branch officers no longer type their own name anywhere — it comes from their account
@@ -2620,8 +2703,7 @@ async function doLogout(){
   $('adminApp').classList.remove('open');
   document.body.style.overflow='';
   if(pollInterval)clearInterval(pollInterval);
-  pollStore();pollInterval=setInterval(pollStore,4000);
-  pushHistoryState('store');
+  openLogin(); // the storefront behind this is hidden, so go straight back to login
 }
 // Returns arr filtered to the branch currently being viewed ('yote' = no filter)
 function filterByTawi(arr){
@@ -2632,10 +2714,10 @@ function filterByTawi(arr){
 // ════════════════════════════════════════════════════════════════
 // ADMIN — DATA
 // ════════════════════════════════════════════════════════════════
-async function loadAll(){
-  if(navigator.onLine&&pendingQueue.length)processPendingQueue();
-  try{
-    const [b,m,s,g,w,wn,uh,fm,fp,sa,mo,sk,skm,mst]=await Promise.all([
+// The 14 tables the app needs. Kept separate from loadAll so the login screen can
+// start them EARLY — see doLogin.
+function fetchAllTables(){
+  return Promise.all([
       DB.get('bidhaa','deleted_at=is.null&order=jina.asc'),
       DB.get('manunuzi','deleted_at=is.null&order=tarehe.desc,created_at.desc'),
       DB.get('mauzo','deleted_at=is.null&order=tarehe.desc,created_at.desc'),
@@ -2651,6 +2733,16 @@ async function loadAll(){
       DB.get('mafuta_mauzo_serikali','deleted_at=is.null&order=created_at.desc'),
       DB.get('maombi_stock_serikali','order=created_at.desc&limit=300')
     ]);
+}
+let _prefetch=null;                       // data requested at login, while the profile lookup is still running
+let _loadRunning=null,_loadPending=null;
+async function _runLoad(){
+  try{
+    if(navigator.onLine&&pendingQueue.length)processPendingQueue();
+    let rows;
+    if(_prefetch){const pf=_prefetch;_prefetch=null;rows=await pf.catch(()=>fetchAllTables());}
+    else rows=await fetchAllTables();
+    const [b,m,s,g,w,wn,uh,fm,fp,sa,mo,sk,skm,mst]=rows;
     if(Array.isArray(b))allBidhaa=b;
     if(Array.isArray(m))allManunuzi=m;
     if(Array.isArray(s))allMauzo=s;
@@ -2665,9 +2757,21 @@ async function loadAll(){
     if(Array.isArray(sk))allSerikali=sk;
     if(Array.isArray(skm))allSerikaliMafuta=skm;
     if(Array.isArray(mst))allMaombiStock=mst;
-    renderAll();jaziChaguoBidhaa();jaziUhamishoChaguoBidhaa();updateJinaSuggestions();
+        renderAll();jaziChaguoBidhaa();jaziUhamishoChaguoBidhaa();updateJinaSuggestions();
   }catch(e){console.error('Load error:',e);}
 }
+function _startLoad(){_loadRunning=_runLoad().finally(()=>{_loadRunning=null;});return _loadRunning;}
+// Refresh everything. If a refresh is already running, this waits for it and then does ONE
+// more — so a caller that just saved something always gets a load that STARTED after the
+// save (36 places rely on `await loadAll()` to see their own new record), without
+// piling up requests on a slow connection.
+function loadAll(){
+  if(_loadPending)return _loadPending;
+  if(_loadRunning){_loadPending=_loadRunning.then(()=>{_loadPending=null;return _startLoad();});return _loadPending;}
+  return _startLoad();
+}
+// The 8-second background refresh: simply skip a tick if the last one hasn't finished.
+function loadAllPoll(){if(!_loadRunning&&!_loadPending)loadAll();}
 function nextInvoiceNo(){
   const nums=allMauzo.map(s=>parseInt((s.invoice_no||'').replace(/\D/g,''))||0);
   const max=nums.length?Math.max(...nums):42289;
@@ -2696,7 +2800,6 @@ function switchPage(page){
   if(!allowed.includes(page))return;
   document.querySelectorAll('#adminApp .nav-btn,.a-tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
   document.querySelectorAll('#adminApp .page').forEach(p=>p.classList.toggle('active',p.id===page));
-  pushHistoryState('admin',{page});
   if(page==='takataka')loadTakataka();
 }
 document.querySelectorAll('#adminApp .nav-btn').forEach(btn=>{
@@ -2719,14 +2822,16 @@ function hesabu(kuanzia,hadi){
   const taslimu=mf.filter(s=>s.aina==='Taslimu').reduce((a,b)=>a+b.jumla,0);
   const mkopo=mf.filter(s=>s.aina==='Mkopo').reduce((a,b)=>a+b.jumla,0);
   const jumla_gharama=ef.reduce((a,b)=>a+(b.cash_out||0),0);
-  const madeni=wf.reduce((a,b)=>a+b.bakaa,0);
+  const madeni=wf.reduce((a,b)=>a+b.bakaa,0);   // everything customers STILL owe (running balance) — used by Ripoti
+  // Debt created in THIS period only: the unpaid part of credit sales made on these dates.
+  const madeni_kipindi=mf.filter(s=>s.aina==='Mkopo').reduce((a,b)=>a+(b.bakaa||0),0);
   const stock=bf.reduce((a,b)=>a+b.idadi,0);
   const gharama_cogs=mf.reduce((a,b)=>a+(b.bei_kununulia||0)*b.idadi,0);
   const faida_jumla=jumla_mauzo-gharama_cogs;
   const faida_halisi=faida_jumla-jumla_gharama;
   const malipo=wf.reduce((a,b)=>a+(b.kilicholipwa||0),0);
-  const hela_cash=jumla_mauzo-madeni;
-  return{jumla_mauzo,jumla_manunuzi,taslimu,mkopo,jumla_gharama,madeni,stock,faida_jumla,faida_halisi,hela_cash};
+  const hela_cash=jumla_mauzo-madeni_kipindi;
+  return{jumla_mauzo,jumla_manunuzi,taslimu,mkopo,jumla_gharama,madeni,madeni_kipindi,stock,faida_jumla,faida_halisi,hela_cash};
 }
 
 /* ─── FORMS: MANUNUZI ─── */
@@ -2794,27 +2899,39 @@ let currentOmbiNo=null,currentOmbiTawiChanzo=null; // set while "same ombi" (tra
 function jaziChaguoBidhaa(){
   const sel=$('m-bidhaa');if(!sel)return;
   const prev=sel.value;
-  const catFilter=$('m-aina-filter')?$('m-aina-filter').value:'';
-  let list=filterByTawi(allBidhaa);
-  if(catFilter)list=list.filter(p=>p.aina===catFilter);
+  // Flat list, sorted alphabetically — exactly what's in Stock, in the
+  // same unfiltered form, with nothing grouped on top of it.
+  const list=filterByTawi(allBidhaa).slice().sort((a,b)=>a.jina.localeCompare(b.jina));
   sel.innerHTML='';
   if(!list.length){sel.innerHTML='<option>Hakuna bidhaa</option>';return;}
-  const catOrder=['mabomba','fittings','umeme','saruji','zana','mengineyo'];
-  const groups={};
-  list.forEach(p=>{(groups[p.aina]=groups[p.aina]||[]).push(p);});
-  Object.values(groups).forEach(g=>g.sort((a,b)=>a.jina.localeCompare(b.jina)));
-  const cats=catOrder.filter(c=>groups[c]&&groups[c].length).concat(Object.keys(groups).filter(c=>!catOrder.includes(c)));
-  cats.forEach(cat=>{
-    const og=document.createElement('optgroup');
-    og.label=`${CAT_LABEL[cat]||cat} (${groups[cat].length})`;
-    groups[cat].forEach(p=>{
-      const o=document.createElement('option');o.value=p.id;
-      o.textContent=`${p.jina}${p.jina_sw?' / '+p.jina_sw:''}${viewingTawi==='yote'?' · '+(BRANCHES[p.tawi]||''):''}`;
-      og.appendChild(o);
-    });
-    sel.appendChild(og);
+  list.forEach(p=>{
+    const o=document.createElement('option');o.value=p.id;
+    o.textContent=`${p.jina}${p.jina_sw?' / '+p.jina_sw:''}${viewingTawi==='yote'?' · '+(BRANCHES[p.tawi]||''):''}`;
+    sel.appendChild(o);
   });
   if(prev&&list.some(p=>p.id===prev))sel.value=prev;
+  // Type-ahead suggestions for the search box above — same product names,
+  // so typing and picking from the dropdown always agree with each other.
+  const dl=$('m-bidhaa-suggestions');
+  if(dl)dl.innerHTML=list.map(p=>`<option value="${escH(p.jina)}${viewingTawi==='yote'?' · '+escH(BRANCHES[p.tawi]||''):''}"></option>`).join('');
+  updateBeiSummary();
+}
+// Typing a name narrows it down and, the moment it matches exactly one
+// product, selects it in the dropdown below automatically — same effect as
+// picking it by hand, just faster when you already know what you're selling.
+function onBidhaaSearchInput(){
+  const q=($('m-bidhaa-search').value||'').trim().toLowerCase();
+  const sel=$('m-bidhaa');if(!sel||!q)return;
+  const list=filterByTawi(allBidhaa);
+  const matches=list.filter(p=>p.jina.toLowerCase().includes(q)||(p.jina_sw||'').toLowerCase().includes(q));
+  if(matches.length===1){sel.value=matches[0].id;updateBeiSummary();}
+}
+// Keeps the search box showing whatever was actually picked, whichever way
+// it was picked — typed, or chosen straight from the dropdown.
+function onBidhaaSelectChange(){
+  const sel=$('m-bidhaa'),search=$('m-bidhaa-search');
+  const chosen=allBidhaa.find(p=>String(p.id)===sel.value);
+  if(search&&chosen)search.value=chosen.jina;
   updateBeiSummary();
 }
 function updateBeiSummary(){
@@ -2980,6 +3097,57 @@ async function ombaUhamisho(){
     renderOmbiInProgress();
   }catch(e){arifu('notifyUhamisho','❌ Hitilafu: '+e.message,'error');}
 }
+
+// ── Fomu ya Manunuzi: direct access to the Purchase Form print sheet,
+//    same pattern as the Transfer forms list above it. ──
+function renderFomuManunuzi(){
+  const tbody=$('tbody-fomu-manunuzi');if(!tbody)return;
+  const list=filterByTawi(allManunuzi).filter(p=>!p._pending).sort((a,b)=>(b.tarehe||'').localeCompare(a.tarehe||'')).slice(0,100);
+  tbody.innerHTML=list.length?list.map(p=>
+    `<tr><td>${p.tarehe}</td><td>${escH(p.jina)}</td><td>${p.idadi} ${p.kipimo||'pc'}</td><td class="num">${pesa(p.jumla)}</td><td><button class="btn sm secondary" onclick="chapishaPurchaseForm('${p.id}')">🖨 Fomu</button></td></tr>`
+  ).join(''):safuTupu(5,'Bado hakuna manunuzi.');
+}
+
+// ── Bin Card: a running IN/OUT/BALANCE history for ONE product, matching
+//    the physical card exactly — every purchase and every sale of that item,
+//    in date order, with the stock balance recalculated at each line. ──
+function renderBinCardSuggestions(){
+  const dl=$('bc-suggestions');if(!dl)return;
+  const list=filterByTawi(allBidhaa).slice().sort((a,b)=>a.jina.localeCompare(b.jina));
+  dl.innerHTML=list.map(p=>`<option value="${escH(p.jina)}">${BRANCHES[p.tawi]||p.tawi} — zipo ${p.idadi}</option>`).join('');
+}
+function onBinCardSearchInput(){
+  const q=($('bc-search').value||'').trim().toLowerCase();
+  if(!q)return;
+  const matches=allBidhaa.filter(p=>p.jina.toLowerCase().includes(q)||(p.jina_sw||'').toLowerCase().includes(q));
+  if(matches.length===1)$('bc-bidhaa-id').value=matches[0].id;
+}
+function generateBinCard(){
+  const q=($('bc-search').value||'').trim().toLowerCase();
+  let p=allBidhaa.find(x=>String(x.id)===$('bc-bidhaa-id').value);
+  if(!p||!p.jina.toLowerCase().includes(q)){
+    const matches=allBidhaa.filter(x=>x.jina.toLowerCase().includes(q));
+    if(matches.length===1)p=matches[0];
+  }
+  if(!p){toast('Chagua bidhaa sahihi kwanza — andika jina kamili kama linavyoonekana kwenye Stock');return;}
+
+  const ins=allManunuzi.filter(m=>!m._pending&&m.tawi===p.tawi&&m.jina.toLowerCase()===p.jina.toLowerCase())
+    .map(m=>({tarehe:m.tarehe,created_at:m.created_at,in:m.idadi,out:0,bei:m.bei_kununulia,cash:0,order:0,purchase:m.jumla,jina:m.jina_muhusika||'—'}));
+  const outs=allMauzo.filter(s=>!s._pending&&s.deleted_at==null&&s.tawi===p.tawi&&s.jina.toLowerCase()===p.jina.toLowerCase()&&s.hali_order!=='Inasubiri'&&s.hali_order!=='Imekataliwa')
+    .map(s=>({tarehe:s.tarehe,created_at:s.created_at,in:0,out:s.idadi,bei:s.bei_kuuzia,cash:s.aina==='Taslimu'?s.jumla:0,order:s.aina==='Mkopo'?s.jumla:0,purchase:0,jina:s.muuzaji||'—'}));
+
+  const rows=ins.concat(outs).sort((a,b)=>(a.tarehe||'').localeCompare(b.tarehe||'')||(a.created_at||'').localeCompare(b.created_at||''));
+  let balance=0;
+  const withBalance=rows.map(r=>{balance+=r.in-r.out;return Object.assign({},r,{balance});});
+
+  $('bcItemName').textContent=p.jina+(p.jina_sw?' / '+p.jina_sw:'');
+  $('bcTawi').textContent=BRANCHES[p.tawi]||p.tawi;
+  $('bcRows').innerHTML=withBalance.length?withBalance.map((r,i)=>
+    `<tr><td>${r.tarehe}</td><td class="num">${r.in||''}</td><td class="num">${r.out||''}</td><td class="num"><strong>${r.balance}</strong></td><td class="num">${pesa(r.bei)}</td><td class="num">${r.cash?pesa(r.cash):''}</td><td class="num">${r.order?pesa(r.order):''}</td><td class="num">${r.purchase?pesa(r.purchase):''}</td><td>${escH(r.jina)}</td><td class="num">${i===withBalance.length-1?r.balance:''}</td></tr>`
+  ).join(''):safuTupu(10,'Bado hakuna manunuzi au mauzo ya bidhaa hii.');
+  openSheet('bcOverlay');
+}
+
 function renderFomuTransfer(){
   const tbody=$('tbody-fomu-transfer');if(!tbody)return;
   const myTawi=userRole==='deski'?userTawi:viewingTawi;
@@ -3207,30 +3375,43 @@ function populateMafutaTawiSelects(){
   populateBranchSelect('mf-tawi',PETROL_BRANCHES,false);
   populateBranchSelect('mf-tawi-2',PETROL_BRANCHES,false);
 }
+// Litres sold = litres at the start minus litres left. Rounded to 2 decimals so values
+// like 0.3 - 0.1 can't leave a long trailing fraction in the saved record.
+// One spelling per person, so "juma" / "JUMA" / "Juma  " all land on the same name and a
+// worker's records never split across spellings when you trace them later.
+function jinaLaMfanyakazi(raw){
+  return String(raw||'').replace(/\s+/g,' ').trim().split(' ').filter(Boolean)
+    .map(w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()).join(' ');
+}
+function litaZilizouzwa(awali,mwisho){return Math.max(0,Math.round((awali-mwisho)*100)/100);}
 function hesabuLitaMauzo(){
   const awali=parseFloat($('mf-m-awali').value)||0;
   const mwisho=parseFloat($('mf-m-mwisho').value)||0;
   const bei=parseFloat($('mf-m-bei').value)||0;
-  const lita=Math.max(0,mwisho-awali);
+  const lita=litaZilizouzwa(awali,mwisho);
   $('mf-m-lita').value=lita?lita.toFixed(2):'';
   $('mf-m-jumla').value=lita&&bei?pesa(lita*bei):'';
 }
 function safishaMafutaMauzo(){
-  ['mf-m-pampu','mf-m-awali','mf-m-mwisho','mf-m-lita','mf-m-bei','mf-m-jumla','mf-m-wasilisho'].forEach(id=>{const el=$(id);if(el)el.value='';});
+  ['mf-m-awali','mf-m-mwisho','mf-m-lita','mf-m-bei','mf-m-jumla','mf-m-wasilisho','mf-m-mfanyakazi'].forEach(id=>{const el=$(id);if(el)el.value='';});
 }
 async function ongezaMafutaMauzo(){
-  const tarehe=$('mf-m-tarehe').value,aina=$('mf-m-aina').value,pampu=$('mf-m-pampu').value.trim();
+  const tarehe=$('mf-m-tarehe').value,aina=$('mf-m-aina').value;
   const awali=parseFloat($('mf-m-awali').value)||0,mwisho=parseFloat($('mf-m-mwisho').value)||0;
-  const lita=Math.max(0,mwisho-awali),bei=parseInt($('mf-m-bei').value)||0;
+  const lita=litaZilizouzwa(awali,mwisho),bei=parseInt($('mf-m-bei').value)||0;
   const tawi=$('mf-tawi').value;
-  if(!lita||lita<=0){arifu('notifyMafutaMauzo','❌ Angalia namba za pampu — lita ni sifuri au hasi.','error');return;}
+  if(mwisho>awali){arifu('notifyMafutaMauzo','❌ Lita Zilizobaki haziwezi kuwa nyingi kuliko Lita za Mwanzo.','error');return;}
+  if(!lita||lita<=0){arifu('notifyMafutaMauzo','❌ Lita Zilizouzwa ni sifuri — angalia Lita za Mwanzo na Lita Zilizobaki.','error');return;}
   if(!bei){arifu('notifyMafutaMauzo','❌ Weka bei kwa lita.','error');return;}
+  // Who handed the money over. An attendant account is always itself; otherwise the name is typed.
+  const mfanyakazi=userRole==='petroli_mauzo'?(myOfficerName()||''):jinaLaMfanyakazi($('mf-m-mfanyakazi').value);
+  if(!mfanyakazi){arifu('notifyMafutaMauzo','❌ Weka jina la mfanyakazi aliyewasilisha fedha.','error');return;}
   const jumla=Math.round(lita*bei);
   const wasilisho=parseInt($('mf-m-wasilisho').value);
-  if(!(await pitaUkaguziDuplicate('mafuta_mauzo',{tawi,aina,lita,bei},`Umeshahifadhi mauzo ya ${aina} L${lita} kwenye kituo hiki hivi punde. Je, unataka kuhifadhi tena?`)))return;
-  kumbukaHifadhi('mafuta_mauzo',{tawi,aina,lita,bei});
-  const row={tarehe,tawi,aina,pampu,kusoma_awali:awali,kusoma_mwisho:mwisho,lita,bei_kwa_lita:bei,jumla,
-    muuzaji:myOfficerName()||null,kiasi_kilichowasilishwa:Number.isFinite(wasilisho)?wasilisho:null};
+  if(!(await pitaUkaguziDuplicate('mafuta_mauzo',{tawi,aina,lita,bei,mfanyakazi},`Umeshahifadhi mauzo ya ${aina} L${lita} ya ${mfanyakazi} kwenye kituo hiki hivi punde. Je, unataka kuhifadhi tena?`)))return;
+  kumbukaHifadhi('mafuta_mauzo',{tawi,aina,lita,bei,mfanyakazi});
+  const row={tarehe,tawi,aina,kusoma_awali:awali,kusoma_mwisho:mwisho,lita,bei_kwa_lita:bei,jumla,
+    muuzaji:mfanyakazi,kiasi_kilichowasilishwa:Number.isFinite(wasilisho)?wasilisho:null};
   const calls=[{op:'post',table:'mafuta_mauzo',data:row}];
   function saveOffline(){
     queueCalls(calls);
@@ -3292,10 +3473,19 @@ function renderMafuta(){
   // the manager's job. (The database enforces this too; this just matches it.)
   if(userRole==='petroli_mauzo')salesList=salesList.filter(r=>r.muuzaji===myOfficerName());
   const isManager=userRole==='petroli'||userRole==='gm';
-  const wfSection=$('mfWafanyakaziSection');if(wfSection)wfSection.style.display=isManager?'':'none';
+  // Per-attendant breakdown retired — stations no longer have separate
+  // attendant accounts, just the one manager, so "per worker" has nothing
+  // left to break down.
+  const wfSection=$('mfWafanyakaziSection');if(wfSection)wfSection.style.display='none';
   const isReadOnlyHere=userRole==='gm'||userRole==='cashier';
   const mauzoEntry=$('mfMauzoEntrySection');if(mauzoEntry)mauzoEntry.style.display=isReadOnlyHere?'none':'';
   const manunuziWrap=$('mfManunuziWrap');if(manunuziWrap)manunuziWrap.style.display=(userRole==='petroli_mauzo'||isReadOnlyHere)?'none':'';
+  const mfWrap=$('mf-m-mfanyakazi-wrap');if(mfWrap)mfWrap.style.display=(userRole==='petroli_mauzo')?'none':'';
+  const mfList=$('mf-m-mfanyakazi-list');
+  if(mfList){
+    const known=[...new Set(allMafutaMauzo.filter(r=>viewingTawi==='yote'||r.tawi===viewingTawi).map(r=>r.muuzaji).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+    mfList.innerHTML=known.map(n=>`<option value="${escH(n)}"></option>`).join('');
+  }
   // An attendant cares about their own sales, not the station's fuel stock —
   // swap the "Salio la Petroli/Dizeli" cards for their own daily/monthly totals.
   const salioCards=$('mfSalioCards'),afisaCards=$('mfAfisaCards');
@@ -3311,13 +3501,26 @@ function renderMafuta(){
   }else{
     if(salioCards)salioCards.style.display='';
     if(afisaCards)afisaCards.style.display='none';
+    // Manager/GM: the station's own daily performance, alongside the stock
+    // estimate — not stock alone, which said nothing about how the day's
+    // actually gone.
+    const managerCards=$('mfManagerCards');
+    if(managerCards)managerCards.style.display=isManager?'':'none';
+    if(isManager){
+      const leo=salesList.filter(r=>!r._pending&&r.tarehe===leoISO());
+      const mwezi=salesList.filter(r=>!r._pending&&(r.tarehe||'').slice(0,7)===leoISO().slice(0,7));
+      $('mfKituoMauzoLeo').textContent=pesa(leo.reduce((a,r)=>a+(r.jumla||0),0));
+      $('mfKituoLitaLeo').textContent=leo.reduce((a,r)=>a+(r.lita||0),0).toFixed(1)+' L';
+      $('mfKituoMauzoMwezi').textContent=pesa(mwezi.reduce((a,r)=>a+(r.jumla||0),0));
+      $('mfKituoLitaMwezi').textContent=mwezi.reduce((a,r)=>a+(r.lita||0),0).toFixed(1)+' L';
+    }
   }
   tbM.innerHTML=salesList.length?salesList.map(r=>{
     const actions=(r._pending||userRole==='petroli_mauzo')?(r._pending?'<span style="color:var(--a-muted);font-size:11px;">Inasubiri</span>':'—'):`<button class="btn sm danger" onclick="futaMafutaMauzo('${r.id}')">Futa</button>`;
     const tofauti=(r.kiasi_kilichowasilishwa==null)?null:(r.kiasi_kilichowasilishwa-(r.jumla||0));
     const tofautiHtml=tofauti===null?'—':`<strong style="color:${tofauti<0?'var(--a-red)':'var(--a-green)'}">${tofauti<0?'-':''}${pesa(Math.abs(tofauti))}</strong>`;
-    return`<tr><td>${r._pending?'⏳ ':''}${r.tarehe}</td><td>${BRANCHES[r.tawi]||r.tawi}</td><td>${r.muuzaji||'—'}</td><td>${r.aina}</td><td>${r.pampu||'—'}</td><td class="num">${Number(r.lita).toFixed(2)}</td><td class="num">${pesa(r.bei_kwa_lita)}</td><td class="num"><strong>${pesa(r.jumla)}</strong></td><td class="num">${r.kiasi_kilichowasilishwa==null?'—':pesa(r.kiasi_kilichowasilishwa)}</td><td class="num">${tofautiHtml}</td><td>${actions}</td></tr>`;
-  }).join(''):safuTupu(11,'Bado hakuna mauzo ya mafuta.');
+    return`<tr><td>${r._pending?'⏳ ':''}${r.tarehe}</td><td>${BRANCHES[r.tawi]||r.tawi}</td><td>${r.muuzaji||'—'}</td><td>${r.aina}</td><td class="num">${Number(r.lita).toFixed(2)}</td><td class="num">${pesa(r.bei_kwa_lita)}</td><td class="num"><strong>${pesa(r.jumla)}</strong></td><td class="num">${r.kiasi_kilichowasilishwa==null?'—':pesa(r.kiasi_kilichowasilishwa)}</td><td class="num">${tofautiHtml}</td><td>${actions}</td></tr>`;
+  }).join(''):safuTupu(10,'Bado hakuna mauzo ya mafuta.');
   tbP.innerHTML=purchList.length?purchList.map(r=>{
     const actions=r._pending?'<span style="color:var(--a-muted);font-size:11px;">Inasubiri</span>':`<button class="btn sm danger" onclick="futaMafutaManunuzi('${r.id}')">Futa</button>`;
     return`<tr><td>${r._pending?'⏳ ':''}${r.tarehe}</td><td>${BRANCHES[r.tawi]||r.tawi}</td><td>${r.aina}</td><td class="num">${Number(r.lita).toFixed(2)}</td><td class="num">${pesa(r.bei_kwa_lita)}</td><td class="num"><strong>${pesa(r.jumla)}</strong></td><td>${r.msambazaji}</td><td>${actions}</td></tr>`;
@@ -3557,6 +3760,11 @@ function safishaMauzo(keepInvoiceToggle,keepCustomer){
   togglaMkopo();
   if(!keepInvoiceToggle)$('m-same-invoice').checked=false;
   const dflt=document.querySelector('input[name=m-invoice-choice][value=ndiyo]');if(dflt)dflt.checked=true;
+  // The product selector itself isn't cleared (lets the same item be sold
+  // again quickly) — keep the search box showing that same name instead of
+  // leftover typed text that no longer matches what's actually selected.
+  const searchBox=$('m-bidhaa-search');
+  if(searchBox){const chosen=allBidhaa.find(p=>String(p.id)===$('m-bidhaa').value);searchBox.value=chosen?chosen.jina:'';}
   updateBeiSummary();
 }
 async function futaMauzo(id,onDone){
@@ -3697,6 +3905,7 @@ $('tfClose') && $('tfClose').addEventListener('click',()=>closeSheet('tfOverlay'
 $('rfClose') && $('rfClose').addEventListener('click',()=>closeSheet('rfOverlay'));
 $('ppClose') && $('ppClose').addEventListener('click',()=>closeSheet('ppOverlay'));
 $('mcClose') && $('mcClose').addEventListener('click',()=>closeSheet('mcOverlay'));
+$('bcClose') && $('bcClose').addEventListener('click',()=>closeSheet('bcOverlay'));
 $('dcClose') && $('dcClose').addEventListener('click',()=>closeSheet('dcOverlay'));
 $('bpClose') && $('bpClose').addEventListener('click',()=>closeSheet('bpOverlay'));
 
@@ -3926,6 +4135,12 @@ async function toggleDukani(id){
 
 /* ─── RENDER FUNCTIONS ─── */
 function renderDashibodi(){
+  const srSection=$('dashStationsReportSection');
+  if(srSection){
+    const canSeeStationsReport=userRole==='gm'||userRole==='cashier';
+    srSection.style.display=canSeeStationsReport?'':'none';
+    if(canSeeStationsReport)renderStationsReport();
+  }
   const hw=$('dashHardwareView'),fv=$('dashFuelView');
   if(PETROL_BRANCHES[viewingTawi]){
     if(hw)hw.style.display='none';
@@ -3935,9 +4150,29 @@ function renderDashibodi(){
   }
   if(hw)hw.style.display='';
   if(fv)fv.style.display='none';
-  const t=hesabu();
+  // Cashier sees only the four figures that are actually theirs to watch —
+  // not Faida Halisi (that's the GM's call to make), and not the trend
+  // chart or the Muhtasari/Tahadhari panel, which are GM-oriented detail.
+  const cashierOnly=userRole==='cashier';
+  const faidaWrap=$('cardFaidaWrap'),chartSec=$('mauzoChartSection'),grid2=$('dashGrid2');
+  if(faidaWrap)faidaWrap.style.display=cashierOnly?'none':'';
+  if(chartSec)chartSec.style.display=cashierOnly?'none':(userRole==='gm'?'':'none');
+  if(grid2)grid2.style.display=cashierOnly?'none':'';
+  // The General Manager's dashboard no longer shows the Tahadhari (alerts) panel —
+  // it was confusing next to the day's figures. Branch officers keep it: low-stock and
+  // overdue-debt warnings are what they act on. With it gone, Muhtasari fills the row.
+  const tahadhari=$('dashTahadhariSection'),hideTahadhari=userRole==='gm';
+  if(tahadhari)tahadhari.style.display=hideTahadhari?'none':'';
+  if(grid2)grid2.style.gridTemplateColumns=hideTahadhari?'1fr':'';
+  // Default to TODAY's figures, not everything ever recorded — pick any other
+  // date with the picker above to see that day's report instead. Madeni (total
+  // still owed) stays a running balance regardless of date, since "today's new
+  // debt" would be a far less useful number than what's actually still owed.
+  if(!$('dash-tarehe').value)$('dash-tarehe').value=leoISO();
+  const dashDate=$('dash-tarehe').value;
+  const t=hesabu(dashDate,dashDate);
   $('cardManunuzi').textContent=pesa(t.jumla_manunuzi);$('cardMauzo').textContent=pesa(t.jumla_mauzo);
-  $('cardFaida').textContent=pesa(t.faida_halisi);$('cardMadeni').textContent=pesa(t.madeni);
+  $('cardFaida').textContent=pesa(t.faida_halisi);$('cardMadeni').textContent=pesa(t.madeni_kipindi);
   $('cardCash').textContent=pesa(Math.max(0,t.hela_cash));
   $('sumTaskimu').textContent=pesa(t.taslimu);$('sumMkopo').textContent=pesa(t.mkopo);
   $('sumGharama').textContent=pesa(t.jumla_gharama);$('sumStock').textContent=t.stock;
@@ -4018,6 +4253,80 @@ function renderMafutaTrendChart(){
     options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y.toFixed(1)+' L'}}},scales:{y:{min:0,grid:{color:'#E4E0D4'}},x:{grid:{display:false}}}}
   });
 }
+
+// Stations Report — a real daily/monthly report with a date picker, for one
+// station or every station together. Separate from the branch switcher's
+// quick "today" fuel view above, since this needs its own period and station
+// choice regardless of whichever branch happens to be selected there.
+function renderStationsReport(){
+  const kituoSel=$('sr-kituo');
+  if(kituoSel&&kituoSel.options.length<2){
+    kituoSel.innerHTML='<option value="yote">Vituo Vyote</option>'+
+      Object.entries(PETROL_BRANCHES).map(([k,l])=>`<option value="${k}">${l}</option>`).join('');
+  }
+  const kipindi=$('sr-kipindi').value,kituo=$('sr-kituo').value;
+  $('sr-tarehe').style.display=kipindi==='siku'?'':'none';
+  $('sr-mwezi').style.display=kipindi==='mwezi'?'':'none';
+  if(kipindi==='siku'&&!$('sr-tarehe').value)$('sr-tarehe').value=leoISO();
+  if(kipindi==='mwezi'&&!$('sr-mwezi').value)$('sr-mwezi').value=leoISO().slice(0,7);
+  const matchPeriod=d=>kipindi==='siku'?d===$('sr-tarehe').value:(d||'').slice(0,7)===$('sr-mwezi').value;
+  const matchKituo=t=>kituo==='yote'||t===kituo;
+
+  const pump=allMafutaMauzo.filter(r=>!r._pending&&matchPeriod(r.tarehe)&&matchKituo(r.tawi));
+  const serikali=allSerikaliMafuta.filter(r=>matchPeriod(r.tarehe)&&matchKituo(r.tawi));
+
+  const totalLita=pump.reduce((a,r)=>a+(r.lita||0),0)+serikali.reduce((a,r)=>a+(r.lita||0),0);
+  const totalJumla=pump.reduce((a,r)=>a+(r.jumla||0),0)+serikali.reduce((a,r)=>a+(r.jumla||0),0);
+  const naW=pump.filter(r=>r.kiasi_kilichowasilishwa!=null);
+  const wasilisho=naW.reduce((a,r)=>a+(r.kiasi_kilichowasilishwa||0),0);
+  const expectedForW=naW.reduce((a,r)=>a+(r.jumla||0),0);
+  const tofauti=naW.length?wasilisho-expectedForW:null;
+
+  $('sr-cards').innerHTML=`
+    <div class="card"><div class="c-label">Lita Zilizouzwa</div><div class="c-value">${totalLita.toFixed(1)} L</div><span class="c-badge badge-amber">Jumla</span></div>
+    <div class="card"><div class="c-label">Mapato</div><div class="c-value">${pesa(totalJumla)}</div><span class="c-badge badge-green">TZS</span></div>
+    <div class="card"><div class="c-label">Waliyowasilisha (Pampu)</div><div class="c-value">${naW.length?pesa(wasilisho):'—'}</div><span class="c-badge badge-amber">TZS</span></div>
+    <div class="card" style="border-left:3px solid ${tofauti===null?'var(--a-muted)':tofauti<0?'var(--a-red)':'var(--a-green)'}"><div class="c-label">Tofauti</div><div class="c-value" style="color:${tofauti===null?'':tofauti<0?'var(--a-red)':'var(--a-green)'}">${tofauti===null?'—':(tofauti<0?'-':'')+pesa(Math.abs(tofauti))}</div><span class="c-badge ${tofauti===null?'badge-gray':tofauti<0?'badge-red':'badge-green'}">${tofauti===null?'Bado':tofauti<0?'Pungufu':'Sawa'}</span></div>`;
+
+  const thead=$('sr-thead'),tb=$('tbody-stations-report');
+  if(kituo==='yote'){
+    // One row per station, so the whole network can be compared at a glance.
+    thead.innerHTML='<tr><th>Kituo</th><th class="num">Lita</th><th class="num">Mapato</th><th class="num">Waliyowasilisha</th><th class="num">Tofauti</th></tr>';
+    const rows=Object.entries(PETROL_BRANCHES).map(([k,label])=>{
+      const p=pump.filter(r=>r.tawi===k),s=serikali.filter(r=>r.tawi===k);
+      const lita=p.reduce((a,r)=>a+(r.lita||0),0)+s.reduce((a,r)=>a+(r.lita||0),0);
+      const jumla=p.reduce((a,r)=>a+(r.jumla||0),0)+s.reduce((a,r)=>a+(r.jumla||0),0);
+      const pw=p.filter(r=>r.kiasi_kilichowasilishwa!=null);
+      const w=pw.reduce((a,r)=>a+(r.kiasi_kilichowasilishwa||0),0),ew=pw.reduce((a,r)=>a+(r.jumla||0),0);
+      const tf=pw.length?w-ew:null;
+      const tfHtml=tf===null?'—':`<strong style="color:${tf<0?'var(--a-red)':'var(--a-green)'}">${tf<0?'-':''}${pesa(Math.abs(tf))}</strong>`;
+      return `<tr><td><strong>${label}</strong></td><td class="num">${lita.toFixed(2)}</td><td class="num">${pesa(jumla)}</td><td class="num">${pw.length?pesa(w):'—'}</td><td class="num">${tfHtml}</td></tr>`;
+    }).join('');
+    tb.innerHTML=rows||safuTupu(5,'Hakuna data katika kipindi hiki.');
+  }else{
+    // One station chosen: per-attendant breakdown is more useful than a single total.
+    thead.innerHTML='<tr><th>Mfanyakazi</th><th class="num">Lita</th><th class="num">Mapato Yanayotarajiwa</th><th class="num">Aliyowasilisha</th><th class="num">Tofauti</th></tr>';
+    const byPerson={};
+    pump.forEach(r=>{
+      const jina=r.muuzaji||'(Hajulikani)';
+      if(!byPerson[jina])byPerson[jina]={lita:0,jumla:0,wasilisho:0,naW:false};
+      byPerson[jina].lita+=r.lita||0;byPerson[jina].jumla+=r.jumla||0;
+      if(r.kiasi_kilichowasilishwa!=null){byPerson[jina].wasilisho+=r.kiasi_kilichowasilishwa;byPerson[jina].naW=true;}
+    });
+    if(serikali.length){
+      const key='🏛 Mauzo ya Serikali/Kampuni';
+      if(!byPerson[key])byPerson[key]={lita:0,jumla:0,wasilisho:0,naW:false};
+      serikali.forEach(r=>{byPerson[key].lita+=r.lita||0;byPerson[key].jumla+=r.jumla||0;});
+    }
+    const rows=Object.entries(byPerson).sort((a,b)=>b[1].jumla-a[1].jumla).map(([jina,d])=>{
+      const tf=d.naW?d.wasilisho-d.jumla:null;
+      const tfHtml=tf===null?'—':`<strong style="color:${tf<0?'var(--a-red)':'var(--a-green)'}">${tf<0?'-':''}${pesa(Math.abs(tf))}</strong>`;
+      return `<tr><td><strong>${jina}</strong></td><td class="num">${d.lita.toFixed(2)}</td><td class="num">${pesa(d.jumla)}</td><td class="num">${d.naW?pesa(d.wasilisho):'—'}</td><td class="num">${tfHtml}</td></tr>`;
+    }).join('');
+    tb.innerHTML=rows||safuTupu(5,'Hakuna mauzo katika kipindi hiki.');
+  }
+}
+
 let mauzoChartInstance=null;
 let chartRangeDays=14;
 function setChartRange(days){
@@ -4059,8 +4368,8 @@ function renderManunuzi(){
   const list=filterByTawi(allManunuzi);
   $('tbody-manunuzi').innerHTML=list.length?list.map(p=>{
     const actions=p._pending?'<span style="color:var(--a-muted);font-size:11px;">Inasubiri</span>':`<button class="btn sm secondary" onclick="chapishaPurchaseForm('${p.id}')">🖨</button>${gmReadOnly?'':kitufeMarekebisho('manunuzi',p.id)}`;
-    return`<tr><td>${p._pending?'⏳ ':''}${p.tarehe}</td><td><strong>${p.jina}</strong></td><td>${CAT_LABEL[p.aina]||p.aina}</td><td>${p.kipimo||'pc'}</td><td>${p.idadi}</td><td>${pesa(p.bei_kununulia)}</td><td><strong>${pesa(p.jumla)}</strong></td><td>${p.msambazaji}</td><td style="display:flex;gap:4px;flex-wrap:wrap;">${actions}</td></tr>`;
-  }).join(''):safuTupu(9,'Bado hakuna manunuzi.');
+    return`<tr><td>${p._pending?'⏳ ':''}${p.tarehe}</td><td><strong>${p.jina}</strong></td><td>${p.kipimo||'pc'}</td><td>${p.idadi}</td><td>${pesa(p.bei_kununulia)}</td><td><strong>${pesa(p.jumla)}</strong></td><td>${p.msambazaji}</td><td style="display:flex;gap:4px;flex-wrap:wrap;">${actions}</td></tr>`;
+  }).join(''):safuTupu(8,'Bado hakuna manunuzi.');
 }
 function computeMatumiziLedger(kuanzia,hadi){
   const sorted=[...allGharama].sort((a,b)=>{
@@ -4134,27 +4443,20 @@ function chapishaMatumiziRipoti(){
 }
 function updateJinaSuggestions(){
   const dl=$('t-jina-suggestions');if(!dl)return;
-  const cat=$('t-aina').value;
-  const names=[...new Set(allBidhaa.filter(p=>p.aina===cat).map(p=>p.jina))].sort();
+  const names=[...new Set(allBidhaa.map(p=>p.jina))].sort();
   dl.innerHTML=names.map(n=>`<option value="${n}"></option>`).join('');
 }
 function renderStock(){
   const tafuta=($('search-stock').value||'').toLowerCase();
-  const list=filterByTawi(allBidhaa).filter(p=>`${p.jina} ${p.jina_sw||''} ${p.aina}`.toLowerCase().includes(tafuta));
+  // Flat list, in the order products were actually entered — no category
+  // sections imposed on top of what the officer wrote.
+  const list=filterByTawi(allBidhaa).filter(p=>`${p.jina} ${p.jina_sw||''}`.toLowerCase().includes(tafuta));
   const blank="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Crect fill='%23F3E6DE' width='40' height='40'/%3E%3C/svg%3E";
-  if(!list.length){$('tbody-stock').innerHTML=safuTupu(11,'Hakuna bidhaa.');return;}
-  const catOrder=['mabomba','fittings','umeme','saruji','zana','mengineyo'];
-  const groups={};
-  list.forEach(p=>{const cat=p.aina||'mengineyo';(groups[cat]=groups[cat]||[]).push(p);});
-  Object.values(groups).forEach(g=>g.sort((a,b)=>a.jina.localeCompare(b.jina)));
-  const cats=catOrder.filter(c=>groups[c]&&groups[c].length).concat(Object.keys(groups).filter(c=>!catOrder.includes(c)));
-  $('tbody-stock').innerHTML=cats.map(cat=>{
-    const rows=groups[cat].map(p=>{
-      const fp=p.bei_kuuzia>0?Math.round(((p.bei_kuuzia-p.bei_kununulia)/p.bei_kuuzia)*100):0;
-      const badge=p.idadi===0?'<span class="pill pill-red">Imekwisha</span>':p.idadi<=p.kiwango_chini?'<span class="pill pill-amber">Ndogo</span>':'<span class="pill pill-green">Ipo ✓</span>';
-      return`<tr><td><img src="${p.img||blank}" style="width:34px;height:34px;object-fit:cover;border-radius:4px"/></td><td><strong>${p.jina}${p.jina_sw?` / ${p.jina_sw}`:''}</strong></td><td>${CAT_LABEL[p.aina]||p.aina}</td><td>${p.kipimo||'pc'}</td><td>${pesa(p.bei_kununulia)}</td><td>${pesa(p.bei_kuuzia)}</td><td><span class="pill ${fp>=30?'pill-green':fp>=15?'pill-amber':'pill-red'}">${fp}%</span></td><td><strong>${p.idadi}</strong></td><td>${badge}</td><td><div class="toggle-wrap"><div class="toggle${p.onyesha_dukani?' on':''}" onclick="toggleDukani('${p.id}')"></div></div></td><td style="display:flex;gap:4px;flex-wrap:wrap;">${gmReadOnly?'—':`<button class="btn sm secondary" onclick="funguaHaririBidhaa('${p.id}')">✏️ Hariri</button>${kitufeMarekebisho('bidhaa',p.id)}`}</td></tr>`;
-    }).join('');
-    return `<tr class="cat-group-row"><td colspan="11">${CAT_LABEL[cat]||cat} <span class="cat-count">(${groups[cat].length})</span></td></tr>${rows}`;
+  if(!list.length){$('tbody-stock').innerHTML=safuTupu(10,'Hakuna bidhaa.');return;}
+  $('tbody-stock').innerHTML=list.map(p=>{
+    const fp=p.bei_kuuzia>0?Math.round(((p.bei_kuuzia-p.bei_kununulia)/p.bei_kuuzia)*100):0;
+    const badge=p.idadi===0?'<span class="pill pill-red">Imekwisha</span>':p.idadi<=p.kiwango_chini?'<span class="pill pill-amber">Ndogo</span>':'<span class="pill pill-green">Ipo ✓</span>';
+    return`<tr><td><img src="${p.img||blank}" style="width:34px;height:34px;object-fit:cover;border-radius:4px"/></td><td><strong>${p.jina}${p.jina_sw?` / ${p.jina_sw}`:''}</strong></td><td>${p.kipimo||'pc'}</td><td>${pesa(p.bei_kununulia)}</td><td>${pesa(p.bei_kuuzia)}</td><td><span class="pill ${fp>=30?'pill-green':fp>=15?'pill-amber':'pill-red'}">${fp}%</span></td><td><strong>${p.idadi}</strong></td><td>${badge}</td><td><div class="toggle-wrap"><div class="toggle${p.onyesha_dukani?' on':''}" onclick="toggleDukani('${p.id}')"></div></div></td><td style="display:flex;gap:4px;flex-wrap:wrap;">${gmReadOnly?'—':kitufeMarekebisho('bidhaa',p.id)}</td></tr>`;
   }).join('');
 }
 function renderWateja(){
@@ -4825,8 +5127,18 @@ function renderSerikaliMafuta(){
   if(userRole==='serikali_mafuta'){jaziTawiSerikaliMafuta();renderDraftSerikaliMafuta();}
   const jumla=allSerikaliMafuta.reduce((a,s)=>a+Number(s.jumla||0),0);
   const imelipwa=allSerikaliMafuta.filter(s=>s.hali_malipo==='Imelipwa').reduce((a,s)=>a+Number(s.jumla||0),0);
+  const litaPetroli=allSerikaliMafuta.filter(s=>s.aina==='Petroli').reduce((a,s)=>a+Number(s.lita||0),0);
+  const litaDizeli=allSerikaliMafuta.filter(s=>s.aina==='Dizeli').reduce((a,s)=>a+Number(s.lita||0),0);
   const sm=$('skm-summary');
-  if(sm)sm.innerHTML=`<div style="display:flex;gap:28px;flex-wrap:wrap;margin-bottom:14px;"><div><span style="font-size:11px;color:var(--a-muted);text-transform:uppercase;">Jumla ya Invoice</span><br><strong style="font-size:18px;">${pesa(jumla)}</strong></div><div><span style="font-size:11px;color:var(--a-muted);text-transform:uppercase;">Imelipwa</span><br><strong style="font-size:18px;color:var(--a-green,#4ade80);">${pesa(imelipwa)}</strong></div><div><span style="font-size:11px;color:var(--a-muted);text-transform:uppercase;">Haijalipwa</span><br><strong style="font-size:18px;color:var(--a-red,#f87171);">${pesa(jumla-imelipwa)}</strong></div></div>`;
+  // Litres first — this is a fuel invoice list, not a hardware one, so what's
+  // actually moved (and in which fuel) matters as much as the money.
+  if(sm)sm.innerHTML=`<div style="display:flex;gap:28px;flex-wrap:wrap;margin-bottom:14px;">
+    <div><span style="font-size:11px;color:var(--a-muted);text-transform:uppercase;">Lita za Petroli</span><br><strong style="font-size:18px;">${litaPetroli.toFixed(1)} L</strong></div>
+    <div><span style="font-size:11px;color:var(--a-muted);text-transform:uppercase;">Lita za Dizeli</span><br><strong style="font-size:18px;">${litaDizeli.toFixed(1)} L</strong></div>
+    <div><span style="font-size:11px;color:var(--a-muted);text-transform:uppercase;">Jumla ya Mapato</span><br><strong style="font-size:18px;">${pesa(jumla)}</strong></div>
+    <div><span style="font-size:11px;color:var(--a-muted);text-transform:uppercase;">Imelipwa</span><br><strong style="font-size:18px;color:var(--a-green,#4ade80);">${pesa(imelipwa)}</strong></div>
+    <div><span style="font-size:11px;color:var(--a-muted);text-transform:uppercase;">Haijalipwa</span><br><strong style="font-size:18px;color:var(--a-red,#f87171);">${pesa(jumla-imelipwa)}</strong></div>
+  </div>`;
   tb.innerHTML=allSerikaliMafuta.length?allSerikaliMafuta.map(s=>{
     const paid=s.hali_malipo==='Imelipwa';
     let acts=`<button class="btn sm secondary" onclick="onyeshaInvoiceSerikaliMafutaNo('${s.invoice_no}')">🖨</button>`;
@@ -4879,9 +5191,12 @@ function maombiKwaTawiLangu(){
 }
 function renderMaombiStockTawi(containerId,aina_chanzo){
   const tb=$(containerId);if(!tb)return;
-  const list=maombiKwaTawiLangu().filter(m=>m.aina_chanzo===aina_chanzo);
   const wrap=tb.closest('.section');
-  if(wrap)wrap.style.display=(list.length||['gm','deski','petroli'].includes(userRole))?'':'none';
+  // GM and Cashier are view-only here — approving/rejecting stock requests is
+  // the branch's/station's own job, not something to action from an overview.
+  if(userRole==='gm'||userRole==='cashier'){if(wrap)wrap.style.display='none';return;}
+  const list=maombiKwaTawiLangu().filter(m=>m.aina_chanzo===aina_chanzo);
+  if(wrap)wrap.style.display=(list.length||['deski','petroli'].includes(userRole))?'':'none';
   tb.innerHTML=list.length?list.map(m=>{
     const bidhaaTxt=aina_chanzo==='Bidhaa'?`${escH(m.jina)} x${m.idadi} ${m.kipimo||'pc'}`:`${m.aina} — ${Number(m.lita).toFixed(2)} L`;
     return `<tr><td>${(m.created_at||'').slice(0,10)}</td>${viewingTawi==='yote'?`<td>${BRANCHES[m.tawi]||m.tawi}</td>`:''}<td><strong>${escH(m.mteja)}</strong>${m.mradi?`<br><span style="font-size:11px;color:var(--a-muted);">${escH(m.mradi)}</span>`:''}</td><td>${bidhaaTxt}</td><td>${pesa(m.bei_serikali)}</td><td class="num"><strong>${pesa(m.jumla)}</strong></td><td>${m.aina_malipo}</td><td style="display:flex;gap:4px;flex-wrap:wrap;"><button class="btn sm gold" onclick="thibitishaMaombiStock('${m.id}')">✔ Thibitisha</button><button class="btn sm danger" onclick="kataaMaombiStockUI('${m.id}')">✖ Kataa</button></td></tr>`;
@@ -4915,6 +5230,9 @@ async function kataaMaombiStock(id,sababu){
 // The Serikali officer's own view of what they've asked for and its status.
 function renderMaombiSerikaliYangu(containerId,aina_chanzo){
   const tb=$(containerId);if(!tb)return;
+  const wrap=tb.closest('.section');
+  if(userRole==='gm'||userRole==='cashier'){if(wrap)wrap.style.display='none';return;}
+  if(wrap)wrap.style.display='';
   const mine=allMaombiStock.filter(m=>m.aina_chanzo===aina_chanzo&&m.omba_na);
   const byKundi={};
   mine.forEach(m=>{(byKundi[m.kundi_id]=byKundi[m.kundi_id]||[]).push(m);});
@@ -4931,7 +5249,7 @@ function renderMaombiSerikaliYangu(containerId,aina_chanzo){
   }).join(''):safuTupu(5,'Bado hujatuma ombi lolote.');
 }
 
-function renderAll(){renderDashibodi();renderMaagizo();renderManunuzi();renderMauzo();renderUhamisho();renderUhamishoSent();renderGharama();renderStock();renderWateja();renderWanunuzi();renderRipoti();renderKilaSiku();renderGrid(curFilter);renderMafuta();renderFomuTransfer();renderInvoiceInProgress();renderOmbiInProgress();renderMarekebisho();renderSerikali();renderSerikaliMafuta();renderWatejaSerikali();renderMaombiStockTawi('tbody-maombi-stock-mauzo','Bidhaa');renderMaombiStockTawi('tbody-maombi-stock-mafuta','Mafuta');renderMaombiSerikaliYangu('tbody-skm-maombi-yangu','Mafuta');renderMaombiSerikaliYangu('tbody-sk-maombi-yangu','Bidhaa');}
+function renderAll(){renderDashibodi();renderMaagizo();renderManunuzi();renderMauzo();renderUhamisho();renderUhamishoSent();renderGharama();renderStock();renderWateja();renderWanunuzi();renderRipoti();renderKilaSiku();renderGrid(curFilter);renderMafuta();renderFomuTransfer();renderFomuManunuzi();renderBinCardSuggestions();renderInvoiceInProgress();renderOmbiInProgress();renderMarekebisho();renderSerikali();renderSerikaliMafuta();renderWatejaSerikali();renderMaombiStockTawi('tbody-maombi-stock-mauzo','Bidhaa');renderMaombiStockTawi('tbody-maombi-stock-mafuta','Mafuta');renderMaombiSerikaliYangu('tbody-skm-maombi-yangu','Mafuta');renderMaombiSerikaliYangu('tbody-sk-maombi-yangu','Bidhaa');}
 
 /* ─── WANUNUZI — broadcast ─── */
 async function ongezaMteja(){
@@ -5028,11 +5346,12 @@ async function tumaBroadcast(){
 }
 
 /* ─── INIT ─── */
-if(!history.state)history.replaceState({type:'store'},'','#store');
+// No history.pushState/replaceState anywhere in this file anymore (see the
+// note by openSheet/closeSheet above) — nothing left here that file:// can break.
 populateAllBranchSelects();
 populateStoreBranchSelect();
 populateMafutaTawiSelects();
-initStore();
+// initStore(); — storefront disabled: its own startup code no longer runs at all
 tryRestoreSession();
 updateOfflineBanner();
 </script>
