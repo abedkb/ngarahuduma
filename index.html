@@ -588,6 +588,22 @@ body.mauzo-officer .col-gharama{display:none !important;}
 /* cells in a table that the system calculates */
 .grid-entry td.g-jumla,.grid-entry td.g-bei,.grid-entry td.g-lita,.grid-entry td.g-kiasi{background:#F1EFE9;color:#5F5A4E;font-family:'IBM Plex Mono',monospace;font-weight:700;text-align:right;box-shadow:inset 0 0 0 1px #D5D0C4;}
 .oto-lebo{display:block;font-size:8.5px;font-weight:700;letter-spacing:.08em;color:#98A0B5;margin-top:1px;}
+/* ── DAILY SALES REPORT FORM: the layout of the paper form ── */
+.ds-tbl{width:100%;border-collapse:collapse;table-layout:fixed;border:2px solid #1d1d1d;font-family:Arial,Helvetica,sans-serif;color:#111;margin:0;}
+.ds-tbl td,.ds-tbl th{border:1.5px solid #1d1d1d;padding:1px 5px;height:6.3mm;font-size:12px;vertical-align:middle;overflow:hidden;}
+.ds-tbl .ds-firma{color:#B3203F;font-family:"Times New Roman",Times,serif;font-weight:700;font-size:22px;text-align:center;height:10mm;letter-spacing:.3px;}
+.ds-tbl .ds-kichwa{color:#2B4C8C;font-family:"Times New Roman",Times,serif;font-weight:700;font-size:20px;text-align:center;height:9mm;letter-spacing:.3px;}
+.ds-tbl .ds-lebo{font-family:"Times New Roman",Times,serif;font-weight:700;font-size:12px;text-align:center;text-decoration:underline;letter-spacing:.4px;}
+.ds-tbl th{font-family:"Times New Roman",Times,serif;font-weight:700;font-size:12.5px;text-align:center;letter-spacing:.4px;background:transparent;}
+.ds-tbl .ds-jina-la-keeper{font-size:14px;font-weight:700;text-align:center;}
+.ds-tbl .ds-nembo{text-align:center;padding:2px;}
+.ds-tbl .ds-nembo .inv-logo{width:36mm;height:22mm;}
+.ds-tbl .sn{text-align:center;font-size:11px;}
+.ds-tbl .num{text-align:right;font-variant-numeric:tabular-nums;}
+.ds-tbl .ds-mid{text-align:center;}
+.ds-tbl .ds-jumla{font-weight:700;font-size:13px;}
+.ds-tbl .ds-jumla-kubwa{font-weight:700;font-size:15px;height:9mm;}
+.ds-tbl td.ds-tupu-kulia{background:transparent;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
@@ -1636,8 +1652,19 @@ body.mauzo-officer .col-gharama{display:none !important;}
          the branch switcher); Front Desk Officers automatically see only
          their own branch, same as everywhere else in the system. -->
     <section id="fomu" class="page">
-      <div class="topbar"><div class="topbar-left"><h2>Fomu</h2><p>Fomu za kuchapisha — Transfer, Purchase, Bin Card, Monthly Closing, Discount, Malipo ya Benki na Cash Expenditure.</p></div></div>
-      <div class="section"><div class="section-header"><h3>🔄 Fomu za Transfer</h3></div>
+      <div class="topbar"><div class="topbar-left"><h2>Fomu</h2><p>Fomu za kuchapisha — Daily Sales Report, Transfer, Purchase, Bin Card, Monthly Closing, Discount, Malipo ya Benki na Cash Expenditure.</p></div></div>
+      <div class="section"><div class="section-header"><h3>📊 Daily Sales Report Form</h3></div>
+    <div class="section-body">
+      <div id="notifyDaily" class="notify"></div>
+      <p style="font-size:12.5px;color:var(--a-muted);margin-bottom:10px;">Fomu ya kila siku ya mauzo — inajaza yenyewe mauzo ya tawi ulilochagua (juu kushoto) kwa tarehe uliyochagua: mauzo ya papo hapo, mauzo ya oda, na bidhaa zenye punguzo.</p>
+      <div class="form-grid">
+        <div class="field"><label>Tarehe ya Mauzo</label><input type="date" id="ds-tarehe"/></div>
+        <div class="field"><label>Jina la Store Keeper</label><input type="text" id="ds-jina-mweka-stoo" autocomplete="off" placeholder="Jina lako kamili"/></div>
+      </div>
+      <div class="controls"><button class="btn gold" onclick="generateDailySalesForm()">🖨 Tengeneza Fomu</button></div>
+    </div>
+  </div>
+  <div class="section"><div class="section-header"><h3>🔄 Fomu za Transfer</h3></div>
         <div class="section-body"><div class="table-wrap"><table>
           <thead><tr><th>Tarehe</th><th>Bidhaa</th><th>Kutoka</th><th>Kwenda</th><th>Hali</th><th>Fomu</th></tr></thead>
           <tbody id="tbody-fomu-transfer"><tr class="loading-row"><td colspan="6">Inapakia...</td></tr></tbody>
@@ -2183,6 +2210,19 @@ body.mauzo-officer .col-gharama{display:none !important;}
     <div class="inv-print-btn" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
       <button class="fomu-btn primary" onclick="chapishaFomu()">🖨 Chapisha / Print</button>
       <button class="fomu-btn secondary" onclick="pakuaFomu()">⬇️ Pakua</button>
+      <button class="fomu-btn secondary" onclick="shirikiFomu()">📤 Shiriki (WhatsApp)</button>
+    </div>
+  </div>
+</div>
+
+<!-- DAILY SALES REPORT FORM -->
+<div class="inv-overlay" id="dsOverlay">
+  <div class="inv-sheet ds-sheet">
+    <button class="inv-close" onclick="closeSheet('dsOverlay')">&times;</button>
+    <div id="dsBody"></div>
+    <div class="inv-print-btn" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="fomu-btn primary" onclick="chapishaFomu()">🖨 Chapisha / Print</button>
+      <button class="fomu-btn secondary" onclick="pakuaFomu()">⬇️ Pakua (PDF)</button>
       <button class="fomu-btn secondary" onclick="shirikiFomu()">📤 Shiriki (WhatsApp)</button>
     </div>
   </div>
@@ -3265,7 +3305,7 @@ function applyRoleUI(){
   document.querySelectorAll('.a-tab-btn[data-page="serikali"] .t-label').forEach(l=>l.textContent=skTab);
   { const st=$('stmtSection');if(st)st.style.display=(userRole==='serikali_mafuta'||userRole==='gm')?'':'none'; }   // Fuad prepares the monthly statements; the GM can view them
   // Branch officers no longer type their own name anywhere — it comes from their account
-  ['t-jina-muhusika','uh-jina-muombaji','mc-jina-mweka-stoo','dc-jina-mweka-stoo','bp-jina-mweka-stoo'].forEach(id=>{
+  ['t-jina-muhusika','uh-jina-muombaji','mc-jina-mweka-stoo','dc-jina-mweka-stoo','bp-jina-mweka-stoo','ds-jina-mweka-stoo'].forEach(id=>{
     const el=$(id),f=el&&el.closest('.field');if(f)f.style.display=myOfficerName()?'none':'';
   });
   gmReadOnly=(userRole==='gm'||userRole==='cashier'); // Cashier is view-only too
@@ -3456,7 +3496,7 @@ function arifu(id,msg,type){const el=$(id);if(!el)return;el.textContent=msg;el.c
 function safuTupu(cols,msg){return`<tr><td colspan="${cols}" class="empty-state"><div class="icon">📭</div>${msg}</td></tr>`;}
 function setDefaultDates(){
   const today=leoISO();
-  ['t-tarehe','g-tarehe','mapato-tarehe','mk-tarehe','bs-tarehe','m-tarehe','uh-tarehe','mf-m-tarehe','mf-p-tarehe','sk-tarehe'].forEach(id=>{const el=$(id);if(el)el.value=today;});
+  ['t-tarehe','g-tarehe','mapato-tarehe','mk-tarehe','bs-tarehe','ds-tarehe','m-tarehe','uh-tarehe','mf-m-tarehe','mf-p-tarehe','sk-tarehe'].forEach(id=>{const el=$(id);if(el)el.value=today;});
   if($('filter-mauzo-tarehe')&&!$('filter-mauzo-tarehe').value)$('filter-mauzo-tarehe').value=today;
   if($('mz-kuanzia')&&!$('mz-kuanzia').value)$('mz-kuanzia').value=today;
   if($('mz-hadi')&&!$('mz-hadi').value)$('mz-hadi').value=today;
@@ -7715,6 +7755,57 @@ function fungaCashExpFomu(){
   const k=$('fm-mz-kuanzia').value,h=$('fm-mz-hadi').value,k0=$('mz-kuanzia').value,h0=$('mz-hadi').value;
   $('mz-kuanzia').value=k;$('mz-hadi').value=h;
   try{chapishaMatumiziRipoti();}finally{$('mz-kuanzia').value=k0;$('mz-hadi').value=h0;}
+}
+// ═══════════════════════════════════════════════════════════════════════════
+// DAILY SALES REPORT FORM — the paper form, filled in from the day's sales of one branch.
+//   · the table lists the sales PAID AT ONCE (cash, NMB, CRDB, Lipa Namba) → TOTAL CASH AMOUNT
+//   · TOTAL ORDER SALES = the rest of the day's sales: sales on credit (Deni) and sales that came through an order
+//     (online store, government, transfer)
+//   · TOTAL DAILY SALES = both together = every confirmed sale of the day (the same figure as the dashboard)
+//   · Discounted Products = the day's sales that carried a discount (the amounts above are already AFTER the discount)
+// ═══════════════════════════════════════════════════════════════════════════
+const niMauzoYaOda=(s)=>s.aina==='Mkopo'||['Duka','Bidhaa','Transfer'].includes(s.chanzo);
+function tarehePangoFomu(iso){const [y,m,d]=String(iso).split('-');return `${d} / ${m} / ${y}`;}
+function htmlYaDailySales(d){
+  const MIN_MAUZO=20,MIN_PUNGUZO=5;
+  const mauzoRows=d.pesa.map((s,i)=>`<tr><td class="sn">${i+1}</td><td>${escH(s.jina)}${s.njia_ya_malipo==='Bank'&&s.benki?` <span style="font-size:10px;color:#555;">(${escH(s.benki)})</span>`:''}</td><td class="ds-mid">${escH(s.kipimo||'pc')}</td><td class="ds-mid">${s.idadi}</td><td class="num">${fmt0(Number(s.bei_kuuzia)||0)}</td><td class="num">${fmt0(Number(s.jumla)||0)}</td></tr>`);
+  for(let i=d.pesa.length;i<MIN_MAUZO;i++)mauzoRows.push(`<tr><td class="sn">${i+1}</td><td></td><td></td><td></td><td></td><td></td></tr>`);
+  const punguzoRows=d.punguzo.map((s,i)=>`<tr><td class="sn">${i+1}</td><td>${escH(s.mteja||'—')}</td><td colspan="3">${escH(s.jina)} × ${s.idadi}</td><td class="num">${fmt0(Number(s.punguzo)||0)}</td></tr>`);
+  for(let i=d.punguzo.length;i<MIN_PUNGUZO;i++)punguzoRows.push(`<tr><td class="sn">${i+1}</td><td></td><td colspan="3"></td><td></td></tr>`);
+  const T=(n)=>`TSh ${fmt0(n)}`;
+  return `<table class="ds-tbl"><colgroup><col style="width:7%"><col style="width:37%"><col style="width:8%"><col style="width:9%"><col style="width:16%"><col style="width:23%"></colgroup><tbody>
+    <tr><td colspan="6" class="ds-firma">..NGARA HUDUMA COMPANY LIMITED..</td></tr>
+    <tr><td style="height:15mm;"></td><td colspan="4" style="height:15mm;vertical-align:top;"><div class="ds-lebo">NAME OF STORE KEEPER.</div><div class="ds-jina-la-keeper">${escH(d.keeper)}</div></td><td rowspan="2" class="ds-nembo"><div class="inv-logo"></div><div style="font-size:10px;color:#555;margin-top:2px;">${escH(d.tawiJina)}</div></td></tr>
+    <tr><td colspan="4" style="font-weight:700;font-size:14px;">DATE: ${tarehePangoFomu(d.tarehe)}</td><td></td></tr>
+    <tr><td colspan="6" class="ds-kichwa">.....DAILY SALES REPORT FORM ......</td></tr>
+    <tr><th>S/N</th><th>PARTICULAR</th><th>UNIT</th><th>QTY</th><th>RATE</th><th>AMOUNT</th></tr>
+    ${mauzoRows.join('')}
+    <tr><td></td><td class="ds-jumla">TOTAL CASH AMOUNT</td><td></td><td></td><td colspan="2" class="num ds-jumla">${T(d.jumlaPesa)}</td></tr>
+    <tr><td rowspan="2"></td><td colspan="3" class="ds-jumla" style="text-align:center;height:8mm;">TOTAL ORDER SALES</td><td colspan="2" class="num ds-jumla">${T(d.jumlaOda)}</td></tr>
+    <tr><td colspan="4" class="ds-jumla" style="text-align:center;">DISCOUNTED PRODUCTS</td><td></td></tr>
+    <tr><th style="height:9mm;">S/N</th><th>NAME OF CUSTOMER</th><th colspan="3">PRODUCT PURCHASED</th><th>AMOUNT DISCOUNTED</th></tr>
+    ${punguzoRows.join('')}
+    <tr><td></td><td class="ds-jumla">TOTAL AMOUNT</td><td colspan="3"></td><td class="num ds-jumla">${T(d.jumlaPunguzo)}</td></tr>
+    <tr><td></td><td colspan="3" class="ds-jumla-kubwa">TOTAL DAILY SALES</td><td colspan="2" class="num ds-jumla-kubwa">${T(d.jumlaYote)}</td></tr>
+  </tbody></table>
+`;
+}
+function generateDailySalesForm(){
+  const tawi=viewingTawi;
+  if(!tawi||tawi==='yote'){arifu('notifyDaily','❌ Chagua tawi mahususi (juu kushoto) kwanza.','error');return;}
+  const tarehe=$('ds-tarehe').value||leoISO();
+  const keeper=myOfficerName()||$('ds-jina-mweka-stoo').value.trim()||officerOf(tawi);
+  if(!keeper){arifu('notifyDaily','❌ Weka jina la store keeper.','error');return;}
+  const siku=confirmedMauzo().filter(s=>s.tawi===tawi&&s.tarehe===tarehe&&!s._pending).sort((a,b)=>String(a.created_at||'').localeCompare(String(b.created_at||'')));
+  const pesa_=siku.filter(s=>!niMauzoYaOda(s)),oda=siku.filter(niMauzoYaOda),punguzo=siku.filter(s=>(Number(s.punguzo)||0)>0);
+  const jm=(a)=>a.reduce((x,s)=>x+(Number(s.jumla)||0),0);
+  const d={tarehe,tawiJina:BRANCHES[tawi]||tawi,keeper,pesa:pesa_,punguzo,jumlaPesa:jm(pesa_),jumlaOda:jm(oda),jumlaPunguzo:punguzo.reduce((x,s)=>x+(Number(s.punguzo)||0),0)};
+  d.jumlaYote=d.jumlaPesa+d.jumlaOda;
+  $('dsBody').innerHTML=htmlYaDailySales(d);
+  $('dsOverlay').dataset.jina='daily-sales-report-form-'+tarehe+'-'+tawi;
+  setWaPhone('dsOverlay',ADMIN_PHONE);
+  $('notifyDaily').className='notify';
+  openSheet('dsOverlay');
 }
 // ── Buttons that SAVE lock the moment they are pressed and say "⏳ Subiri...", so a slow connection never invites a second tap.
 // A second press while the first is still working is ignored. (Pressing again after it finished is a new save — the
