@@ -1838,12 +1838,12 @@ body.mauzo-officer .col-gharama{display:none !important;}
             <h4 style="margin:0 0 4px;font-size:14px;">💳 Njia ya Malipo — mauzo ya leo yalilipwaje?</h4>
             <p style="font-size:12px;color:var(--a-muted);margin:0 0 10px;">Weka kiasi kilicholipwa kwa NMB, CRDB na Lipa Namba. Lita za Order (ulizoandika kwenye mikono) <strong>hazihesabiwi</strong> kama fedha taslimu iliyopokelewa. Cash inahesabiwa yenyewe: kiasi kinachotarajiwa − njia zingine.</p>
             <div class="form-grid">
-              <div class="field"><label>NMB (TZS)</label><input type="number" id="mf-njia-nmb" min="0" placeholder="0" oninput="hesabuGridMafuta()"/></div>
-              <div class="field"><label>CRDB (TZS)</label><input type="number" id="mf-njia-crdb" min="0" placeholder="0" oninput="hesabuGridMafuta()"/></div>
-              <div class="field"><label>Lipa Namba (TZS)</label><input type="number" id="mf-njia-lipa" min="0" placeholder="0" oninput="hesabuGridMafuta()"/></div>
+              <div class="field"><label>NMB (TZS)</label><input type="number" step="0.01" id="mf-njia-nmb" min="0" placeholder="0" oninput="hesabuGridMafuta()"/></div>
+              <div class="field"><label>CRDB (TZS)</label><input type="number" step="0.01" id="mf-njia-crdb" min="0" placeholder="0" oninput="hesabuGridMafuta()"/></div>
+              <div class="field"><label>Lipa Namba (TZS)</label><input type="number" step="0.01" id="mf-njia-lipa" min="0" placeholder="0" oninput="hesabuGridMafuta()"/></div>
               <div class="field"><label>Order — thamani ya lita za Order (TZS)</label><input type="number" id="mf-njia-deni" readonly placeholder="auto"/><div id="mfOdaMsaada" style="font-size:11.5px;color:var(--a-muted);margin-top:4px;"></div></div>
               <div class="field"><label>Cash / Taslimu Inayotarajiwa (TZS)</label><input type="number" id="mf-njia-cash" readonly placeholder="auto"/></div>
-              <div class="field"><label>Cash Halisi Aliyowasilisha (TZS)</label><input type="number" id="mf-m-wasilisho" placeholder="fedha taslimu halisi aliyoleta" oninput="hesabuGridMafuta()"/></div>
+              <div class="field"><label>Cash Halisi Aliyowasilisha (TZS)</label><input type="number" step="0.01" id="mf-m-wasilisho" placeholder="fedha taslimu halisi aliyoleta" oninput="hesabuGridMafuta()"/></div>
             </div>
           </div>
           <div id="mfMikonoErrors" class="grid-errors"></div>
@@ -2848,6 +2848,10 @@ const DB={
 
 function $(id){return document.getElementById(id);}
 function pesa(n){return new Intl.NumberFormat('en-TZ',{style:'currency',currency:'TZS',maximumFractionDigits:0}).format(n||0);}
+// Money to the cent: 267,283.88 is shown as it is (whole amounts have no decimals)
+const round2=(n)=>Math.round((Number(n)||0)*100)/100;
+function pesa2(n){const v=round2(n);return new Intl.NumberFormat('en-TZ',{style:'currency',currency:'TZS',minimumFractionDigits:Number.isInteger(v)?0:2,maximumFractionDigits:2}).format(v);}
+const tofautiSafi=(t)=>Math.abs(t)<0.005?0:round2(t);      // a difference smaller than half a cent is no difference
 function isoYaMtaa(d){const z=(n)=>String(n).padStart(2,'0');return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`;}      // a date as YYYY-MM-DD in the LOCAL calendar (toISOString() gives the UTC day: yesterday until 03:00 in Tanzania)
 function leoISO(){return isoYaMtaa(new Date());}      // the local date: between midnight and 3 a.m. in Tanzania the UTC date is still yesterday
 function toast(msg){tangazaKati(msg);}      // shown in the middle of the screen, like every other message
@@ -4540,10 +4544,10 @@ function renderMafuta(){
   }
   tbM.innerHTML=salesList.length?salesList.map(r=>{
     const actions=(r._pending||userRole==='petroli_mauzo')?(r._pending?'<span style="color:var(--a-muted);font-size:11px;">Inasubiri</span>':'—'):`<button class="btn sm danger" onclick="futaMafutaMauzo('${r.id}')">Futa</button>`;
-    const tofauti=(r.kiasi_kilichowasilishwa==null)?null:(r.kiasi_kilichowasilishwa-cashInayotarajiwa(r));
-    const tofautiHtml=tofauti===null?'—':`<strong style="color:${tofauti<0?'var(--a-red)':'var(--a-green)'}">${tofauti<0?'-':''}${pesa(Math.abs(tofauti))}</strong>`;
-    return`<tr><td>${r._pending?'⏳ ':''}${r.tarehe}</td><td>${BRANCHES[r.tawi]||r.tawi}</td><td>${r.pampu?'P'+r.pampu+(r.mkono?' · M'+r.mkono:''):'—'}</td><td>${r.muuzaji||'—'}</td><td>${r.aina}</td><td class="num">${Number(r.lita).toFixed(2)}</td><td class="num" style="color:#E8A33D">${litaOdaYaSafu(r)>0.004?litaOdaYaSafu(r).toFixed(2):'—'}</td><td class="num">${pesa(r.bei_kwa_lita)}</td><td class="num"><strong>${pesa(kiasiBaadaYaOrder(r))}</strong></td><td class="num">${r.kiasi_kilichowasilishwa==null?'—':pesa(r.kiasi_kilichowasilishwa)}</td><td class="num">${tofautiHtml}</td><td>${actions}</td></tr>`;
-  }).join('')+(()=>{const ok=salesList.filter(r=>!r._pending),l=ok.reduce((a,r)=>a+(r.lita||0),0),lo=ok.reduce((a,r)=>a+litaOdaYaSafu(r),0),j=ok.reduce((a,r)=>a+kiasiBaadaYaOrder(r),0),w=ok.filter(r=>r.kiasi_kilichowasilishwa!=null),wj=w.reduce((a,r)=>a+r.kiasi_kilichowasilishwa,0),t=wj-w.reduce((a,r)=>a+cashInayotarajiwa(r),0);return`<tr style="background:rgba(255,138,87,0.10);font-weight:700;"><td colspan="5">JUMLA (${ok.length})</td><td class="num">${l.toFixed(2)}</td><td class="num" style="color:#E8A33D">${lo>0.004?lo.toFixed(2):'—'}</td><td></td><td class="num">${pesa(j)}</td><td class="num">${w.length?pesa(wj):'—'}</td><td class="num">${w.length?(t<0?'-':'')+pesa(Math.abs(t)):'—'}</td><td></td></tr><tr><td colspan="12" style="font-size:12.5px;">${htmlYaNjia(njiaMuhtasari(ok))}${(()=>{const g=ugawanyoWaMafuta(viewingTawi||'yote',()=>true);return g.litaOda>0?`<br>🏛 <strong>Lita za Order zilizo ndani ya lita zote:</strong> ${g.litaOda.toFixed(1)} L (${pesa(g.jumlaOda)}) — hazijalipwa bado, kwa hiyo zimeondolewa kwenye "Cash Inayotarajiwa".${g.litaZisizogawiwa>0?`<br>⚠ Lita ${g.litaZisizogawiwa.toFixed(1)} L za Order zimerekodiwa lakini hazijaandikwa kwenye mkono wowote.`:''}`:'';})()}</td></tr>`;})():safuTupu(12,'Bado hakuna mauzo ya mafuta.');
+    const tofauti=(r.kiasi_kilichowasilishwa==null)?null:tofautiSafi(r.kiasi_kilichowasilishwa-cashInayotarajiwa(r));
+    const tofautiHtml=tofauti===null?'—':`<strong style="color:${tofauti<0?'var(--a-red)':'var(--a-green)'}">${tofauti<0?'-':(tofauti>0?'+':'')}${pesa2(Math.abs(tofauti))}</strong>`;
+    return`<tr><td>${r._pending?'⏳ ':''}${r.tarehe}</td><td>${BRANCHES[r.tawi]||r.tawi}</td><td>${r.pampu?'P'+r.pampu+(r.mkono?' · M'+r.mkono:''):'—'}</td><td>${r.muuzaji||'—'}</td><td>${r.aina}</td><td class="num">${Number(r.lita).toFixed(2)}</td><td class="num" style="color:#E8A33D">${litaOdaYaSafu(r)>0.004?litaOdaYaSafu(r).toFixed(2):'—'}</td><td class="num">${pesa(r.bei_kwa_lita)}</td><td class="num"><strong>${pesa2(kiasiBaadaYaOrder(r))}</strong></td><td class="num">${r.kiasi_kilichowasilishwa==null?'—':pesa2(r.kiasi_kilichowasilishwa)}</td><td class="num">${tofautiHtml}</td><td>${actions}</td></tr>`;
+  }).join('')+(()=>{const ok=salesList.filter(r=>!r._pending),l=ok.reduce((a,r)=>a+(r.lita||0),0),lo=ok.reduce((a,r)=>a+litaOdaYaSafu(r),0),j=ok.reduce((a,r)=>a+kiasiBaadaYaOrder(r),0),w=ok.filter(r=>r.kiasi_kilichowasilishwa!=null),wj=round2(w.reduce((a,r)=>a+Number(r.kiasi_kilichowasilishwa),0)),t=tofautiSafi(wj-w.reduce((a,r)=>a+cashInayotarajiwa(r),0));return`<tr style="background:rgba(255,138,87,0.10);font-weight:700;"><td colspan="5">JUMLA (${ok.length})</td><td class="num">${l.toFixed(2)}</td><td class="num" style="color:#E8A33D">${lo>0.004?lo.toFixed(2):'—'}</td><td></td><td class="num">${pesa2(j)}</td><td class="num">${w.length?pesa2(wj):'—'}</td><td class="num">${w.length?(t<0?'-':(t>0?'+':''))+pesa2(Math.abs(t)):'—'}</td><td></td></tr><tr><td colspan="12" style="font-size:12.5px;">${htmlYaNjia(njiaMuhtasari(ok))}${(()=>{const g=ugawanyoWaMafuta(viewingTawi||'yote',()=>true);return g.litaOda>0?`<br>🏛 <strong>Lita za Order zilizo ndani ya lita zote:</strong> ${g.litaOda.toFixed(1)} L (${pesa(g.jumlaOda)}) — hazijalipwa bado, kwa hiyo zimeondolewa kwenye "Cash Inayotarajiwa".${g.litaZisizogawiwa>0?`<br>⚠ Lita ${g.litaZisizogawiwa.toFixed(1)} L za Order zimerekodiwa lakini hazijaandikwa kwenye mkono wowote.`:''}`:'';})()}</td></tr>`;})():safuTupu(12,'Bado hakuna mauzo ya mafuta.');
   tbP.innerHTML=purchList.length?purchList.map(r=>{
     const actions=r._pending?'<span style="color:var(--a-muted);font-size:11px;">Inasubiri</span>':`<button class="btn sm danger" onclick="futaMafutaManunuzi('${r.id}')">Futa</button>`;
     return`<tr><td>${r._pending?'⏳ ':''}${r.tarehe}</td><td>${BRANCHES[r.tawi]||r.tawi}</td><td>${r.aina}</td><td class="num">${Number(r.lita).toFixed(2)}</td><td class="num">${pesa(r.bei_kwa_lita)}</td><td class="num"><strong>${pesa(r.jumla)}</strong></td><td>${r.msambazaji}</td><td>${actions}</td></tr>`;
@@ -4623,6 +4627,14 @@ function thibitishaSiyoDuplicate(msg,orodha,mgumu){
 //   mechi  = descriptions of records ALREADY IN THE SYSTEM that look the same (any day, any phone, any person)
 //   mgumu  = true when it can only be a repeat: then it cannot be saved again at all
 // Returns true = go ahead and save, false = stop.
+// A warning with two choices: accept (true) or reject (false) — for figures that may simply be an approximation.
+async function thibitishaTofauti(kichwa,ujumbe,orodha,kubali,kataa){
+  const jibu=thibitishaSiyoDuplicate(ujumbe,orodha,false);
+  $('dupKichwa').textContent=kichwa;$('dupConfirmBtn').textContent=kubali;$('dupCancelBtn').textContent=kataa;
+  const v=await jibu;
+  $('dupConfirmBtn').textContent='Ndiyo, Hifadhi Tena';$('dupCancelBtn').textContent='Ghairi';
+  return v;
+}
 async function pitaUkaguziDuplicate(formKey,obj,msg,mechi,mgumu){
   if(mechi&&mechi.length){
     return await thibitishaSiyoDuplicate(mgumu?'Rekodi hii tayari ipo kwenye mfumo, kwa hiyo haiwezi kuhifadhiwa mara ya pili. Kama ile ya zamani ina makosa, ifute kwanza (Futa), kisha uhifadhi hii.':'Rekodi inayofanana na hii tayari imehifadhiwa. Angalia kabla ya kuhifadhi tena — kuhifadhi mara mbili kunazidisha mauzo, hesabu na stock.',mechi,!!mgumu);
@@ -7278,15 +7290,17 @@ function kumbukaAinaYaMkono(sel){
 }
 const beiYaMafuta=(aina)=>parseFloat($('mf-bei-'+String(aina).toLowerCase()).value)||0;
 // HOW THE DAY WAS PAID: the four amounts typed in; cash is what is left. Only cash is expected to be handed in.
+// the value of ALL the litres of a record, to the cent (the database keeps only the whole-shilling figure in "jumla")
+const jumlaKamili=(r)=>{const l=Number(r.lita),b=Number(r.bei_kwa_lita);return(l>0&&b>0)?round2(l*b):(Number(r.jumla)||0);};
 const njiaZisizoCash=(r)=>(Number(r.njia_nmb)||0)+(Number(r.njia_crdb)||0)+(Number(r.njia_lipa)||0)+ordaYaSafu(r);      // NMB + CRDB + Lipa + the Order part (taken off by the system)
-const cashInayotarajiwa=(r)=>Math.max(0,(Number(r.jumla)||0)-njiaZisizoCash(r));
+const cashInayotarajiwa=(r)=>round2(Math.max(0,jumlaKamili(r)-njiaZisizoCash(r)));
 function njiaMuhtasari(rows){
   const s={jumla:0,nmb:0,crdb:0,lipa:0,deni:0};
   rows.forEach(r=>{s.jumla+=Number(r.jumla)||0;s.nmb+=Number(r.njia_nmb)||0;s.crdb+=Number(r.njia_crdb)||0;s.lipa+=Number(r.njia_lipa)||0;s.deni+=ordaYaSafu(r);});
   s.cash=Math.max(0,s.jumla-s.nmb-s.crdb-s.lipa-s.deni);return s;
 }
 const htmlYaNjia=(s)=>`💳 <strong>Njia za malipo:</strong> Cash <strong>${pesa(s.cash)}</strong> · NMB <strong>${pesa(s.nmb)}</strong> · CRDB <strong>${pesa(s.crdb)}</strong> · Lipa Namba <strong>${pesa(s.lipa)}</strong> · Order <strong style="color:var(--a-amber,#E8A33D)">${pesa(s.deni)}</strong>`;
-const njiaZaFomuYaMafuta=()=>{const g=(id)=>Math.max(0,parseInt($(id).value)||0);return{nmb:g('mf-njia-nmb'),crdb:g('mf-njia-crdb'),lipa:g('mf-njia-lipa'),deni:g('mf-njia-deni')};};
+const njiaZaFomuYaMafuta=()=>{const g=(id)=>Math.max(0,round2(parseFloat($(id).value)||0));return{nmb:g('mf-njia-nmb'),crdb:g('mf-njia-crdb'),lipa:g('mf-njia-lipa'),deni:g('mf-njia-deni')};};
 // The selling price of each fuel comes from the stocking: the "Bei ya Kuuza kwa Lita" the manager entered in Ununuzi wa Mafuta
 // (the latest purchase of that fuel at that station on or before the sales date). Only when a station has no purchase yet,
 // it falls back to the latest sale price. Order lines keep their own price in the Order tab.
@@ -7334,12 +7348,12 @@ function hesabuGridMafuta(){
   mistari.forEach(({tr,aina,l,a})=>{
     const odaE=tr.querySelector('.g-oda');if(l===0&&!odaE.dataset.mwenyewe&&!a)odaE.value='';
     const o=Math.max(0,parseFloat(odaE.value)||0),bei=beiYaMafuta(aina),zaidi=l>0&&o>l+0.0001,oHalali=Math.min(o,l),baada=l-oHalali;
-    const k=Math.round(baada*bei);
-    tr.querySelector('.g-lita').textContent=l?l.toFixed(2):'—';tr.querySelector('.g-kiasi').textContent=l?pesa(k):'—';
+    const k=round2(baada*bei);
+    tr.querySelector('.g-lita').textContent=l?l.toFixed(2):'—';tr.querySelector('.g-kiasi').textContent=l?pesa2(k):'—';
     tr.classList.toggle('g-err',zaidi);
-    lita+=l;litaOda+=oHalali;kiasi+=k;thamaniOda+=Math.round(oHalali*bei);kwaAina[aina]+=l;
+    lita+=l;litaOda+=oHalali;kiasi=round2(kiasi+k);thamaniOda=round2(thamaniOda+oHalali*bei);kwaAina[aina]+=l;
   });
-  $('mfJumlaLita').textContent=lita.toFixed(2);$('mfJumlaOda').textContent=litaOda.toFixed(2);$('mfJumlaKiasi').textContent=pesa(kiasi);
+  $('mfJumlaLita').textContent=lita.toFixed(2);$('mfJumlaOda').textContent=litaOda.toFixed(2);$('mfJumlaKiasi').textContent=pesa2(kiasi);
   $('mf-njia-deni').value=thamaniOda>0?thamaniOda:'';
   // a short note under the grid: which Order litres are still waiting for a mkono
   const hint=$('mfOdaHint'),maelezo=['Petroli','Dizeli'].filter(a=>bakiBila[a]>0).map(a=>`${a}: <strong>${bakiBila[a].toFixed(1)} L</strong>`);
@@ -7351,17 +7365,17 @@ function hesabuGridMafuta(){
     if(maelezo.length)sehemu.push(`🏛 Order zilizorekodiwa tarehe hii bila pampu/mkono na ambazo hazijaandikwa kwenye mkono wowote: ${maelezo.join(' · ')}.`+(nyingi.length?` Andika kwenye "Lita za Order" za mkono uliotoa mafuta hayo (${nyingi.join(', ')} — mikono zaidi ya mmoja inatumika).`:' Zimeandikwa kiotomatiki kwenye mkono unaotumika; unaweza kuzibadilisha.'));
     hint.style.display=sehemu.length?'block':'none';hint.innerHTML=sehemu.join('<br>');
   }
-  const nj=njiaZaFomuYaMafuta(),siyoCash=nj.nmb+nj.crdb+nj.lipa,cash=kiasi-siyoCash,zaidi=siyoCash>kiasi;
+  const nj=njiaZaFomuYaMafuta(),siyoCash=nj.nmb+nj.crdb+nj.lipa,cash=round2(kiasi-siyoCash),zaidi=siyoCash>kiasi+0.005;
   $('mf-njia-cash').value=(!zaidi&&kiasi>0)?cash:'';
   const msaada=$('mfOdaMsaada');if(msaada)msaada.textContent=litaOda>0?`${litaOda.toFixed(2)} L za Order × bei = thamani iliyoondolewa kwenye cash.`:'Hakuna lita za Order zilizoandikwa kwenye mikono.';
-  const w=parseInt($('mf-m-wasilisho').value),bx=$('mfJumlaMaelezo');
-  const tofauti=(Number.isFinite(w)&&!zaidi)?w-cash:null;
+  const wTxt=$('mf-m-wasilisho').value.trim(),w=wTxt===''?NaN:round2(parseFloat(wTxt)),bx=$('mfJumlaMaelezo');
+  const tofauti=(Number.isFinite(w)&&!zaidi)?tofautiSafi(w-cash):null;
   bx.innerHTML=`Petroli: <strong>${kwaAina.Petroli.toFixed(2)} L</strong> · Dizeli: <strong>${kwaAina.Dizeli.toFixed(2)} L</strong> · Lita Zilizouzwa: <strong>${lita.toFixed(2)} L</strong>`
     +(litaOda>0?` − Lita za Order: <strong style="color:#E8A33D">${litaOda.toFixed(2)} L</strong> = Lita Zilizobaki: <strong>${(lita-litaOda).toFixed(2)} L</strong>`:'')
-    +` · Kiasi Kinachotarajiwa: <strong style="color:var(--a-rg);font-size:15px;">${pesa(kiasi)}</strong>`
-    +(siyoCash>0?` · Siyo-cash (NMB+CRDB+Lipa): <strong>${pesa(siyoCash)}</strong>`:'')
-    +(zaidi?` · <strong style="color:var(--a-red)">⚠ Njia za malipo (${pesa(siyoCash)}) zinazidi kiasi kinachotarajiwa</strong>`:` · Cash Inayotarajiwa: <strong style="color:var(--a-green);font-size:15px;">${pesa(Math.max(0,cash))}</strong>`)
-    +(tofauti===null?'':` · Tofauti: <strong style="color:${tofauti<0?'var(--a-red)':'var(--a-green)'}">${tofauti<0?'-':''}${pesa(Math.abs(tofauti))}</strong>`);
+    +` · Kiasi Kinachotarajiwa: <strong style="color:var(--a-rg);font-size:15px;">${pesa2(kiasi)}</strong>`
+    +(siyoCash>0?` · Siyo-cash (NMB+CRDB+Lipa): <strong>${pesa2(siyoCash)}</strong>`:'')
+    +(zaidi?` · <strong style="color:var(--a-red)">⚠ Njia za malipo (${pesa2(siyoCash)}) zinazidi kiasi kinachotarajiwa — utaulizwa kukubali au kukataa wakati wa kuhifadhi</strong>`:` · Cash Inayotarajiwa: <strong style="color:var(--a-green);font-size:15px;">${pesa2(Math.max(0,cash))}</strong>`)
+    +(tofauti===null?'':` · Tofauti: <strong style="color:${tofauti<0?'var(--a-red)':'var(--a-green)'}">${tofauti<0?'-':(tofauti>0?'+':'')}${pesa2(Math.abs(tofauti))}</strong>${Math.abs(tofauti)>=1?' <span style="color:var(--a-muted);font-size:12px;">(utaulizwa kukubali au kukataa wakati wa kuhifadhi)</span>':''}`);
 }
 function safishaMafutaMauzo(){
   ['mf-m-wasilisho','mf-m-mfanyakazi','mf-njia-nmb','mf-njia-crdb','mf-njia-lipa','mf-njia-deni'].forEach(id=>{const el=$(id);if(el)el.value='';});
@@ -7370,6 +7384,8 @@ function safishaMafutaMauzo(){
   hesabuGridMafuta();onyeshaMakosaGrid('mfMikonoErrors','notifyMafutaMauzo',[]);
 }
 // splits the money handed in across the mikono in proportion to what each should bring (no rounding loss), so reports stay correct
+// share an amount out to the CENT (a whole-number sharer applied to cents)
+function gawaKwaSenti(uzito,jumla){return gawaKwaUwiano(uzito,Math.round(jumla*100)).map(x=>x/100);}
 function gawaKwaUwiano(thamani,jumla){
   const t=thamani.reduce((a,x)=>a+x,0);if(!t)return thamani.map(()=>0);
   const raw=thamani.map(x=>jumla*x/t),base=raw.map(Math.floor);let baki=jumla-base.reduce((a,x)=>a+x,0);
@@ -7396,23 +7412,44 @@ async function ongezaMafutaMauzo(){
     if(!(litaOda>=0))tatizo.push('Lita za Order si sahihi');
     else if(!tatizo.length&&litaOda>litaKutokaMita(awali,mwisho)+0.0001)tatizo.push(`Lita za Order (${litaOda}) haziwezi kuzidi lita zilizouzwa (${litaKutokaMita(awali,mwisho)})`);
     if(tatizo.length){tr.classList.add('g-err');makosa.push(`${lbl}: ${tatizo.join(', ')}`);return;}
-    const lita=litaKutokaMita(awali,mwisho),jumla=Math.round(lita*bei),thamaniOda=Math.round(litaOda*bei);
-    safu.push({p:tr.dataset.p,m:tr.dataset.m,aina,awali,mwisho,lita,bei,litaOda,thamaniOda,jumla,kiasi:Math.max(0,jumla-thamaniOda)});
+    const lita=litaKutokaMita(awali,mwisho),thamani=round2(lita*bei),thamaniOda=round2(litaOda*bei),jumla=Math.round(thamani);      // the database keeps the whole-shilling value; the expected amount is kept to the cent
+    safu.push({p:tr.dataset.p,m:tr.dataset.m,aina,awali,mwisho,lita,bei,litaOda,thamaniOda,jumla,kiasi:round2(Math.max(0,thamani-thamaniOda))});
   });
   onyeshaMakosaGrid('mfMikonoErrors','notifyMafutaMauzo',makosa);
   if(makosa.length)return;
   if(!safu.length){arifu('notifyMafutaMauzo','❌ Weka mita za angalau mkono mmoja.','error');return;}
-  const njia=njiaZaFomuYaMafuta(),kiasiKinachotarajiwa=safu.reduce((a,s)=>a+s.kiasi,0);
-  if(njia.nmb+njia.crdb+njia.lipa>kiasiKinachotarajiwa){arifu('notifyMafutaMauzo',`❌ NMB + CRDB + Lipa Namba (${pesa(njia.nmb+njia.crdb+njia.lipa)}) zinazidi kiasi kinachotarajiwa baada ya lita za Order (${pesa(kiasiKinachotarajiwa)}). Angalia kiasi ulichoandika.`,'error');return;}
+  const njia=njiaZaFomuYaMafuta(),kiasiKinachotarajiwa=round2(safu.reduce((a,s)=>a+s.kiasi,0));
+  const siyoCashJ=round2(njia.nmb+njia.crdb+njia.lipa);
+  if(siyoCashJ>kiasiKinachotarajiwa+0.005){      // NMB + CRDB + Lipa more than expected: a warning, and she chooses
+    const ziada=round2(siyoCashJ-kiasiKinachotarajiwa);
+    if(!(await thibitishaTofauti('Malipo Yanazidi Yanayotarajiwa',`NMB + CRDB + Lipa Namba zinazidi kiasi kinachotarajiwa kwa ${pesa2(ziada)}. Kama ni kukadiria au kuzungusha (rounding) unaweza kukubali; kama ni kosa la kuandika, kataa kisha urekebishe.`,[`Kinachotarajiwa: ${pesa2(kiasiKinachotarajiwa)}`,`NMB + CRDB + Lipa: ${pesa2(siyoCashJ)}`,`Ziada: ${pesa2(ziada)}`],'✔ Kubali na Hifadhi','✖ Kataa — Nirekebishe')))return;
+  }
   // Who handed the money over. An attendant account is always itself; otherwise the name is typed.
   const mfanyakazi=userRole==='petroli_mauzo'?(myOfficerName()||''):jinaLaMfanyakazi($('mf-m-mfanyakazi').value);
   if(!mfanyakazi){arifu('notifyMafutaMauzo','❌ Weka jina la mfanyakazi aliyewasilisha fedha.','error');return;}
+  // The cash handed in, to the cent, against the cash expected. A difference of a shilling or more is a WARNING with two choices:
+  // accept (an approximation, e.g. rounding up) or reject (a mistake: go back and correct it). Under a shilling is rounding noise.
+  const wTxt=$('mf-m-wasilisho').value.trim(),wasilishoJumla=wTxt===''?NaN:round2(parseFloat(wTxt)),cashInayotarajiwaJ=round2(Math.max(0,kiasiKinachotarajiwa-siyoCashJ));
+  let tofautiIliyokubaliwa=0;
+  if(Number.isFinite(wasilishoJumla)){
+    const t=round2(wasilishoJumla-cashInayotarajiwaJ),ab=Math.abs(t),juu=t>0;
+    if(ab>=1){
+      const ndogo=ab<=1000&&(cashInayotarajiwaJ>0?ab/cashInayotarajiwaJ<=0.01:false);
+      const orodha=[`Kinachotarajiwa: ${pesa2(cashInayotarajiwaJ)}`,`Alichowasilisha: ${pesa2(wasilishoJumla)}`,`Tofauti: ${juu?'+':'−'}${pesa2(ab)}`];
+      const ujumbe=juu
+        ?(ndogo?`${mfanyakazi} amewasilisha ${pesa2(ab)} zaidi ya inavyotarajiwa. Inaonekana ni kukadiria (kuzungusha hadi nambari kamili) — unaweza kukubali. Kama amekosea kuandika, kataa kisha urekebishe.`
+               :`⚠ ${mfanyakazi} amewasilisha ${pesa2(ab)} zaidi ya inavyotarajiwa — tofauti hii ni kubwa kuliko kukadiria kwa kawaida. Hakikisha si kosa la kuandika (mfano nambari ya ziada) kabla ya kukubali.`)
+        :`${mfanyakazi} amewasilisha ${pesa2(ab)} pungufu ya inavyotarajiwa. Ukikubali, upungufu huu utarekodiwa dhidi yake. Kama amekosea kuandika, kataa kisha urekebishe.`;
+      if(!(await thibitishaTofauti(juu?'Cash Iliyowasilishwa Ni Zaidi':'Cash Iliyowasilishwa Ni Pungufu',ujumbe,orodha,'✔ Kubali na Hifadhi','✖ Kataa — Nirekebishe')))return;
+      tofautiIliyokubaliwa=t;
+    }
+  }
   const sahihi={tarehe,tawi,mfanyakazi,safu:safu.map(s=>`${s.p}${s.m}${s.aina}:${s.awali}>${s.mwisho}`).join(',')};
   if(!(await pitaUkaguziDuplicate('mafuta_mauzo',sahihi,`Umeshahifadhi mauzo ya mafuta ya ${mfanyakazi} (mikono ${safu.length}) kwenye kituo hiki hivi punde. Je, unataka kuhifadhi tena?`,mechiYaMafutaMauzo(tawi,tarehe,safu).laini,mechiYaMafutaMauzo(tawi,tarehe,safu).mgumu)))return;
   kumbukaHifadhi('mafuta_mauzo',sahihi);
   const uzito=safu.some(s=>s.kiasi>0)?safu.map(s=>s.kiasi):safu.map(s=>s.jumla);      // money is shared out by what each mkono should bring in (after its Order litres)
-  const wasilishoJumla=parseInt($('mf-m-wasilisho').value),sehemu=Number.isFinite(wasilishoJumla)?gawaKwaUwiano(uzito,wasilishoJumla):null;
-  const gawa=(v)=>v>0?gawaKwaUwiano(uzito,v):safu.map(()=>0),ngNmb=gawa(njia.nmb),ngCrdb=gawa(njia.crdb),ngLipa=gawa(njia.lipa);
+  const sehemu=Number.isFinite(wasilishoJumla)?gawaKwaSenti(uzito,wasilishoJumla):null;      // shared out to the cent, so the total stays exactly what she handed in
+  const gawa=(v)=>v>0?gawaKwaSenti(uzito,v):safu.map(()=>0),ngNmb=gawa(njia.nmb),ngCrdb=gawa(njia.crdb),ngLipa=gawa(njia.lipa);
   const data=safu.map((s,i)=>({tarehe,tawi,aina:s.aina,pampu:s.p,mkono:s.m,kusoma_awali:s.awali,kusoma_mwisho:s.mwisho,lita:s.lita,bei_kwa_lita:s.bei,jumla:s.jumla,muuzaji:mfanyakazi,kiasi_kilichowasilishwa:sehemu?sehemu[i]:null,njia_nmb:ngNmb[i],njia_crdb:ngCrdb[i],njia_lipa:ngLipa[i],lita_oda:s.litaOda,njia_deni:s.thamaniOda}));
   ['Petroli','Dizeli'].forEach(a=>{const v=beiYaMafuta(a);if(v)hifadhiLocal(`nh_bei_${tawi}_${a}`,String(v));});     // prices are remembered for next time
   const calls=[{op:'post',table:'mafuta_mauzo',data}];
@@ -7432,8 +7469,8 @@ async function ongezaMafutaMauzo(){
   }
   if(Array.isArray(results[0])&&kamataMabadilikoLocal('mafuta_mauzo',results[0]))panga();
   mwisho();
-  const kiasi=safu.reduce((a,s)=>a+s.kiasi,0),lita=data.reduce((a,r)=>a+r.lita,0),litaOdaJ=data.reduce((a,r)=>a+(r.lita_oda||0),0);
-  arifu('notifyMafutaMauzo',`✅ Mauzo ya mikono ${data.length} yamehifadhiwa — ${lita.toFixed(2)} L${litaOdaJ>0?` (Order ${litaOdaJ.toFixed(2)} L)`:''}, kiasi kinachotarajiwa ${pesa(kiasi)}.`,'success');
+  const kiasi=round2(safu.reduce((a,s)=>a+s.kiasi,0)),lita=data.reduce((a,r)=>a+r.lita,0),litaOdaJ=data.reduce((a,r)=>a+(r.lita_oda||0),0);
+  arifu('notifyMafutaMauzo',`✅ Mauzo ya mikono ${data.length} yamehifadhiwa — ${lita.toFixed(2)} L${litaOdaJ>0?` (Order ${litaOdaJ.toFixed(2)} L)`:''}, kiasi kinachotarajiwa ${pesa2(kiasi)}.${tofautiIliyokubaliwa?` Tofauti ya ${tofautiIliyokubaliwa>0?'+':'−'}${pesa2(Math.abs(tofautiIliyokubaliwa))} imekubaliwa.`:''}`,'success');
   loadAllBaada();
 }
 // ═══════════════════════════════════════════════════════════════════════════
@@ -8203,7 +8240,7 @@ function ramaniYaOrder(){      // per station and day: the Order amount, what th
   if(_ramaniOda.sig===sig&&_ramaniOda.m)return _ramaniOda.m;
   const m=new Map(),get=(k)=>{let d=m.get(k);if(!d){d={oda:0,litaOda:0,idadi:0,typed:0,litaRows:0,jumla:0,baki:0};m.set(k,d);}return d;};
   allSerikaliMafuta.filter(niOdaIsiyolipwa).forEach(r=>{const d=get(r.tawi+'|'+r.tarehe+'|'+r.aina);d.oda+=Number(r.jumla)||0;d.litaOda+=Number(r.lita)||0;d.idadi++;});
-  allMafutaMauzo.forEach(r=>{const d=get(r.tawi+'|'+r.tarehe+'|'+r.aina);d.typed+=Math.max(Number(r.njia_deni)||0,(Number(r.lita_oda)||0)*(Number(r.bei_kwa_lita)||0));d.litaRows+=litaOdaIliyogawiwa(r);d.jumla+=Number(r.jumla)||0;});
+  allMafutaMauzo.forEach(r=>{const d=get(r.tawi+'|'+r.tarehe+'|'+r.aina);d.typed+=Math.max(Number(r.njia_deni)||0,(Number(r.lita_oda)||0)*(Number(r.bei_kwa_lita)||0));d.litaRows+=litaOdaIliyogawiwa(r);d.jumla+=jumlaKamili(r);});
   m.forEach(d=>{d.baki=Math.max(0,d.oda-d.typed);});
   _ramaniOda={sig,m};return m;
 }
@@ -8212,12 +8249,12 @@ function litaOdaIliyogawiwa(r){const lo=Number(r.lita_oda)||0;if(lo>0)return lo;
 // The part of one meter record that is Order = the Order litres the manager wrote against that mkono × the price.
 // Only when NOBODY wrote any Order litres for that station and day (older records) does the system share the day's recorded Orders across the records, so nobody is judged on them.
 function ordaYaSafu(r){
-  const jumla=Number(r.jumla)||0,typed=Math.max(Number(r.njia_deni)||0,(Number(r.lita_oda)||0)*(Number(r.bei_kwa_lita)||0)),d=ramaniYaOrder().get(r.tawi+'|'+r.tarehe+'|'+r.aina);      // per fuel: a diesel order is never shared with petrol records
+  const jumla=jumlaKamili(r),typed=Math.max(Number(r.njia_deni)||0,(Number(r.lita_oda)||0)*(Number(r.bei_kwa_lita)||0)),d=ramaniYaOrder().get(r.tawi+'|'+r.tarehe+'|'+r.aina);      // per fuel: a diesel order is never shared with petrol records
   if(!d||d.typed>0||d.litaRows>0||d.baki<=0||!(d.jumla>0))return Math.min(jumla,typed);
   return Math.min(jumla,d.baki*(jumla/d.jumla));
 }
 const litaOdaYaSafu=(r)=>{const lo=Number(r.lita_oda)||0;if(lo>0)return lo;const b=Number(r.bei_kwa_lita)||0;return b>0?ordaYaSafu(r)/b:0;};
-const kiasiBaadaYaOrder=(r)=>Math.max(0,(Number(r.jumla)||0)-ordaYaSafu(r));      // what the remaining litres should bring in (before NMB / CRDB / Lipa)
+const kiasiBaadaYaOrder=(r)=>round2(Math.max(0,jumlaKamili(r)-ordaYaSafu(r)));      // what the remaining litres should bring in (before NMB / CRDB / Lipa)
 // Order litres of each fuel that the Oda tab recorded for a station and day but that no mkono has taken yet
 function odaBakiKwaAina(tawi,tarehe){
   const out={Petroli:0,Dizeli:0};
@@ -8244,8 +8281,8 @@ function ugawanyoWaMafuta(tawi,ch){      // tawi: a station or 'yote'; ch: a tes
   const g={litaMita:0,jumlaMita:0,litaOda:0,jumlaOda:0,idadiOda:oda.length,nmb:0,crdb:0,lipa:0,litaZisizogawiwa:0,litaPapo:0,jumlaPapo:0,litaOdaBilaMita:0};
   // one entry per station + day + fuel: its meters, the Orders recorded for it, and the Order litres written against its mikono
   const siku=new Map(),get=(k)=>{let d=siku.get(k);if(!d){d={mL:0,mJ:0,tL:0,tJ:0,rL:0,rJ:0};siku.set(k,d);}return d;};
-  mita.forEach(r=>{g.litaMita+=Number(r.lita)||0;g.jumlaMita+=Number(r.jumla)||0;g.nmb+=Number(r.njia_nmb)||0;g.crdb+=Number(r.njia_crdb)||0;g.lipa+=Number(r.njia_lipa)||0;
-    const d=get(r.tawi+'|'+r.tarehe+'|'+r.aina);d.mL+=Number(r.lita)||0;d.mJ+=Number(r.jumla)||0;d.rL+=litaOdaIliyogawiwa(r);d.rJ+=Math.max(Number(r.njia_deni)||0,(Number(r.lita_oda)||0)*(Number(r.bei_kwa_lita)||0));});
+  mita.forEach(r=>{g.litaMita+=Number(r.lita)||0;g.jumlaMita+=jumlaKamili(r);g.nmb+=Number(r.njia_nmb)||0;g.crdb+=Number(r.njia_crdb)||0;g.lipa+=Number(r.njia_lipa)||0;
+    const d=get(r.tawi+'|'+r.tarehe+'|'+r.aina);d.mL+=Number(r.lita)||0;d.mJ+=jumlaKamili(r);d.rL+=litaOdaIliyogawiwa(r);d.rJ+=Math.max(Number(r.njia_deni)||0,(Number(r.lita_oda)||0)*(Number(r.bei_kwa_lita)||0));});
   oda.forEach(r=>{const d=get(r.tawi+'|'+r.tarehe+'|'+r.aina);d.tL+=Number(r.lita)||0;d.tJ+=Number(r.jumla)||0;});
   siku.forEach(d=>{
     const kutoaTable=d.tL>=d.rL,oL=kutoaTable?d.tL:d.rL,oJ=kutoaTable?d.tJ:d.rJ;      // the recorded Orders, or what the mikono say if that is more
@@ -8273,7 +8310,7 @@ function kadiZaKituo(g,kichwa,idPrefix){
     sehemuYaKadi('Lita Zote (Mita)',g.litaMita.toFixed(1)+' L','Thamani '+pesa(g.jumlaMita),'mita',idPrefix+'Mita')+
     sehemuYaKadi('Lita za Order (hazijalipwa)',g.litaOda.toFixed(1)+' L',pesa(g.jumlaOda)+(g.idadiOda?` · Order ${g.idadiOda}`:''),'oda',idPrefix+'Oda')+
     sehemuYaKadi('Lita za Malipo ya Papo',g.litaPapo.toFixed(1)+' L',pesa(g.jumlaPapo),'papo',idPrefix+'Papo')+
-    sehemuYaKadi('Cash Inayotarajiwa',pesa(g.cash),'baada ya NMB / CRDB / Lipa','cash',idPrefix+'Cash')+`</div>`;
+    sehemuYaKadi('Cash Inayotarajiwa',pesa2(g.cash),'baada ya NMB / CRDB / Lipa','cash',idPrefix+'Cash')+`</div>`;
 }
 let tareheYaKadi='';      // '' = today; otherwise the day the manager picked
 function badilishaTareheKadi(v){tareheYaKadi=v||'';jazaKadiZaKituo();}
