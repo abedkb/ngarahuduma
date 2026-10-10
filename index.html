@@ -653,6 +653,8 @@ body.mauzo-officer .col-gharama{display:none !important;}
 .mf-tarehe-bar input[type=date]{padding:6px 9px;border-radius:7px;border:1px solid var(--a-line);background:transparent;color:inherit;font:inherit;}
 .mf-kipindi{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--a-muted);margin:6px 0 8px;}
 #mfManagerCards .cards.mf-kadi4{grid-template-columns:repeat(4,1fr);margin-bottom:12px;}
+#mfManagerCards .cards.mf-kadi5{grid-template-columns:repeat(5,1fr);margin-bottom:12px;}
+@media(max-width:900px){#mfManagerCards .cards.mf-kadi5{grid-template-columns:repeat(2,1fr);}}
 @media(max-width:760px){#mfManagerCards .cards.mf-kadi4{grid-template-columns:repeat(2,1fr);}}
 .mf-tahadhari{font-size:12.5px;margin:0 0 12px;padding:9px 14px;border:1px solid rgba(232,163,61,.5);border-left:3px solid #E8A33D;border-radius:10px;background:rgba(232,163,61,.08);}
 .mf-oda-hint{font-size:12.5px;margin:10px 0 4px;padding:9px 14px;border:1px solid rgba(232,163,61,.5);border-left:3px solid #E8A33D;border-radius:10px;background:rgba(232,163,61,.08);line-height:1.5;}
@@ -8888,6 +8890,15 @@ function kadiZaKituo(g,kichwa,idPrefix){
     sehemuYaKadi('Lita za Malipo ya Papo',g.litaPapo.toFixed(1)+' L',pesa(g.jumlaPapo),'papo',idPrefix+'Papo')+
     sehemuYaKadi('Cash Inayotarajiwa',pesa2(g.cash),'baada ya NMB / CRDB / Lipa','cash',idPrefix+'Cash')+`</div>`;
 }
+// Money RECEIVED, by the way it was paid: Cash, CRDB, NMB and Lipa Namba — and the total of the four (Orders are not money received yet)
+function kadiYaMapokezi(rows,kichwa){
+  const n=njiaMuhtasari(rows),jumla=round2(n.cash+n.crdb+n.nmb+n.lipa),w=rows.filter(r=>r.kiasi_kilichowasilishwa!=null),wj=round2(w.reduce((a,r)=>a+Number(r.kiasi_kilichowasilishwa),0));
+  const k=(lebo,v,bg,sty)=>`<div class="card"${sty?` style="${sty}"`:''}><div class="c-label">${lebo}</div><div class="c-value">${pesa2(v)}</div>${bg?`<span class="c-badge badge-gray">${bg}</span>`:''}</div>`;
+  return `<div class="mf-kipindi">💰 Fedha Zilizopokelewa — ${kichwa}</div><div class="cards mf-kadi5">`
+    +k('Cash (Taslimu)',n.cash,w.length?'Aliyowasilisha '+pesa2(wj):'inayotarajiwa')
+    +k('CRDB',n.crdb,'')+k('NMB',n.nmb,'')+k('Lipa Namba',n.lipa,'')
+    +`<div class="card" style="border-left:3px solid var(--a-green)"><div class="c-label">Jumla Iliyopokelewa</div><div class="c-value" id="mfPokeaJumla">${pesa2(jumla)}</div><span class="c-badge badge-green">Cash + CRDB + NMB + Lipa</span></div></div>`;
+}
 let tareheYaKadi='';      // '' = today; otherwise the day the manager picked
 function badilishaTareheKadi(v){tareheYaKadi=v||'';jazaKadiZaKituo();}
 function jazaKadiZaKituo(){
@@ -8896,7 +8907,8 @@ function jazaKadiZaKituo(){
   const a=ugawanyoWaMafuta(tawi,d=>d===tarehe);      // ONLY the chosen day (today unless a date is picked): its meters and its Orders — never another day's
   const jinaSiku=niLeo?'Leo — '+maandishiYaTarehe(tarehe):maandishiYaTarehe(tarehe);
   const upau=`<div class="mf-tarehe-bar"><label for="mfKadiTarehe">📅 Muhtasari wa tarehe</label><input type="date" id="mfKadiTarehe" value="${tarehe}" max="${leo}" onchange="badilishaTareheKadi(this.value)"/>${niLeo?'<span>(leo)</span>':'<button class="btn sm secondary" onclick="badilishaTareheKadi(\'\')">↩ Rudi Leo</button>'}</div>`;
-  kk.innerHTML=upau+kadiZaKituo(a,jinaSiku,'mfLeo')+
+  const mistariYaSiku=allMafutaMauzo.filter(r=>!r._pending&&(tawi==='yote'||r.tawi===tawi)&&r.tarehe===tarehe);
+  kk.innerHTML=upau+kadiZaKituo(a,jinaSiku,'mfLeo')+kadiYaMapokezi(mistariYaSiku,jinaSiku)+
     (a.zaidi?`<div class="mf-tahadhari">⚠ ${niLeo?'Leo':maandishiYaTarehe(tarehe)}: Order za lita ${a.litaOdaBilaMita.toFixed(1)} L zimerekodiwa lakini mita za siku hii hazijawekwa (au ni pungufu) — mita za Order hizo bado hazijawekwa kamili.</div>`:'')+
     (a.litaZisizogawiwa>0?`<div class="mf-tahadhari">⚠ Order za lita ${a.litaZisizogawiwa.toFixed(1)} L zimerekodiwa lakini hazijaandikwa kwenye "Lita za Order" za mkono wowote — fedha zinazotarajiwa za mikono husika zinaweza kuonekana kuwa nyingi kuliko halisi.</div>`:'');
   // how that day was paid (cash, NMB, CRDB, Lipa, Order), for the same day
