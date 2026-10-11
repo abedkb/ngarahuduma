@@ -602,6 +602,9 @@ body.mauzo-officer .col-gharama{display:none !important;}
   box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 1px 2px rgba(0,0,0,.25);}
 #adminApp :is(.page,.modal) :is(input,textarea):not([readonly]):not(:disabled)::placeholder{color:#6F93C2;font-weight:500;opacity:1;}
 #adminApp :is(.page,.modal) input[type=number]:not([readonly]):not(:disabled){font-family:'IBM Plex Mono',monospace;}
+/* amounts and quantities are TYPED only: no up/down arrows to touch by mistake */
+input[type=number]{-moz-appearance:textfield;appearance:textfield;}
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;appearance:none;margin:0;display:none;}
 #adminApp :is(.page,.modal) :is(input:not([type=checkbox],[type=radio],[type=file],[type=hidden],[type=range],[type=color],[type=button],[type=submit]),select,textarea):not([readonly]):not(:disabled):hover{border-color:#1F6FEB;background:#EAF2FE;}
 #adminApp :is(.page,.modal) :is(input,select,textarea):not([readonly]):not(:disabled):focus{background:#FFFFFF;border-color:#FF7A45;box-shadow:0 0 0 3px rgba(255,122,69,.30);}
 #adminApp :is(.page,.modal) select:not([readonly]):not(:disabled) option{background:#FFFFFF;color:#0B2F57;}
@@ -1002,7 +1005,6 @@ body.mauzo-officer .col-gharama{display:none !important;}
         <div class="card"><div class="c-label">Jumla ya Manunuzi</div><div class="c-value" id="cardManunuzi">—</div><span class="c-badge badge-gray">Matumizi</span></div>
         <div class="card"><div class="c-label">Jumla ya Mauzo</div><div class="c-value" id="cardMauzo">—</div><span class="c-badge badge-green">Mapato</span></div>
         <div class="card" id="cardFaidaWrap"><div class="c-label">Faida Halisi</div><div class="c-value" id="cardFaida">—</div><span class="c-badge" id="faidaBadge">—</span><div id="faidaNote" style="font-size:11px;margin-top:6px;color:#E8A33D;"></div></div>
-        <div class="card" id="cardStockWrap" style="display:none;border-left:3px solid #4A90E2"><div class="c-label">📦 Stock Yangu</div><div class="c-value" id="cardStock">—</div><span class="c-badge badge-gray" id="cardStockSub">—</span><div id="cardStockVipimo" style="font-size:11.5px;margin-top:6px;color:var(--a-muted);line-height:1.5;"></div></div>
         <div class="card"><div class="c-label">Madeni</div><div class="c-value" id="cardMadeni">—</div><span class="c-badge badge-amber">Ya msimamizi</span></div>
         <div class="card" style="border-left:3px solid #7C5CFF"><div class="c-label">Order</div><div class="c-value" id="cardOrder">—</div><span class="c-badge badge-gray" id="cardOrderSub">Zilizothibitishwa</span></div>
         <div class="card" style="border-left:3px solid var(--a-green)"><div class="c-label">💵 Hela Cash</div><div class="c-value" id="cardCash" style="color:var(--a-green)">—</div><span class="c-badge badge-green" style="font-size:10px">Cash Net</span></div>
@@ -1019,6 +1021,18 @@ body.mauzo-officer .col-gharama{display:none !important;}
         </div>
         <div class="section-body">
           <canvas id="mauzoTrendChart" height="90"></canvas>
+        </div>
+      </div>
+      <div class="section" id="dashStokiSection">
+        <div class="section-header"><h3>📦 Stock Iliyopo — Muhtasari</h3>
+          <input type="search" id="dash-stoki-tafuta" placeholder="🔍 Tafuta bidhaa..." oninput="renderKadiYaStock()" style="max-width:220px;"/>
+        </div>
+        <div class="section-body">
+          <div id="dash-stoki-muhtasari" style="font-size:12.5px;color:var(--a-muted);margin-bottom:8px;"></div>
+          <div class="table-wrap" style="max-height:380px;overflow-y:auto;"><table class="stoki-orodha">
+            <thead><tr><th style="width:40px;">#</th><th>Bidhaa</th><th class="num">Kilichobaki</th><th>Hali</th></tr></thead>
+            <tbody id="tbody-dash-stoki"></tbody>
+          </table></div>
         </div>
       </div>
       <div class="grid-2" id="dashGrid2" style="grid-template-columns:1fr;">
@@ -3073,6 +3087,9 @@ async function jaribuSmsZote(){
   const n=orodhaYaNambaZaSms().length;
   for(let i=0;i<n;i++){await jaribuSms(i);await new Promise(r=>setTimeout(r,500));}
 }
+// Typing only: the mouse wheel and the Up/Down arrow keys can no longer change a number field by accident.
+document.addEventListener('wheel',(e)=>{const t=e.target;if(t&&t.tagName==='INPUT'&&t.type==='number'&&document.activeElement===t)t.blur();},{passive:true,capture:true});
+document.addEventListener('keydown',(e)=>{const t=e.target;if(t&&t.tagName==='INPUT'&&t.type==='number'&&(e.key==='ArrowUp'||e.key==='ArrowDown'))e.preventDefault();},true);
 const CAT_LABEL={mabomba:'Mabomba',fittings:'Fittings',umeme:'Umeme',saruji:'Saruji',zana:'Zana',mengineyo:'Mengineyo'};
 const KIPIMO_LABEL={pc:'Piece / Pisi',bag:'Bag / Mifuko',roll:'Roll / Rola',meter:'Meter / Mita',litre:'Litre / Lita',kg:'Kg / Kilo',pack:'Pack / Packets',sheet:'Sheet / Bati',box:'Box / Kasha',set:'Set / Seti',pair:'Pair / Jozi'};
 
@@ -5821,17 +5838,34 @@ async function toggleDukani(id){
 /* ─── RENDER FUNCTIONS ─── */
 // "Stock Yangu": the QUANTITY the branch holds now, per unit (no money figure).
 function renderKadiYaStock(){
-  const wrap=$('cardStockWrap');if(!wrap)return;
-  const onyesha=ninaTawiLaKazi()||(userRole==='gm'&&viewingTawi!=='yote');      // a sales officer (or the GM looking at one branch)
-  wrap.style.display=onyesha?'':'none';if(!onyesha)return;
-  const bf=filterByTawi(allBidhaa).filter(p=>!p._pending);
-  const zilizoisha=bf.filter(p=>(Number(p.idadi)||0)<=0).length,ndogo=bf.filter(p=>(Number(p.idadi)||0)>0&&(Number(p.idadi)||0)<=(Number(p.kiwango_chini)||0)).length;
-  const kwaKipimo={};bf.forEach(p=>{const k=p.kipimo||'pc';kwaKipimo[k]=(kwaKipimo[k]||0)+(Number(p.idadi)||0);});
-  const vipimo=Object.entries(kwaKipimo).filter(([,q])=>q>0).sort((a,b)=>b[1]-a[1]);
-  $('cardStock').innerHTML=vipimo.length?vipimo.map(([k,q])=>`${fmtIdadi(q)} <span style="font-size:.6em;font-weight:600;">${escH(k)}</span>`).join('<br>'):'0';
-  $('cardStockSub').textContent=`Bidhaa ${bf.length}`;
-  $('cardStockVipimo').innerHTML=""
-    +(zilizoisha||ndogo?`<div style="margin-top:3px;">${zilizoisha?`<span style="color:var(--a-red);">${zilizoisha} zimeisha</span>`:''}${zilizoisha&&ndogo?' · ':''}${ndogo?`<span style="color:#E8A33D;">${ndogo} zimebaki chache</span>`:''} — <a href="#" onclick="switchPage('hifadhi');return false;" style="color:inherit;">angalia Stock</a></div>`:'');
+  const sec=$('dashStokiSection');
+  const mauzoOfisa=ninaTawiLaKazi();      // only the sales officers get this list
+  if(sec)sec.style.display=mauzoOfisa&&!PETROL_BRANCHES[viewingTawi]?'':'none';
+  if(!mauzoOfisa)return;
+  const tb=$('tbody-dash-stoki');if(!tb)return;
+  const q=($('dash-stoki-tafuta')?$('dash-stoki-tafuta').value:'').trim().toLowerCase();
+  // One row per product: spelling, capitals, spaces and quote marks do not make a new product, and if the same product is kept in more than one unit its quantities are listed together on the one row.
+  const funguo=(j)=>kawaidishaJina(j).replace(/["'`”“″′’‘]/g,'').replace(/[^a-z0-9.\/]+/g,'');
+  const m=new Map();
+  filterByTawi(allBidhaa).filter(p=>!p._pending).forEach(p=>{
+    const k=funguo(p.jina)||kawaidishaJina(p.jina);
+    const x=m.get(k)||{jina:p.jina,vipimo:new Map()};
+    const kp=String(p.kipimo||'pc').toLowerCase();
+    const v=x.vipimo.get(kp)||{kp:p.kipimo||'pc',idadi:0,chini:0};
+    v.idadi+=Number(p.idadi)||0;v.chini+=Number(p.kiwango_chini)||0;x.vipimo.set(kp,v);m.set(k,x);
+  });
+  let l=[...m.values()].map(x=>{
+    const v=[...x.vipimo.values()].sort((a,b)=>b.idadi-a.idadi);
+    const wote=v.every(y=>y.idadi<=0),ndogo=!wote&&v.some(y=>y.idadi<=y.chini);
+    return{jina:x.jina,v,rank:wote?0:(ndogo?1:2)};
+  });
+  const kwisha=l.filter(x=>x.rank===0).length,ndogo=l.filter(x=>x.rank===1).length;
+  const sm=$('dash-stoki-muhtasari');if(sm)sm.innerHTML=`Bidhaa <strong>${l.length}</strong> · Zilizokwisha <strong style="color:var(--a-red,#f87171)">${kwisha}</strong> · Zinazoisha <strong style="color:#E8A33D">${ndogo}</strong>`;
+  if(q)l=l.filter(x=>(x.jina+' '+x.v.map(y=>y.kp).join(' ')).toLowerCase().includes(q));
+  l.sort((a,b)=>a.rank-b.rank||a.jina.localeCompare(b.jina));      // the ones that need attention first
+  tb.innerHTML=l.length?l.map((x,i)=>{const hali=x.rank===0?'<span class="pill pill-red">Imekwisha</span>':(x.rank===1?'<span class="pill pill-amber">Inaisha</span>':'<span class="pill pill-green">Sawa</span>');
+    const kiasi=x.v.map(y=>`<strong>${fmtIdadi(y.idadi)}</strong> <span style="font-size:.85em;color:var(--a-muted);">${escH(y.kp)}</span>`).join(' &nbsp;·&nbsp; ');
+    return`<tr><td style="color:var(--a-muted);">${i+1}</td><td>${escH(x.jina)}</td><td class="num">${kiasi}</td><td>${hali}</td></tr>`;}).join(''):safuTupu(4,q?'Hakuna bidhaa inayolingana.':'Hakuna bidhaa kwenye stoo.');
 }
 const fmtIdadi=(q)=>{const r=Math.round(Number(q)*1000)/1000;return r.toLocaleString('en-US',{maximumFractionDigits:3});};
 function renderDashibodi(){
