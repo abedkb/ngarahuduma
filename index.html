@@ -1419,15 +1419,13 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
             <div class="field"><label>Tawi</label><select id="t-tawi" onchange="hesabuGridUnunuzi()"></select></div>
             <input type="hidden" id="t-msambazaji" value=""/>
             <div class="field"><label>Jina Lako (Uliyepokea)</label><input type="text" id="t-jina-muhusika" autocomplete="off" placeholder="Jina la mmiliki/muhusika wa duka"/><div class="field-error" id="err-t-jina-muhusika">Jina linahitajika</div></div>
-            <div class="field"><label>Name of Driver</label><input type="text" id="t-jina-dereva" autocomplete="off" placeholder="Jina la dereva"/></div>
-            <div class="field"><label>Truck Number</label><input type="text" id="t-namba-gari" autocomplete="off" placeholder="mfano: T.972 DPB"/></div>
             <div class="field full" id="ununuziGridBox">
               <label>Bidhaa za Ununuzi Huu — orodhesha zote hapa chini, kisha uhifadhi mara moja</label>
               <datalist id="t-jina-suggestions"></datalist>
               <input type="hidden" id="t-jina-sw" value=""/>
               <div class="grid-scroll-hint">↔ Telezesha jedwali kulia ili kuona sehemu iliyobaki</div>
             <div class="table-wrap"><table class="grid-entry">
-                <thead><tr><th>#</th><th>Particulars (Bidhaa Uliyonunua)</th><th>UNIT</th><th class="num">QTY</th><th class="num">RATE (Bei ya Kuuzia)</th><th class="num">JUMLA<small class="oto-lebo">AUTO</small></th><th></th></tr></thead>
+                <thead><tr><th>#</th><th>Particulars (Bidhaa Uliyonunua)</th><th>UNIT</th><th class="num">QTY</th><th class="num">RATE (Bei ya Kuuzia)</th><th class="num">JUMLA<small class="oto-lebo">AUTO</small></th><th>Name of Driver</th><th>Truck Number</th><th></th></tr></thead>
                 <tbody id="ununuziGridBody"></tbody>
               </table></div>
               <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;">
@@ -4041,6 +4039,8 @@ function safuUnunuziMpya(){
     <td class="num"><input type="number" class="g-idadi" min="1" placeholder="1" oninput="onSafuUnunuzi(this)"/></td>
     <td class="num"><input type="number" class="g-rate" min="0" placeholder="0" oninput="onSafuUnunuzi(this)"/></td>
     <td class="num g-jumla">—</td>
+    <td><input type="text" class="g-dereva" autocomplete="off" placeholder="Jina la dereva" style="min-width:140px;"/></td>
+    <td><input type="text" class="g-gari" autocomplete="off" placeholder="mfano: T.972 DPB" style="min-width:120px;"/></td>
     <td><button type="button" class="btn sm danger" onclick="futaSafuUnunuzi(this)" title="Ondoa mstari huu">✕</button></td>`;
   return tr;
 }
@@ -4093,7 +4093,7 @@ function somaGridUnunuzi(){
     if(!idadi||idadi<1)tatizo.push('weka QTY');
     if(!rate||rate<1)tatizo.push('weka RATE');
     if(tatizo.length){tr.classList.add('g-err');makosa.push(`Mstari ${i+1}: ${tatizo.join(', ')}`);return;}
-    mistari.push({jina,kipimo,idadi,rate});
+    mistari.push({jina,kipimo,idadi,rate,dereva:tr.querySelector('.g-dereva').value.trim(),gari:tr.querySelector('.g-gari').value.trim()});
   });
   return{mistari,makosa};
 }
@@ -4107,7 +4107,6 @@ async function _ongezaUununuziImpl(){
   const tarehe=$('t-tarehe').value,aina=$('t-aina').value,tawi=$('t-tawi').value;
   const msambazaji=$('t-msambazaji').value.trim()||'Haijasemwa';
   const jinaMuhusika=myOfficerName()||$('t-jina-muhusika').value.trim();
-  const jinaDereva=$('t-jina-dereva').value.trim(),nambaGari=$('t-namba-gari').value.trim();
   // Every filled row of the grid, checked together.
   const {mistari,makosa}=somaGridUnunuzi();
   if(!jinaMuhusika)makosa.push('Weka jina lako (uliyepokea)');
@@ -4123,7 +4122,7 @@ async function _ongezaUununuziImpl(){
   mistari.forEach(l=>{l.jina=jinaSahihi.get(ufunguoWaJina(l.jina));});
 
   // One record per item (RATE and JUMLA exactly as on the paper Purchase Form), all sent in ONE request.
-  const safu=mistari.map(l=>({tarehe,jina:l.jina,tawi,aina,kipimo:l.kipimo,idadi:l.idadi,bei_kununulia:l.rate,jumla:l.idadi*l.rate,msambazaji,jina_muhusika:jinaMuhusika,jina_dereva:jinaDereva,namba_gari:nambaGari}));
+  const safu=mistari.map(l=>({tarehe,jina:l.jina,tawi,aina,kipimo:l.kipimo,idadi:l.idadi,bei_kununulia:l.rate,jumla:l.idadi*l.rate,msambazaji,jina_muhusika:jinaMuhusika,jina_dereva:l.dereva||'',namba_gari:l.gari||''}));
   // Stock: one update per DISTINCT item (the same item listed twice is added up). RATE is the item's selling price.
   // The buying price is not asked of the sales officer, so an existing item keeps whatever buying price it has.
   const kwaJina=new Map();
@@ -4174,7 +4173,7 @@ async function _ongezaUununuziImpl(){
   loadAllBaada();
 }
 function safishaManunuzi(){
-  ['t-jina-sw','t-msambazaji','t-jina-muhusika','t-jina-dereva','t-namba-gari'].forEach(id=>{const el=$(id);if(el)el.value='';});
+  ['t-jina-sw','t-msambazaji','t-jina-muhusika'].forEach(id=>{const el=$(id);if(el)el.value='';});
   jengaGridUnunuzi();onyeshaMakosaGrid('ununuziGridErrors','notifyManunuzi',[]);
 }
 // Items saved together share a creation moment, branch and receiver. The groups are worked out ONCE per set of data
@@ -4203,8 +4202,12 @@ function chapishaPurchaseForm(id){
   $('ppItemsBody').innerHTML=kundi.map((x,i)=>`<tr><td>${i+1}</td><td>${escH(x.jina)}${x.jina_sw?' / '+escH(x.jina_sw):''}</td><td>${escH(x.kipimo||'pc')}</td><td class="num">${x.idadi}</td><td class="num">${pesa(x.bei_kununulia)}</td><td class="num">${pesa(x.jumla)}</td></tr>`).join('')+
     Array.from({length:Math.max(0,10-kundi.length)}).map((_,i)=>`<tr><td>${kundi.length+i+1}</td><td></td><td></td><td></td><td></td><td></td></tr>`).join('');
   $('ppTotalAmount').textContent=pesa(kundi.reduce((a,x)=>a+(x.jumla||0),0));
-  $('ppDriverName').textContent=p.jina_dereva||dots;
-  $('ppTruckNo').textContent=p.namba_gari||dots;
+  {   // one purchase can come on several trucks: list every distinct driver / truck of the items on this form
+    const jozi=[...new Set(kundi.filter(x=>x.jina_dereva||x.namba_gari).map(x=>(x.jina_dereva||'')+'|'+(x.namba_gari||'')))].map(k=>k.split('|'));
+    const madereva=[...new Set(jozi.map(j=>j[0]).filter(Boolean))],magari=[...new Set(jozi.map(j=>j[1]).filter(Boolean))];
+    $('ppDriverName').textContent=jozi.length>1?jozi.map(j=>j[0]&&j[1]?`${j[0]} (${j[1]})`:(j[0]||j[1])).join('; '):(madereva[0]||dots);
+    $('ppTruckNo').textContent=jozi.length>1?magari.join(', ')||dots:(magari[0]||dots);
+  }
   openSheet('ppOverlay');
 }
 
