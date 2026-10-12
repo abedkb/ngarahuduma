@@ -3053,8 +3053,19 @@ const KIPIMO_LABEL={pc:'Piece / Pisi',bag:'Bag / Mifuko',roll:'Roll / Rola',mete
 const sbClient=supabase.createClient(SB_URL,SB_KEY);
 // Official company email per role — staff only ever pick the branch
 // name and type a password; the underlying email is resolved here.
+// A signed-in person whose session has quietly expired (phone slept, network dropped while the token was renewed) used to be
+// treated as an anonymous visitor: reads came back EMPTY and saves failed with a confusing "row-level security" error.
+// Now the session is renewed first; if that is impossible the person is told to sign in again and nothing is sent.
+let _sessionImekwishaImeonyeshwa=false;
+function sessionImekwisha(){
+  if(_sessionImekwishaImeonyeshwa)return;_sessionImekwishaImeonyeshwa=true;
+  try{tangazaKati('Muda wa kuingia umekwisha (huenda mtandao ulikatika). Hakuna kitu kilichopotea kwenye mfumo — bonyeza "Ingia Tena", kisha ujaze tena kilichokuwa kinahifadhiwa.','error',null,'Ingia Tena');}catch(_e){}
+  setTimeout(()=>{if(!confirm('Muda wa kuingia umekwisha. Bonyeza OK kuingia tena.'))return;try{localStorage.removeItem('nh_cached_profile');}catch(_e){}sbClient.auth.signOut().finally(()=>location.reload());},300);
+}
 async function authHeaders(){
-  const {data:{session}}=await sbClient.auth.getSession();
+  let {data:{session}}=await sbClient.auth.getSession();
+  if(!session&&isAdmin){try{const r=await sbClient.auth.refreshSession();session=r&&r.data&&r.data.session||null;}catch(_e){}}
+  if(!session&&isAdmin){sessionImekwisha();throw kosaLaApi(401,{message:'Muda wa kuingia umekwisha — tafadhali ingia tena.'});}
   const token=session?session.access_token:SB_KEY;
   return {'apikey':SB_KEY,'Authorization':'Bearer '+token,'Content-Type':'application/json','Prefer':'return=representation'};
 }
@@ -7416,7 +7427,7 @@ function renderMaombiStockTawi(containerId,aina_chanzo){
   const kuhusu=(m)=>`<td><strong>${escH(m.mteja)}</strong>${m.mradi?`<br><span style="font-size:11px;color:var(--a-muted);">${escH(m.mradi)}</span>`:''}</td>`;
   const vitendo=(m)=>`<td style="display:flex;gap:4px;flex-wrap:wrap;"><button class="btn sm gold" onclick="thibitishaMaombiStock('${m.id}')">✔ Thibitisha</button><button class="btn sm danger" onclick="kataaMaombiStockUI('${m.id}')">✖ Kataa</button></td>`;
   tb.innerHTML=list.length?list.map(m=>{
-    const tarehe=(m.created_at||'').slice(0,10);
+    const tarehe=(m.tarehe||m.created_at||'').slice(0,10);      // the date the officer chose for the order
     if(aina_chanzo==='Bidhaa'){
       // Particulars, then QTY, Unit Price and Jumla each in their own column
       return `<tr><td>${tarehe}</td>${kuhusu(m)}<td>${escH(m.jina)}</td><td class="num">${m.idadi} ${m.kipimo||'pc'}</td><td class="num">${pesa(m.bei_stoo??m.bei_serikali)}</td><td class="num"><strong>${pesa(m.jumla_stoo??m.jumla)}</strong></td><td>—</td>${vitendo(m)}</tr>`;
@@ -7458,6 +7469,17 @@ async function kataaMaombiStock(id,sababu){
     loadAllBaada();
   }catch(e){toast('❌ '+e.message);}
 }
+async function futaOrderYangu(kundi){
+  if(!confirm('Futa order hii yote? Haitaweza kurudishwa. Matawi hayataiona tena.'))return;
+  try{
+    const h=await authHeaders();
+    const r=await fetch(`${SB_URL}/rest/v1/rpc/futa_order_yangu`,{method:'POST',headers:h,body:JSON.stringify({p_kundi:kundi})});
+    const d=await r.json().catch(()=>null);
+    if(!r.ok||!d||!d.ok)throw new Error((d&&(d.message||d.hint))||'Imeshindwa kufuta order');
+    toast('🗑 Order imefutwa');
+    loadAllBaada();
+  }catch(e){toast('❌ '+e.message);}
+}
 // The Serikali officer's own view of what they've asked for and its status.
 function renderMaombiSerikaliYangu(containerId,aina_chanzo){
   const tb=$(containerId);if(!tb)return;
@@ -7489,12 +7511,14 @@ function renderMaombiSerikaliYangu(containerId,aina_chanzo){
     const items=lines.map(l=>aina_chanzo==='Bidhaa'?`${l.jina} x${l.idadi}`:`${l.aina} ${l.lita}L (${BRANCHES[l.tawi]||l.tawi})`).join(aina_chanzo==='Bidhaa'?'<br>':', ');
     const ikoni=(l)=>l.hali==='Imethibitishwa'?' ✓':(l.hali==='Imekataliwa'?' ✗':' ⏳');      // each store's answer for its own goods
     const rs=(aina_chanzo==='Bidhaa'&&lines.length>1)?` rowspan="${lines.length}"`:'';
-    const haliCell=`<td${rs}><span class="pill ${haliCls}">${haliTxt}</span>${rejected?`<div style="font-size:11px;color:var(--a-muted);margin-top:4px;">${escH((lines.find(l=>l.jibu)||{}).jibu||'')}</div>`:''}</td>`;
+    const naweFuta=(userRole==='serikali_mauzo'&&aina_chanzo==='Bidhaa'&&!confirmed&&!invoiced);      // an order no branch has accepted yet can still be taken back
+    const futaBtn=naweFuta?`<div style="margin-top:6px;"><button class="btn sm danger" onclick="futaOrderYangu('${kundi}')">🗑 Futa Order</button></div>`:'';
+    const haliCell=`<td${rs}><span class="pill ${haliCls}">${haliTxt}</span>${futaBtn}${rejected?`<div style="font-size:11px;color:var(--a-muted);margin-top:4px;">${escH((lines.find(l=>l.jibu)||{}).jibu||'')}</div>`:''}</td>`;
     if(aina_chanzo==='Bidhaa'){
       const sehemuB=(l)=>`<td style="font-size:12px;">${escH(l.jina)}</td><td class="num" style="white-space:nowrap;">${l.idadi} ${escH(l.kipimo||'pc')}</td><td style="font-size:12px;"><b>${escH(BRANCHES[l.tawi]||l.tawi)}</b>${ikoni(l)}</td>`;
-      return `<tr><td${rs}>${(lines[0].created_at||'').slice(0,10)}</td><td${rs}>${escH(mteja)}</td>${sehemuB(lines[0])}<td class="num"${rs}>${pesa(jumla)}</td>${haliCell}</tr>`+lines.slice(1).map(l=>`<tr>${sehemuB(l)}</tr>`).join('');
+      return `<tr><td${rs}>${(lines[0].tarehe||lines[0].created_at||'').slice(0,10)}</td><td${rs}>${escH(mteja)}</td>${sehemuB(lines[0])}<td class="num"${rs}>${pesa(jumla)}</td>${haliCell}</tr>`+lines.slice(1).map(l=>`<tr>${sehemuB(l)}</tr>`).join('');
     }
-    return `<tr><td>${(lines[0].created_at||'').slice(0,10)}</td><td>${escH(mteja)}</td><td style="font-size:12px;">${escH(items)}</td><td class="num">${pesa(jumla)}</td>${haliCell}</tr>`;
+    return `<tr><td>${(lines[0].tarehe||lines[0].created_at||'').slice(0,10)}</td><td>${escH(mteja)}</td><td style="font-size:12px;">${escH(items)}</td><td class="num">${pesa(jumla)}</td>${haliCell}</tr>`;
   }).join(''):safuTupu(aina_chanzo==='Bidhaa'?7:5,aina_chanzo==='Bidhaa'?'Bado hujatuma order yoyote.':'Bado hujatuma agizo lolote.');
 }
 
