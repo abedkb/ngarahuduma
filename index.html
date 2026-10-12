@@ -1096,17 +1096,6 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
           </table></div>
         </div>
       </div>
-      <div class="section" id="smsCheckSection" style="display:none;margin-top:18px;">
-        <div class="section-header"><h3>📱 Hakiki Namba za SMS</h3></div>
-        <div class="section-body">
-          <p style="font-size:12.5px;color:var(--a-muted);margin:0 0 10px;">Namba za wafanyakazi wanaopokea SMS za mfumo (maombi ya transfer, taarifa ya kila siku, n.k.). "Namba" inakagua muundo tu; "Tuma Majaribio" inatuma SMS halisi na kuonyesha jibu la Beem. Hakikisha mhusika amepokea kwenye simu yake.</p>
-          <div class="table-wrap"><table>
-            <thead><tr><th>Mhusika</th><th>Namba</th><th>Mtandao</th><th>Muundo</th><th>Jibu la Majaribio</th><th></th></tr></thead>
-            <tbody id="tbody-sms-check"></tbody>
-          </table></div>
-          <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;"><button class="btn gold" onclick="jaribuSmsZote()">📨 Tuma Majaribio Kwa Wote</button></div>
-        </div>
-      </div>
     </section>
 
     <!-- MAAGIZO -->
@@ -3055,38 +3044,6 @@ async function sendSms(to,message){
     return data;
   }catch(e){console.warn('SMS send failed:',e.message);return null;}
 }
-// ── SMS number check (GM): every number the system sends SMS to, checked for format and testable with one tap ──
-function orodhaYaNambaZaSms(){
-  const l=Object.keys(BRANCH_PHONE).map(k=>({jina:(BRANCH_OFFICER[k]||'')+' — '+(BRANCHES[k]||k),simu:BRANCH_PHONE[k]}));
-  l.push({jina:'Admin / GM (ADMIN_PHONE)',simu:ADMIN_PHONE},{jina:'Madeni — Abdul',simu:MADENI_OFFICER_PHONE},{jina:'Serikali — Rehema',simu:SERIKALI_MADENI_PHONE});
-  return l;
-}
-const MITANDAO_YA_SIMU={'074':'Vodacom','075':'Vodacom','076':'Vodacom','071':'Yas (Tigo)','065':'Yas (Tigo)','067':'Yas (Tigo)','068':'Airtel','069':'Airtel','078':'Airtel','062':'Halotel','061':'Halotel','073':'TTCL','077':'Zantel'};
-function ukaguziWaSimu(simu){
-  const n=String(simu||'').replace(/[\s\-()]/g,'').replace(/^\+?255/,'0');
-  const sawa=/^0[67]\d{8}$/.test(n);
-  return{n,sawa,mtandao:sawa?(MITANDAO_YA_SIMU[n.slice(0,3)]||'?'):'—'};
-}
-function jengaOrodhaYaSms(){
-  const tb=$('tbody-sms-check');if(!tb)return;
-  const l=orodhaYaNambaZaSms(),hesabu={};l.forEach(x=>{const k=ukaguziWaSimu(x.simu).n;hesabu[k]=(hesabu[k]||0)+1;});
-  tb.innerHTML=l.map((x,i)=>{const u=ukaguziWaSimu(x.simu),dup=hesabu[u.n]>1;
-    return`<tr><td>${escH(x.jina)}</td><td>${escH(x.simu||'—')}</td><td>${escH(u.mtandao)}</td><td>${u.sawa?(dup?'⚠ imejirudia':'✅ sahihi'):'❌ si sahihi'}</td><td id="sms-jibu-${i}" style="font-size:12px;"></td><td><button class="btn sm secondary" onclick="jaribuSms(${i})">Tuma Majaribio</button></td></tr>`;}).join('');
-}
-async function jaribuSms(i){
-  const x=orodhaYaNambaZaSms()[i],el=$('sms-jibu-'+i);if(!x||!el)return;
-  const u=ukaguziWaSimu(x.simu);
-  if(!u.sawa){el.innerHTML='<span style="color:var(--a-red)">Namba si sahihi — haikutumwa</span>';return;}
-  el.textContent='Inatuma…';
-  const r=await sendSms(x.simu,'Majaribio ya SMS ya mfumo wa Ngara Huduma. Kama umepokea ujumbe huu, namba yako iko sawa. Tafadhali mjulishe Meneja.');
-  if(r&&r.ok)el.innerHTML='<span style="color:var(--a-green)">✅ Beem imekubali ('+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})+') — thibitisha kwenye simu</span>';
-  else el.innerHTML='<span style="color:var(--a-red)">❌ Imeshindwa: '+escH(r?JSON.stringify(r.error||r).slice(0,120):'hakuna jibu')+'</span>';
-}
-async function jaribuSmsZote(){
-  if(!confirm('Kutuma SMS ya majaribio kwa namba zote? (kila SMS inagharimu)'))return;
-  const n=orodhaYaNambaZaSms().length;
-  for(let i=0;i<n;i++){await jaribuSms(i);await new Promise(r=>setTimeout(r,500));}
-}
 // Typing only: the mouse wheel and the Up/Down arrow keys can no longer change a number field by accident.
 document.addEventListener('wheel',(e)=>{const t=e.target;if(t&&t.tagName==='INPUT'&&t.type==='number'&&document.activeElement===t)t.blur();},{passive:true,capture:true});
 document.addEventListener('keydown',(e)=>{const t=e.target;if(t&&t.tagName==='INPUT'&&t.type==='number'&&(e.key==='ArrowUp'||e.key==='ArrowDown'))e.preventDefault();},true);
@@ -3737,7 +3694,6 @@ function applyRoleUI(){
   // Sales trend chart: GM only — not appropriate for other roles to see
   const chartSection=$('mauzoChartSection');
   if(chartSection)chartSection.style.display=(userRole==='gm')?'block':'none';
-  { const sc=$('smsCheckSection');if(sc){sc.style.display=(userRole==='gm')?'':'none';if(userRole==='gm')jengaOrodhaYaSms();} }
   // Branch switcher: GM, Matumizi Officer and Madeni Officer all work across
   // branches, so they get the picker; desk officers are locked to their own.
   const tawiWrap=$('tawiSelectWrap');
