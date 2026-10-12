@@ -1002,7 +1002,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
         <button class="btn sm secondary" onclick="$('dash-tarehe').value=leoISO();renderDashibodi();">Leo</button>
       </div>
       <div class="cards">
-        <div class="card"><div class="c-label">Jumla ya Manunuzi</div><div class="c-value" id="cardManunuzi">—</div><span class="c-badge badge-gray">Matumizi</span></div>
+        <div class="card"><div class="c-label">Jumla ya Manunuzi</div><div class="c-value" id="cardManunuzi">—</div><span class="c-badge badge-gray" id="cardManunuziBadge">Matumizi</span></div>
         <div class="card"><div class="c-label">Jumla ya Mauzo</div><div class="c-value" id="cardMauzo">—</div><span class="c-badge badge-green">Mapato</span></div>
         <div class="card" id="cardFaidaWrap"><div class="c-label">Faida Halisi</div><div class="c-value" id="cardFaida">—</div><span class="c-badge" id="faidaBadge">—</span><div id="faidaNote" style="font-size:11px;margin-top:6px;color:#E8A33D;"></div></div>
         <div class="card"><div class="c-label">Madeni</div><div class="c-value" id="cardMadeni">—</div><span class="c-badge badge-amber">Ya msimamizi</span></div>
@@ -5879,7 +5879,12 @@ function renderDashibodi(){
   const dashDate=$('dash-tarehe').value;
   const t=hesabu(dashDate,dashDate);
   renderKadiYaStock();
-  $('cardManunuzi').textContent=pesa(t.jumla_manunuzi);$('cardMauzo').textContent=pesa(t.jumla_mauzo);
+  // Purchases count on the day they were DATED — and also on the day they were ENTERED, so a purchase a sales officer
+  // records today for an earlier date still shows on today's card instead of seeming to vanish.
+  const manunuziZaIngizo=filterByTawi(allManunuzi).filter(p=>p.tarehe!==dashDate&&p.created_at&&isoYaMtaa(new Date(p.created_at))===dashDate);
+  const manunuziKadi=t.jumla_manunuzi+manunuziZaIngizo.reduce((a,b)=>a+(b.jumla||0),0);
+  {const bg=$('cardManunuziBadge');if(bg)bg.textContent=manunuziZaIngizo.length?`Matumizi · pamoja na ${manunuziZaIngizo.length} zilizoingizwa leo kwa tarehe nyingine`:'Matumizi';}
+  $('cardManunuzi').textContent=pesa(manunuziKadi);$('cardMauzo').textContent=pesa(t.jumla_mauzo);
   $('cardFaida').textContent=pesa(t.faida_halisi);{const n=$('faidaNote');if(n)n.textContent=t.bila_gharama?`⚠ Faida si kamili — mauzo ${t.bila_gharama} hayana bei ya kununulia.`:'';}$('cardMadeni').textContent=pesa(t.madeni_kipindi);$('cardOrder').textContent=pesa(t.order);$('cardOrderSub').textContent=t.order_idadi?`Order ${t.order_idadi} zilizothibitishwa`:'Hakuna Order';
   $('cardCash').textContent=pesa(Math.max(0,t.hela_cash));
     const bf=filterByTawi(allBidhaa),wf=filterByTawi(watejaKawaida());
