@@ -5889,7 +5889,7 @@ function renderDashibodi(){
   // chart or the Muhtasari/Tahadhari panel, which are GM-oriented detail.
   const cashierOnly=userRole==='cashier';
   const faidaWrap=$('cardFaidaWrap'),chartSec=$('mauzoChartSection'),grid2=$('dashGrid2');
-  if(faidaWrap)faidaWrap.style.display=(userRole==='gm')?'':'none';   // profit is shown to the General Manager only
+  if(faidaWrap)faidaWrap.style.display='none';   // the Faida Halisi card is no longer shown on the dashboard (the Reports page still has it)
   if(chartSec)chartSec.style.display=cashierOnly?'none':(userRole==='gm'?'':'none');
   if(grid2)grid2.style.display=cashierOnly?'none':'';
   // The General Manager's dashboard no longer shows the Tahadhari (alerts) panel —
@@ -9102,21 +9102,24 @@ function tengenezaFomuMweziMafuta(){
     data[aina]={awali,beiAwali,litaM,kiasiM,beiM:litaM?kiasiM/litaM:0,A,B,litaO,kiasiO,beiO:litaO?kiasiO/litaO:0,mwishoLita,beiMwisho};
   });
   const D=data.Dizeli,P=data.Petroli;
-  const sehemu=(kichwa,safu)=>safu.map((s,i)=>`<tr>${i===0?`<td rowspan="${safu.length}" style="font-weight:700;">${kichwa}</td>`:''}<td>${s[0]}</td><td class="num">${s[1]}</td><td class="num">${s[2]}</td><td class="num">${s[3]}</td><td class="num">${s[4]}</td></tr>`).join('');
-  const jumlaCash=D.A.kiasi+D.B.kiasi+P.A.kiasi+P.B.kiasi,jumlaOda=D.kiasiO+P.kiasiO;
+  // Only A-(AGO) and B-(PMS) rows, and ONE price column. Cash sales of a month in which the price changed are shown as one row with the average price (amount / litres).
+  const sehemu=(kichwa,safu)=>safu.map((s,i)=>`<tr>${i===0?`<td rowspan="${safu.length}" style="font-weight:700;">${kichwa}</td>`:''}<td>${s[0]}</td><td class="num">${s[1]}</td><td class="num">${s[2]}</td><td class="num">${s[3]}</td></tr>`).join('');
+  const cashD={lita:D.A.lita+D.B.lita,kiasi:D.A.kiasi+D.B.kiasi},cashP={lita:P.A.lita+P.B.lita,kiasi:P.A.kiasi+P.B.kiasi};
+  const wastani=(c)=>c.lita?c.kiasi/c.lita:0;
+  const jumlaCash=cashD.kiasi+cashP.kiasi,jumlaOda=D.kiasiO+P.kiasiO;
   const html=kichwaChaFomuMafuta('MONTHLY CLOSING FORM')+`<div class="inv-meta">Filling station: <b>${escH(BRANCHES[tawi]||tawi)}</b><br>Manager name: <b>${escH(jina)}</b><br>Month: <b>${MIEZI_KAMILI[mo-1]} ${y}</b></div>
-  <table class="inv-table"><thead><tr><th></th><th></th><th class="num">LITRE</th><th class="num">PRICE / OLD PRICE</th><th class="num">NEW PRICE</th><th class="num">AMOUNT</th></tr></thead><tbody>
-  ${sehemu('OPENING BALANCE STOCK',[['A-(AGO)',q(D.awali),p(D.beiAwali),'',a(D.awali*D.beiAwali)],['B-(PMS)',q(P.awali),p(P.beiAwali),'',a(P.awali*P.beiAwali)]])}
-  ${sehemu('TOTAL PURCHASING STOCK',[['A-(AGO)',q(D.litaM),p(D.beiM),'',a(D.kiasiM)],['B-(PMS)',q(P.litaM),p(P.beiM),'',a(P.kiasiM)]])}
-  ${sehemu('TOTAL OF OPENING STOCK AND PURCHASING STOCK',[['A-(AGO)',q(D.awali+D.litaM),p(D.beiMwisho),'',a(D.awali*D.beiAwali+D.kiasiM)],['B-(PMS)',q(P.awali+P.litaM),p(P.beiMwisho),'',a(P.awali*P.beiAwali+P.kiasiM)]])}
-  ${sehemu('TOTAL CASH SALES',[['A-(AGO)',q(D.A.lita),p(D.A.b),'',a(D.A.kiasi)],['B-(AGO)',q(D.B.lita),'',p(D.B.b),a(D.B.kiasi)],['A-(PMS)',q(P.A.lita),p(P.A.b),'',a(P.A.kiasi)],['B-(PMS)',q(P.B.lita),'',p(P.B.b),a(P.B.kiasi)]])}
-  <tr class="inv-total-row"><td colspan="5" style="text-align:right;">TOTAL CASH SALES</td><td class="num">${fmt0(jumlaCash)}</td></tr>
-  ${sehemu('TOTAL ORDER SALES',[['A-(AGO)',q(D.litaO),p(D.beiO),'',a(D.kiasiO)],['B-(AGO)','','','',''],['A-(PMS)',q(P.litaO),p(P.beiO),'',a(P.kiasiO)],['B-(PMS)','','','','']])}
-  <tr class="inv-total-row"><td colspan="5" style="text-align:right;">TOTAL ORDER SALES</td><td class="num">${fmt0(jumlaOda)}</td></tr>
-  ${sehemu('TOTAL DISCOUNTED AMOUNT',[['A-(AGO)','','','',''],['B-(AGO)','','','',''],['A-(PMS)','','','',''],['B-(PMS)','','','','']])}
-  ${sehemu('NET SALES',[['A-(AGO)',q(D.A.lita+D.B.lita+D.litaO),'','',a(D.A.kiasi+D.B.kiasi+D.kiasiO)],['B-(AGO)','','','',''],['A-(PMS)',q(P.A.lita+P.B.lita+P.litaO),'','',a(P.A.kiasi+P.B.kiasi+P.kiasiO)],['B-(PMS)','','','','']])}
-  ${sehemu('CLOSING BALANCE STOCK',[['A-(AGO)',q(D.mwishoLita),p(D.beiMwisho),'',a(D.mwishoLita*D.beiMwisho)],['B-(PMS)',q(P.mwishoLita),p(P.beiMwisho),'',a(P.mwishoLita*P.beiMwisho)]])}
-  <tr class="inv-total-row"><td colspan="5" style="text-align:right;">NET WEALTH</td><td class="num">&nbsp;</td></tr></tbody></table>
+  <table class="inv-table"><thead><tr><th></th><th></th><th class="num">LITRE</th><th class="num">PRICE</th><th class="num">AMOUNT</th></tr></thead><tbody>
+  ${sehemu('OPENING BALANCE STOCK',[['A-(AGO)',q(D.awali),p(D.beiAwali),a(D.awali*D.beiAwali)],['B-(PMS)',q(P.awali),p(P.beiAwali),a(P.awali*P.beiAwali)]])}
+  ${sehemu('TOTAL PURCHASING STOCK',[['A-(AGO)',q(D.litaM),p(D.beiM),a(D.kiasiM)],['B-(PMS)',q(P.litaM),p(P.beiM),a(P.kiasiM)]])}
+  ${sehemu('TOTAL OF OPENING STOCK AND PURCHASING STOCK',[['A-(AGO)',q(D.awali+D.litaM),p(D.beiMwisho),a(D.awali*D.beiAwali+D.kiasiM)],['B-(PMS)',q(P.awali+P.litaM),p(P.beiMwisho),a(P.awali*P.beiAwali+P.kiasiM)]])}
+  ${sehemu('TOTAL CASH SALES',[['A-(AGO)',q(cashD.lita),p(wastani(cashD)),a(cashD.kiasi)],['B-(PMS)',q(cashP.lita),p(wastani(cashP)),a(cashP.kiasi)]])}
+  <tr class="inv-total-row"><td colspan="4" style="text-align:right;">TOTAL CASH SALES</td><td class="num">${fmt0(jumlaCash)}</td></tr>
+  ${sehemu('TOTAL ORDER SALES',[['A-(AGO)',q(D.litaO),p(D.beiO),a(D.kiasiO)],['B-(PMS)',q(P.litaO),p(P.beiO),a(P.kiasiO)]])}
+  <tr class="inv-total-row"><td colspan="4" style="text-align:right;">TOTAL ORDER SALES</td><td class="num">${fmt0(jumlaOda)}</td></tr>
+  ${sehemu('TOTAL DISCOUNTED AMOUNT',[['A-(AGO)','','',''],['B-(PMS)','','','']])}
+  ${sehemu('NET SALES',[['A-(AGO)',q(cashD.lita+D.litaO),'',a(cashD.kiasi+D.kiasiO)],['B-(PMS)',q(cashP.lita+P.litaO),'',a(cashP.kiasi+P.kiasiO)]])}
+  ${sehemu('CLOSING BALANCE STOCK',[['A-(AGO)',q(D.mwishoLita),p(D.beiMwisho),a(D.mwishoLita*D.beiMwisho)],['B-(PMS)',q(P.mwishoLita),p(P.beiMwisho),a(P.mwishoLita*P.beiMwisho)]])}
+  <tr class="inv-total-row"><td colspan="4" style="text-align:right;">NET WEALTH</td><td class="num">&nbsp;</td></tr></tbody></table>
   <div class="inv-meta" style="margin-top:22px;">Signature: ............................................</div>`;
   onyeshaFomuMafuta(html,`monthly-closing-form-${tawi}-${m}`);
 }
