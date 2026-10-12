@@ -2011,6 +2011,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
           </div>
         </div>
       </div>
+      <div id="mfSlipHost"></div>
       <div class="section"><div class="section-header"><h3>📋 Rekodi za Mauzo ya Mafuta</h3></div>
         <div class="section-body"><div class="table-wrap"><table>
           <thead><tr><th>Tarehe</th><th>Zamu</th><th>Tawi</th><th>Pampu / Mkono</th><th>Mfanyakazi</th><th>Aina</th><th class="num">Lita Zilizouzwa</th><th class="num">Lita za Order</th><th class="num">Bei/Lita</th><th class="num">Kiasi Kinachotarajiwa</th><th class="num">Aliyowasilisha</th><th class="num">Tofauti</th><th>Kitendo</th></tr></thead>
@@ -3732,6 +3733,7 @@ function changeViewingTawi(v){
   if($('tawiSelect'))$('tawiSelect').value=v;if($('tawiSelectMobile'))$('tawiSelectMobile').value=v;
   applyPetrolNavVisibility();
   renderAll();jaziChaguoBidhaa();updateJinaSuggestions();
+  if(typeof renderSlipZaMauzo==='function')renderSlipZaMauzo();
 }
 // A fuel station has no invoices, no shop stock, no walk-in credit customers —
 // these tabs are pure hardware-branch concepts, so hide them while looking at
@@ -3980,6 +3982,7 @@ function switchPage(page){
   if(page==='makusanyo'){renderMakusanyo();renderBankSlips('bs');}
   if(page==='mauzo')renderSlipZaMauzo();
   if(page==='fomu-mafuta')anzaFomuMafuta();
+  if(page==='mafuta')renderSlipZaMauzo();
   if(page==='mafuta'){wekaZamuFomu();onZamuMafuta();const t=$('mf-tawi');if(t&&t.value)pakiaMitaZaZamu(t.value);}
   if(page==='mapato')renderBankSlips('bsm');
   if(page==='oda-mafuta')renderOdaMafuta();
@@ -8347,10 +8350,27 @@ async function pakiaSlipZaMauzo(kutoka,hadi,mpya){
   slipMauzoAkiba.set(key,{t:Date.now(),rows});return rows;
 }
 const mweziWaSlipMauzo=()=>{const el=$('sm-mwezi');if(el&&!el.value)el.value=leoISO().slice(0,7);return el?el.value:leoISO().slice(0,7);};
-const slipMauzoNiYangu=()=>ninaTawiLaKazi()&&!!userTawi;
+const niKituoChaMafuta=()=>(userRole==='petroli'||userRole==='petroli_mauzo')&&!!userTawi&&!!PETROL_BRANCHES[userTawi];
+const slipMauzoNiYangu=()=>(ninaTawiLaKazi()||niKituoChaMafuta())&&!!userTawi;
+// The slip section lives on the Mauzo page for shops. For a petrol station (its own login, or the General Manager looking at a station)
+// it moves to the Mafuta page, right under the form where the day's sales are recorded.
+let _slipAsili=null;
+function wekaSlipPahali(){
+  const sec=$('smSection');if(!sec)return;
+  if(!_slipAsili)_slipAsili={parent:sec.parentNode,next:sec.nextSibling};
+  const kwaMafuta=niKituoChaMafuta()||(userRole==='gm'&&!!PETROL_BRANCHES[viewingTawi]);
+  const host=$('mfSlipHost');
+  if(kwaMafuta&&host){if(sec.parentNode!==host)host.appendChild(sec);}
+  else if(sec.parentNode!==_slipAsili.parent)_slipAsili.parent.insertBefore(sec,_slipAsili.next&&_slipAsili.next.parentNode===_slipAsili.parent?_slipAsili.next:null);
+}
 // money the officer took that day (what the customers actually paid) against what he has already banked for that day
 function mapatoYaSikuYaTawi(tarehe){
   const tawi=userTawi;
+  if(niKituoChaMafuta()){      // petrol: the CASH of the day (sales less NMB, CRDB, Lipa Namba and Order) is what goes to the bank
+    return allMafutaMauzo.filter(r=>r.tawi===tawi&&r.tarehe===tarehe&&!r._pending).reduce((a,r)=>{
+      const deni=Math.max(Number(r.njia_deni)||0,(Number(r.lita_oda)||0)*(Number(r.bei_kwa_lita)||0));
+      return a+Math.max(0,(Number(r.jumla)||0)-(Number(r.njia_nmb)||0)-(Number(r.njia_crdb)||0)-(Number(r.njia_lipa)||0)-deni);},0);
+  }
   return confirmedMauzo().filter(s=>s.tawi===tawi&&s.tarehe===tarehe&&s.chanzo!=='Serikali').reduce((a,s)=>a+(Number(s.kilicholipwa)||0),0);
 }
 let _slipMauzoSasa=[];
@@ -8360,11 +8380,12 @@ function onSlipMauzoBadili(){
   const mauzo=mapatoYaSikuYaTawi(tarehe),yaliyowekwa=_slipMauzoSasa.filter(r=>r.tarehe===tarehe&&r.tawi===userTawi).reduce((a,r)=>a+(Number(r.kiasi)||0),0);
   const mpya=parseInt($('sm-kiasi').value)||0,baki=mauzo-yaliyowekwa-mpya;
   box.style.display='';
-  box.innerHTML=`<div>Mauzo yaliyolipwa tarehe ${tarehe}: <b>${pesa(mauzo)}</b> · Slip zilizokwisha wekwa kwa siku hii: <b>${pesa(yaliyowekwa)}</b>${mpya?` · Slip hii: <b>${pesa(mpya)}</b>`:''} · Tofauti: <b style="color:${Math.abs(baki)<1?'var(--a-green)':'var(--a-amber,#E8A33D)'}">${pesa(baki)}</b><br><span style="color:var(--a-muted)">Ni mwongozo tu — malipo ya NMB/CRDB/Lipa kwa mteja moja kwa moja hayahitaji slip.</span></div>`;
+  box.innerHTML=`<div>${niKituoChaMafuta()?'Cash ya mauzo ya mafuta':'Mauzo yaliyolipwa'} tarehe ${tarehe}: <b>${pesa(mauzo)}</b> · Slip zilizokwisha wekwa kwa siku hii: <b>${pesa(yaliyowekwa)}</b>${mpya?` · Slip hii: <b>${pesa(mpya)}</b>`:''} · Tofauti: <b style="color:${Math.abs(baki)<1?'var(--a-green)':'var(--a-amber,#E8A33D)'}">${pesa(baki)}</b><br><span style="color:var(--a-muted)">Ni mwongozo tu — malipo ya NMB/CRDB/Lipa kwa mteja moja kwa moja hayahitaji slip.</span></div>`;
 }
 const _slipMauzoToken={};
 async function renderSlipZaMauzo(){
   const sec=$('smSection');if(!sec)return;
+  wekaSlipPahali();
   const naRuhusa=slipMauzoNiYangu()||['gm','cashier','matumizi'].includes(userRole);
   sec.style.display=naRuhusa?'':'none';if(!naRuhusa)return;
   const ingiza=$('smEntry');if(ingiza)ingiza.style.display=slipMauzoNiYangu()?'':'none';
@@ -8423,7 +8444,7 @@ function safishaSlipYaMauzo(){
   onSlipMauzoBadili();
 }
 async function hifadhiSlipYaMauzo(){
-  if(!slipMauzoNiYangu()){arifu('notifySlipMauzo','❌ Ni maafisa wa mauzo wa tawi tu wanaoweza kuweka slip.','error');return;}
+  if(!slipMauzoNiYangu()){arifu('notifySlipMauzo','❌ Ni maafisa wa tawi au wa kituo cha mafuta tu wanaoweza kuweka slip.','error');return;}
   const tarehe=$('sm-tarehe').value,benki=$('sm-benki').value,kiasi=parseInt($('sm-kiasi').value),rejea=$('sm-rejea').value.trim();
   const faili=$('sm-picha').files&&$('sm-picha').files[0],makosa=[];
   if(!tarehe)makosa.push('chagua tarehe ya mauzo');
