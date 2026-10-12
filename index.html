@@ -1134,7 +1134,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
           <div class="field" id="wrap-kiasi" style="display:none"><label>Kiasi Kilicholipwa (jumla ya invoice nzima, TZS)</label><input type="number" id="m-kiasi" placeholder="0"/></div>
           <div class="field" id="wrap-tarehe-mkopo" style="display:none"><label>Tarehe ya Mwisho wa Kulipa</label><input type="date" id="m-tarehe-mkopo"/></div>
           <div class="field full" id="mauzoGridBox">
-            <label>Bidhaa za Mauzo Haya — orodhesha zote hapa chini, kisha uhifadhi mara moja</label>
+            <label>Bidhaa za Mauzo Haya — orodhesha zote hapa chini, kisha uhifadhi mara moja</label><div style="margin:2px 0 10px;"><button type="button" class="btn secondary sm" onclick="skaniMauzo()">📷 Soma Karatasi ya Mauzo kutoka Picha</button> <span style="font-size:11.5px;color:var(--a-muted);">Piga picha ya fomu ya karatasi — mfumo utasoma na kujaza; wewe unahakiki kisha unahifadhi.</span></div>
             <datalist id="m-bidhaa-suggestions"></datalist>
             <div class="grid-scroll-hint">↔ Telezesha jedwali kulia ili kuona sehemu iliyobaki</div>
             <div class="table-wrap"><table class="grid-entry">
@@ -1221,6 +1221,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       <div class="section"><div class="section-header"><h3>➕ Omba Transfer</h3></div>
         <div class="section-body">
           <div id="notifyUhamisho" class="notify"></div>
+          <div style="margin:2px 0 10px;"><button type="button" class="btn secondary sm" onclick="skaniUhamisho()">📷 Soma Fomu ya Transfer kutoka Picha</button> <span style="font-size:11.5px;color:var(--a-muted);">Piga picha ya fomu ya karatasi — mfumo utasoma na kujaza; wewe unahakiki kisha unahifadhi.</span></div><div id="uhSkaniBox"></div>
           <div class="form-grid">
             <div class="field"><label>Tarehe</label><input type="date" id="uh-tarehe"/></div>
             <div id="uhRoseMaelezo" style="display:none;font-size:12.5px;color:var(--a-muted);margin-bottom:10px;padding:9px 12px;border:1px solid var(--a-line);border-left:3px solid #4A90E2;border-radius:8px;">📦 Unaomba <strong>matairi yaliyo kwenye orodha yako tu</strong>, kutoka kwa <strong>Abel (Nakatunga Godown)</strong> pekee. Ombi hili ni la <strong>kuongeza stock yako</strong> — hakuna mauzo yanayofanyika.</div>
@@ -1420,7 +1421,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
             <input type="hidden" id="t-msambazaji" value=""/>
             <div class="field"><label>Jina Lako (Uliyepokea)</label><input type="text" id="t-jina-muhusika" autocomplete="off" placeholder="Jina la mmiliki/muhusika wa duka"/><div class="field-error" id="err-t-jina-muhusika">Jina linahitajika</div></div>
             <div class="field full" id="ununuziGridBox">
-              <label>Bidhaa za Ununuzi Huu — orodhesha zote hapa chini, kisha uhifadhi mara moja</label>
+              <label>Bidhaa za Ununuzi Huu — orodhesha zote hapa chini, kisha uhifadhi mara moja</label><div style="margin:2px 0 10px;"><button type="button" class="btn secondary sm" onclick="skaniUnunuzi()">📷 Soma Purchase Form kutoka Picha</button> <button type="button" class="btn secondary sm" onclick="skaniBinCardStock()">📷 Soma Bin Card (Ingiza Stock)</button> <span style="font-size:11.5px;color:var(--a-muted);">Piga picha ya fomu ya karatasi — mfumo utasoma na kujaza; wewe unahakiki kisha unahifadhi.</span></div>
               <datalist id="t-jina-suggestions"></datalist>
               <input type="hidden" id="t-jina-sw" value=""/>
               <div class="grid-scroll-hint">↔ Telezesha jedwali kulia ili kuona sehemu iliyobaki</div>
@@ -1695,6 +1696,29 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
         </div>
       </div>
 
+      <div class="section" id="mkAfisaSection">
+        <div class="section-header"><h3>🔎 Tafuta Rekodi za Afisa</h3></div>
+        <div class="section-body">
+          <datalist id="mk-afisa-list"></datalist>
+          <div class="form-grid">
+            <div class="field"><label>Jina la Afisa</label><input type="search" id="mk-afisa-tafuta" list="mk-afisa-list" placeholder="Andika jina, mf. Diana" autocomplete="off" oninput="tafutaAfisaMakusanyoPole()"/></div>
+            <div class="field"><label>Kuanzia Tarehe</label><input type="date" id="mk-afisa-kutoka" onchange="tafutaAfisaMakusanyo()"/></div>
+            <div class="field"><label>Hadi Tarehe</label><input type="date" id="mk-afisa-hadi" onchange="tafutaAfisaMakusanyo()"/></div>
+          </div>
+          <div class="controls">
+            <button class="btn sm secondary" onclick="mkAfisaMuda('mwezi')">Mwezi huu</button>
+            <button class="btn sm secondary" onclick="mkAfisaMuda('zote')">Tarehe zote</button>
+            <button class="btn sm secondary" onclick="mkAfisaSafisha()">🗑 Safisha</button>
+          </div>
+          <div id="mk-afisa-hitilafu" class="notify" style="display:none;"></div>
+          <div id="mk-afisa-muhtasari"></div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Tarehe</th><th>Afisa</th><th class="num">Cash</th><th class="num">Lipa Namba</th><th class="num">Benki</th><th class="num">Jumla</th><th>Aliyeingiza</th><th>Saa</th><th></th></tr></thead>
+            <tbody id="tbody-mk-afisa"></tbody>
+          </table></div>
+        </div>
+      </div>
+
       <div class="section" id="bsSection">
         <div class="section-header"><h3>🏦 Amana Benki — Bank Slip</h3>
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
@@ -1913,6 +1937,8 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
             <input type="hidden" id="bc-bidhaa-id"/>
           </div>
           <button class="btn gold" onclick="generateBinCard()">🖨 Tengeneza Bin Card</button>
+          <button class="btn secondary" type="button" onclick="skaniBinCard()">📷 Soma Bin Card ya Karatasi (Hakiki Salio)</button>
+          <div id="bcSkaniBox" style="margin-top:12px;"></div>
         </div>
       </div>
       <div class="section" style="margin-top:16px"><div class="section-header"><h3>🏷 Discount Form</h3></div>
@@ -4074,7 +4100,7 @@ function hesabuGridUnunuzi(){
     tr.querySelector('.sn').textContent=i+1;
     const jina=tr.querySelector('.g-jina').value.trim(),idadi=parseFloat(tr.querySelector('.g-idadi').value)||0,rate=parseInt(tr.querySelector('.g-rate').value)||0;
     const ex=jina&&allBidhaa.find(p=>p.jina.toLowerCase()===jina.toLowerCase()&&p.tawi===tawi);
-    tr.querySelector('.g-hint').textContent=!jina?'':ex?`Ipo stoo: ${ex.idadi} ${ex.kipimo||'pc'} · bei sasa ${pesa(ex.bei_kuuzia)}`:'Bidhaa mpya';
+    tr.querySelector('.g-hint').textContent=(!jina?'':ex?`Ipo stoo: ${ex.idadi} ${ex.kipimo||'pc'} · bei sasa ${pesa(ex.bei_kuuzia)}`:'Bidhaa mpya')+(tr._tarehe?` · 📅 ${tr._tarehe}`:'');
     tr.querySelector('.g-jumla').textContent=(idadi&&rate)?pesa(Math.round(idadi*rate)):'—';
     if(idadi&&rate)jumla+=Math.round(idadi*rate);
   });
@@ -4104,7 +4130,7 @@ function somaGridUnunuzi(){
     if(!(idadi>0))tatizo.push('weka QTY');
     if(!rate||rate<1)tatizo.push('weka RATE');
     if(tatizo.length){tr.classList.add('g-err');makosa.push(`Mstari ${i+1}: ${tatizo.join(', ')}`);return;}
-    mistari.push({jina,kipimo,idadi,rate,dereva:tr.querySelector('.g-dereva').value.trim(),gari:tr.querySelector('.g-gari').value.trim()});
+    mistari.push({jina,kipimo,idadi,rate,tarehe:tr._tarehe||'',dereva:tr.querySelector('.g-dereva').value.trim(),gari:tr.querySelector('.g-gari').value.trim()});
   });
   return{mistari,makosa};
 }
@@ -4133,7 +4159,7 @@ async function _ongezaUununuziImpl(){
   mistari.forEach(l=>{l.jina=jinaSahihi.get(ufunguoWaJina(l.jina));});
 
   // One record per item (RATE and JUMLA exactly as on the paper Purchase Form), all sent in ONE request.
-  const safu=mistari.map(l=>({tarehe,jina:l.jina,tawi,aina,kipimo:l.kipimo,idadi:l.idadi,bei_kununulia:l.rate,jumla:Math.round(l.idadi*l.rate),msambazaji,jina_muhusika:jinaMuhusika,jina_dereva:l.dereva||'',namba_gari:l.gari||''}));
+  const safu=mistari.map(l=>({tarehe:l.tarehe||tarehe,jina:l.jina,tawi,aina,kipimo:l.kipimo,idadi:l.idadi,bei_kununulia:l.rate,jumla:Math.round(l.idadi*l.rate),msambazaji,jina_muhusika:jinaMuhusika,jina_dereva:l.dereva||'',namba_gari:l.gari||''}));
   // Stock: one update per DISTINCT item (the same item listed twice is added up). RATE is the item's selling price.
   // The buying price is not asked of the sales officer, so an existing item keeps whatever buying price it has.
   const kwaJina=new Map();
@@ -7752,6 +7778,204 @@ function jengaKitabuRahisiChaRipotiOrder(miezi){      // plain fallback (no colo
   return wb;
 }
 
+
+/* ═══════════════════════════════════════════════════════════════
+   SOMA KUTOKA PICHA — a photo of the paper form is read by the scan-document function (Gemini);
+   the rows are put into the SAME form the user would have typed in. Nothing is saved until the user checks it and presses Hifadhi.
+   ═══════════════════════════════════════════════════════════════ */
+const SCAN_FN_URL=`${SB_URL}/functions/v1/scan-document`;
+let skaniInaendelea=false;
+function chaguaPicha(){return new Promise(res=>{const i=document.createElement('input');i.type='file';i.accept='image/*';i.onchange=()=>res(i.files&&i.files[0]||null);i.oncancel=()=>res(null);i.click();});}
+function punguzaPichaKwaSkani(file,max=1800){return new Promise((res,rej)=>{
+  const img=new Image(),u=URL.createObjectURL(file);
+  img.onload=()=>{const k=Math.min(1,max/Math.max(img.width,img.height)),w=Math.round(img.width*k),h=Math.round(img.height*k),c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);URL.revokeObjectURL(u);res(c.toDataURL('image/jpeg',0.85).split(',')[1]);};
+  img.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('Picha haisomeki — jaribu picha nyingine'));};
+  img.src=u;});}
+async function skaniFomu(kind){
+  if(skaniInaendelea)return null;
+  if(!navigator.onLine){toast('❌ Hakuna mtandao — kusoma picha kunahitaji mtandao');return null;}
+  const f=await chaguaPicha();if(!f)return null;
+  skaniInaendelea=true;toast('📷 Inasoma picha… subiri sekunde chache');
+  try{
+    const image=await punguzaPichaKwaSkani(f);
+    const h0=await authHeaders(),h={'apikey':h0.apikey,'Authorization':h0.Authorization,'Content-Type':'application/json'};      // only the headers the function needs (extra ones fail the browser's permission check)
+    const r=await fetch(SCAN_FN_URL,{method:'POST',headers:h,body:JSON.stringify({kind,image,mime:'image/jpeg'})});
+    const d=await r.json().catch(()=>null);
+    if(!r.ok||!d||!d.ok)throw new Error(((d&&d.message)||'Imeshindwa kusoma picha')+(d&&d.detail?' ['+String(d.detail).slice(0,260)+']':''));
+    return d.data||{};
+  }catch(e){toast('❌ '+e.message);return null;}
+  finally{skaniInaendelea=false;}
+}
+// The product on the paper → the product in stock (exact, or a very close match; never a loose guess).
+function linganinishaBidhaa(jina,orodha){
+  const k=ufunguoWaJina(jina);if(!k)return null;
+  let m=orodha.find(p=>ufunguoWaJina(p.jina)===k||(p.jina_sw&&ufunguoWaJina(p.jina_sw)===k));if(m)return m;
+  const tok=(t)=>String(t||'').toLowerCase().split(/[^a-z0-9.]+/).filter(Boolean);
+  const a=new Set(tok(jina));if(!a.size)return null;
+  let best=null,bs=0;
+  orodha.forEach(p=>{const b=tok(p.jina);if(!b.length)return;const sc=b.filter(x=>a.has(x)).length/Math.max(a.size,b.length);if(sc>bs){bs=sc;best=p;}});
+  return bs>=0.75?best:null;
+}
+const tareheSahihi=(t)=>/^\d{4}-\d{2}-\d{2}$/.test(String(t||''))&&t<=leoISO();
+const idadiSahihi=(x)=>Number(x)>0?Math.round(Number(x)*1000)/1000:0;
+async function skaniUnunuzi(){const d=await skaniFomu('manunuzi');if(!d)return;jazaGridUnunuzi(d);}
+function jazaGridUnunuzi(d){
+  const mist=(d.mistari||[]).filter(l=>l&&String(l.jina||'').trim()&&Number(l.idadi)>0);
+  if(!mist.length){arifu('notifyManunuzi','❌ Hakuna mistari iliyoweza kusomwa kwenye picha — jaribu picha iliyo wazi zaidi (mwanga mzuri, karatasi nzima ionekane).','error');return;}
+  const b=$('ununuziGridBody'),tawi=$('t-tawi').value;
+  [...b.children].forEach(tr=>{if(!safuUnunuziImetumika(tr))tr.remove();});
+  const stoo=allBidhaa.filter(p=>p.tawi===tawi);let mashaka=0,mwisho=null;
+  mist.forEach(l=>{
+    const tr=safuUnunuziMpya();b.appendChild(tr);
+    const ex=linganinishaBidhaa(l.jina,stoo);
+    tr.querySelector('.g-jina').value=ex?ex.jina:String(l.jina).trim();
+    const kp=String(l.kipimo||(ex&&ex.kipimo)||'').trim().toLowerCase(),sel=tr.querySelector('.g-kipimo');
+    const op=[...sel.options].find(o=>o.value.toLowerCase()===kp);if(op)sel.value=op.value;
+    tr.querySelector('.g-idadi').value=idadiSahihi(l.idadi)||'';
+    const rate=Math.round(Number(l.rate)||0);if(rate>0)tr.querySelector('.g-rate').value=rate;
+    tr.querySelector('.g-dereva').value=String(l.dereva||'').trim();
+    tr.querySelector('.g-gari').value=String(l.gari||'').trim();
+    tr._shaka=!!l.hakiki||!(rate>0);mwisho=tr;
+    tr._tarehe=tareheSahihi(l.tarehe)?l.tarehe:(tareheSahihi(d.tarehe)?d.tarehe:'');      // each row keeps ITS OWN date from the paper
+  });
+  if(mwisho)onSafuUnunuzi(mwisho.querySelector('.g-jina'));
+  [...b.children].forEach(tr=>{if(tr._shaka){tr.classList.add('g-err');mashaka++;}});
+  {const t0=[...b.children].map(tr=>tr._tarehe).find(Boolean);if(t0)$('t-tarehe').value=t0;}
+  const tarehePekee=new Set([...b.children].map(tr=>tr._tarehe).filter(Boolean));
+  hesabuGridUnunuzi();
+  arifu('notifyManunuzi',`✅ Mistari ${mist.length} imesomwa kutoka kwenye picha${tarehePekee.size>1?` (tarehe ${tarehePekee.size} tofauti — kila mstari umehifadhiwa na tarehe yake)`:''}${mashaka?` — ${mashaka} yenye rangi nyekundu haikusomeka vizuri, ihakiki`:''}. Linganisha na karatasi, rekebisha kisha ubonyeze Hifadhi.`,'success');
+}
+let skaniMauzoBaki=[];
+function jazaMauzoKundi(g,mteja){
+  const b=$('mauzoGridBody'),stoo=filterByTawi(allBidhaa);let mashaka=0,mwisho=null;
+  [...b.children].forEach(tr=>{if(!safuMauzoImetumika(tr))tr.remove();});
+  g.mist.forEach(l=>{
+    const tr=safuMauzoMpya();b.appendChild(tr);
+    const p=linganinishaBidhaa(l.jina,stoo);
+    tr.querySelector('.g-bidhaa').value=p?p.jina:String(l.jina).trim();
+    tr.querySelector('.g-idadi').value=idadiSahihi(l.idadi)||'';
+    const pg=Math.round(Number(l.punguzo)||0);if(pg>0)tr.querySelector('.g-punguzo').value=pg;
+    tr._shaka=!p||!!l.hakiki;mwisho=tr;
+  });
+  if(mwisho)onSafuMauzo(mwisho.querySelector('.g-bidhaa'));
+  [...b.children].forEach(tr=>{if(tr._shaka){tr.classList.add('g-err');mashaka++;}});
+  if(g.tarehe&&$('m-tarehe'))$('m-tarehe').value=g.tarehe;
+  if(mteja&&String(mteja).trim()&&$('m-mteja')&&!$('m-mteja').value.trim())$('m-mteja').value=String(mteja).trim();
+  hesabuGridMauzo();
+  arifu('notifyMauzo',`✅ Mistari ${g.mist.length} ${g.tarehe?`ya tarehe ${g.tarehe} `:''}imesomwa kutoka kwenye picha${mashaka?` — ${mashaka} yenye rangi nyekundu haipo kwenye stoo ya tawi hili au haikusomeka vizuri, ihakiki`:''}. Linganisha na karatasi kisha ubonyeze Hifadhi.`,'success');
+}
+function onyeshaBakiMauzo(){
+  let bx=$('mauzoSkaniBaki');
+  if(!bx){bx=document.createElement('div');bx.id='mauzoSkaniBaki';const gb=$('mauzoGridBox');if(gb&&gb.parentNode)gb.parentNode.insertBefore(bx,gb);}
+  if(!skaniMauzoBaki.length){bx.innerHTML='';bx.style.display='none';return;}
+  bx.style.display='';
+  bx.innerHTML=`<div style="border:1.5px solid var(--a-rg);border-radius:10px;padding:12px;margin:0 0 12px;grid-column:1/-1;">
+    <div style="font-weight:700;margin-bottom:4px;">📅 Karatasi ina tarehe nyingine ${skaniMauzoBaki.length} bado:</div>
+    <div style="font-size:13px;margin-bottom:8px;">${skaniMauzoBaki.map(g=>`<b>${g.tarehe||'bila tarehe'}</b> (mistari ${g.mist.length})`).join(' · ')}</div>
+    <div style="font-size:12px;color:var(--a-muted);margin-bottom:8px;">Kila tarehe huhifadhiwa kama mauzo yake yenye tarehe sahihi. Hifadhi mistari iliyopo kwanza, kisha ubonyeze hapa chini.</div>
+    <button type="button" class="btn gold sm" onclick="jazaTareheInayofuataMauzo()">➡ Jaza tarehe inayofuata (${skaniMauzoBaki[0].tarehe||'bila tarehe'})</button></div>`;
+}
+function jazaTareheInayofuataMauzo(){
+  if([...$('mauzoGridBody').children].some(tr=>safuMauzoImetumika(tr))){toast('⚠ Hifadhi kwanza mistari iliyopo kwenye orodha, kisha ubonyeze tena');return;}
+  const g=skaniMauzoBaki.shift();if(!g)return;
+  jazaMauzoKundi(g,'');onyeshaBakiMauzo();
+}
+async function skaniMauzo(){const d=await skaniFomu('mauzo');if(!d)return;jazaMauzoKutokaData(d);}
+function jazaMauzoKutokaData(d){
+  const mist=(d.mistari||[]).filter(l=>l&&String(l.jina||'').trim()&&Number(l.idadi)>0);
+  if(!mist.length){arifu('notifyMauzo','❌ Hakuna mistari iliyoweza kusomwa kwenye picha — jaribu picha iliyo wazi zaidi.','error');return;}
+  // The sales form saves ONE date at a time, so rows are grouped by their own date: the earliest date is filled now, the others follow one tap at a time.
+  const kundi=new Map();
+  mist.forEach(l=>{const t=tareheSahihi(l.tarehe)?l.tarehe:(tareheSahihi(d.tarehe)?d.tarehe:'');if(!kundi.has(t))kundi.set(t,[]);kundi.get(t).push(l);});
+  skaniMauzoBaki=[...kundi.entries()].sort((a,b)=>String(a[0]).localeCompare(String(b[0]))).map(([tarehe,mist])=>({tarehe,mist}));
+  const g=skaniMauzoBaki.shift();
+  jazaMauzoKundi(g,d.mteja);
+  onyeshaBakiMauzo();
+}
+
+// A BIN CARD as a stock-in sheet: its IN lines (opening STOCK and every later IN) become Purchase rows with their own date and price;
+// its OUT lines are offered separately as Sales, because they only belong in the system if those sales were never entered.
+let skaniBinCardData=null;
+async function skaniBinCardStock(){
+  const d=await skaniFomu('bincard');if(!d)return;
+  const jina=String(d.jina||'').trim(),m=(d.mistari||[]).filter(l=>l);
+  const ndani=m.filter(l=>Number(l.ndani)>0),nje=m.filter(l=>Number(l.nje)>0);
+  if(!jina||!ndani.length){arifu('notifyManunuzi',!jina?'❌ Jina la bidhaa (ITEM CODE) halikusomeka kwenye Bin Card — jaribu picha iliyo wazi zaidi.':'❌ Hakuna mstari wa IN (stock iliyoingia) uliosomwa kwenye Bin Card hii.','error');return;}
+  skaniBinCardData={jina,kipimo:String(d.kipimo||'').trim(),ndani,nje,salio:d.salio_la_mwisho};
+  jazaGridUnunuzi({tarehe:'',mistari:ndani.map(l=>{
+    const bei=Number(l.bei)>0?Number(l.bei):(Number(l.ununuzi)>0?Math.round(Number(l.ununuzi)/Number(l.ndani)):null);
+    const haikubaliani=Number(l.bei)>0&&Number(l.ununuzi)>0&&Math.abs(Number(l.bei)*Number(l.ndani)-Number(l.ununuzi))>1;      // PRICE × IN should equal PURCHASE
+    return{tarehe:l.tarehe,jina,kipimo:skaniBinCardData.kipimo,idadi:l.ndani,rate:bei,hakiki:!!l.hakiki||haikubaliani};})});
+  onyeshaMauzoYaBinCard();
+}
+function onyeshaMauzoYaBinCard(){
+  let bx=$('bcMauzoBox');
+  if(!bx){bx=document.createElement('div');bx.id='bcMauzoBox';const gb=$('ununuziGridBox');if(gb&&gb.parentNode)gb.parentNode.insertBefore(bx,gb);}
+  const dd=skaniBinCardData;
+  if(!dd||!dd.nje.length){bx.innerHTML='';bx.style.display='none';return;}
+  const jumlaNje=dd.nje.reduce((a,l)=>a+Number(l.nje),0),jumlaNdani=dd.ndani.reduce((a,l)=>a+Number(l.ndani),0);
+  bx.style.display='';
+  bx.innerHTML=`<div style="border:1.5px solid var(--a-rg);border-radius:10px;padding:12px;margin:0 0 12px;grid-column:1/-1;">
+    <div style="font-weight:700;margin-bottom:4px;">📒 Bin Card ya "${escH(dd.jina)}" pia ina mauzo/matoleo (OUT): ${fmtIdadi(jumlaNje)} kwa mistari ${dd.nje.length}</div>
+    <div style="font-size:13px;margin-bottom:6px;">${dd.nje.map(l=>`${escH(l.tarehe||'?')}: ${fmtIdadi(l.nje)}`).join(' · ')}</div>
+    <div style="font-size:12px;color:var(--a-muted);margin-bottom:8px;">Stock ya mwisho kwenye karatasi: <b>${dd.salio!=null?fmtIdadi(dd.salio):fmtIdadi(jumlaNdani-jumlaNje)}</b> (IN ${fmtIdadi(jumlaNdani)} − OUT ${fmtIdadi(jumlaNje)}). Manunuzi hapo juu yanaingiza IN tu. Kama mauzo haya hayajaingizwa kwenye mfumo, bonyeza hapa chini — <b>hifadhi Manunuzi kwanza</b> ili bidhaa iwepo stoo.</div>
+    <button type="button" class="btn gold sm" onclick="jazaMauzoYaBinCard()">➡ Ingiza OUT kama Mauzo (kwa tarehe zake)</button></div>`;
+}
+function jazaMauzoYaBinCard(){
+  const dd=skaniBinCardData;if(!dd||!dd.nje.length)return;
+  if(!allBidhaa.some(p=>filterByTawi([p]).length&&ufunguoWaJina(p.jina)===ufunguoWaJina(dd.jina))){toast('⚠ Hifadhi Manunuzi ya bidhaa hii kwanza, kisha ubonyeze tena');return;}
+  switchPage('mauzo');
+  jazaMauzoKutokaData({tarehe:'',mteja:'',mistari:dd.nje.map(l=>({tarehe:l.tarehe,jina:dd.jina,idadi:l.nje,hakiki:!!l.hakiki}))});
+}
+let skaniUhamishoMist=[];
+async function skaniUhamisho(){
+  const d=await skaniFomu('uhamisho');if(!d)return;
+  const mist=(d.mistari||[]).filter(l=>l&&String(l.jina||'').trim()&&Number(l.idadi)>0);
+  const box=$('uhSkaniBox');if(!box)return;
+  if(!mist.length){box.innerHTML='';arifu('notifyUhamisho','❌ Hakuna mistari iliyoweza kusomwa kwenye picha — jaribu picha iliyo wazi zaidi.','error');return;}
+  const sel=$('uh-bidhaa'),ruhusa=new Set([...sel.options].map(o=>o.value));
+  const orodha=allBidhaa.filter(p=>ruhusa.has(p.jina.toLowerCase()));
+  skaniUhamishoMist=mist.map(l=>({l,p:linganinishaBidhaa(l.jina,orodha)}));
+  box.innerHTML=`<div style="border:1.5px solid var(--a-line);border-radius:10px;padding:12px;margin-bottom:12px;">
+    <div style="font-weight:700;margin-bottom:4px;">📷 Zilizosomwa kutoka kwenye picha${d.kutoka?` — kutoka: <span style="font-weight:600">${escH(d.kutoka)}</span>`:''}</div>
+    <div style="font-size:12px;color:var(--a-muted);margin-bottom:8px;">Bonyeza "Jaza" kwa kila bidhaa, kisha "Tuma Ombi" (weka alama ya "Endelea kuongeza bidhaa" ili ziwe ombi moja).</div>
+    <table style="width:100%;font-size:13px;"><tbody>${skaniUhamishoMist.map((x,i)=>`<tr><td style="padding:5px 4px;">${escH(x.l.jina)}${x.l.hakiki?' <span class="pill pill-amber">hakiki</span>':''}</td><td class="num" style="white-space:nowrap;">${x.l.idadi} ${escH(x.l.kipimo||'')}</td><td>${x.p?`<span style="color:var(--a-green,#4ade80)">✓ ${escH(x.p.jina)}</span>`:'<span class="pill pill-red">haipo kwenye orodha</span>'}</td><td>${x.p?`<button type="button" class="btn sm gold" onclick="jazaUhamishoKutokaPicha(${i})">Jaza</button>`:''}</td></tr>`).join('')}</tbody></table></div>`;
+}
+function jazaUhamishoKutokaPicha(i){
+  const x=skaniUhamishoMist[i];if(!x||!x.p)return;
+  $('uh-bidhaa').value=x.p.jina.toLowerCase();jaziUhamishoTawiKwaBidhaa();
+  $('uh-idadi').value=idadiSahihi(x.l.idadi)||'';
+  updateUhamishoBeiSummary();
+  $('uh-idadi').scrollIntoView({block:'center',behavior:'smooth'});
+  toast('✅ Imejazwa — hakiki kisha ubonyeze "Tuma Ombi"');
+}
+async function skaniBinCard(){
+  const d=await skaniFomu('bincard');if(!d)return;
+  const box=$('bcSkaniBox');if(!box)return;
+  const m=(d.mistari||[]).filter(l=>l);
+  if(!m.length){box.innerHTML='<div class="notify show error">❌ Hakuna mistari iliyoweza kusomwa kwenye Bin Card — jaribu picha iliyo wazi zaidi.</div>';return;}
+  const p=linganinishaBidhaa(d.jina,filterByTawi(allBidhaa));
+  const n=(x)=>x==null||x===''?'':Number(x);
+  let prev=null;const kosa=[];
+  const safu=m.map((l,i)=>{
+    let tatizo=!!l.hakiki;
+    if(prev!=null&&l.salio!=null){const tarajio=Math.round((prev+(Number(l.ndani)||0)-(Number(l.nje)||0))*1000)/1000;if(Math.abs(tarajio-Number(l.salio))>0.0005){tatizo=true;kosa.push(i+1);}}
+    if(l.salio!=null)prev=Number(l.salio);
+    return`<tr${tatizo?' style="background:rgba(248,113,113,.12)"':''}><td>${escH(l.tarehe||'')}</td><td>${escH(l.maelezo||'')}</td><td class="num">${n(l.ndani)}</td><td class="num">${n(l.nje)}</td><td class="num"><strong>${n(l.salio)}</strong></td></tr>`;
+  }).join('');
+  const salioKaratasi=d.salio_la_mwisho!=null?Number(d.salio_la_mwisho):(prev!=null?prev:null);
+  let ulinganisho='';
+  if(!p)ulinganisho=`<div style="margin:8px 0;">⚠ Bidhaa "${escH(d.jina||'?')}" haikupatikana kwenye stoo ya tawi hili — hakuna kulinganisha.</div>`;
+  else if(salioKaratasi==null)ulinganisho=`<div style="margin:8px 0;">⚠ Salio la mwisho halikusomeka kwenye karatasi.</div>`;
+  else{const tofauti=Math.round((Number(p.idadi)-salioKaratasi)*1000)/1000;
+    ulinganisho=tofauti===0?`<div style="margin:8px 0;color:var(--a-green,#4ade80);font-weight:700;">✅ Salio la karatasi (${fmtIdadi(salioKaratasi)}) linalingana na stoo ya mfumo (${fmtIdadi(p.idadi)}) — ${escH(p.jina)}</div>`
+      :`<div style="margin:8px 0;color:#f87171;font-weight:700;">⚠ Tofauti: karatasi ${fmtIdadi(salioKaratasi)} · mfumo ${fmtIdadi(p.idadi)} · tofauti ${fmtIdadi(tofauti)} — ${escH(p.jina)}</div>`;}
+  box.innerHTML=`<div style="border:1.5px solid var(--a-line);border-radius:10px;padding:12px;">
+    <div style="font-weight:700;">📷 Bin Card iliyosomwa: ${escH(d.jina||'—')}</div>${ulinganisho}
+    ${kosa.length?`<div style="margin:6px 0;color:#f87171;font-size:12.5px;">Mistari ${kosa.join(', ')}: salio haliendani na (salio la awali + ndani − nje) — angalia karatasi au makosa ya kuandika.</div>`:''}
+    <div class="table-wrap"><table><thead><tr><th>Tarehe</th><th>Maelezo</th><th class="num">Ndani</th><th class="num">Nje</th><th class="num">Salio</th></tr></thead><tbody>${safu}</tbody></table></div>
+    <div style="font-size:11.5px;color:var(--a-muted);margin-top:6px;">Hii ni ya kuhakiki tu — haibadilishi stoo.</div></div>`;
+}
 function renderAll(){renderDashibodi();renderMaagizo();renderManunuzi();renderMauzo();renderUhamisho();renderUhamishoSent();renderGharama();renderStock();renderWateja();renderWanunuzi();renderRipoti();renderKilaSiku();renderGrid(curFilter);renderMafuta();renderFomuTransfer();renderFomuManunuzi();renderBinCardSuggestions();hesabuGridMauzo();renderOmbiInProgress();renderMarekebisho();renderSerikali();renderSerikaliMafuta();renderWatejaSerikali();renderMaombiStockTawi('tbody-maombi-stock-mauzo','Bidhaa');renderMaombiStockTawi('tbody-maombi-stock-mafuta','Mafuta');renderMaombiSerikaliYangu('tbody-skm-maombi-yangu','Mafuta');renderMaombiSerikaliYangu('tbody-sk-maombi-yangu','Bidhaa');}
 
 /* ─── WANUNUZI — broadcast ─── */
@@ -7886,7 +8110,7 @@ async function pakiaMakusanyo(kutoka,hadi,mpya){
   makusanyoCache.set(key,{t:Date.now(),rows});
   return rows;
 }
-function futaAkibaMakusanyo(){makusanyoCache.clear();}
+function futaAkibaMakusanyo(){makusanyoCache.clear();mkAfisaMajinaYamepakiwa=false;}
 // Groups rows by officer (names compared ignoring capitals/extra spaces) and by day.
 function kusanyaMakusanyo(rows){
   const kwaAfisa=new Map(),kwaSiku=new Map(),jumla={cash:0,lipa:0,benki:0,jumla:0};
@@ -8019,7 +8243,7 @@ async function futaMakusanyo(id){
     const r=await pigaSeva('patch','ukusanyaji_siku',`id=eq.${id}`,{deleted_at:new Date().toISOString()});
     // the database silently skips a row you may not change, so an empty answer means "not allowed"
     if(!Array.isArray(r)||!r.length){toast('❌ Huwezi kufuta rekodi hii — imepita saa 24 tangu iingizwe, au haikuingizwa na wewe.');return;}
-    futaAkibaMakusanyo();toast('✅ Rekodi imefutwa');renderMakusanyo();renderKadiMakusanyo();
+    futaAkibaMakusanyo();toast('✅ Rekodi imefutwa');renderMakusanyo();renderKadiMakusanyo();tafutaAfisaMakusanyo();
   }catch(e){toast('❌ '+e.message);}
 }
 
@@ -8068,6 +8292,54 @@ function onyeshaMweziMakusanyo(rows){
       `<tr style="background:rgba(255,138,87,0.10);font-weight:700;"><td>JUMLA YA MWEZI</td>${seli(g.jumla.cash)}${seli(g.jumla.lipa)}<td class="num">${pesa(g.jumla.jumla)}</td><td></td></tr>`
     :safuTupu(7,'Hakuna makusanyo yaliyoingizwa kwa mwezi huu.');
 }
+// ── search one officer's records (cashier + GM) ──
+let mkAfisaToken=0,mkAfisaTimer=null,mkAfisaMajinaYamepakiwa=false;
+const mkNorm=(t)=>String(t||'').trim().replace(/\s+/g,' ');
+async function mkAfisaPakiaMajina(){
+  if(mkAfisaMajinaYamepakiwa)return;
+  try{
+    const rows=await DB.get('ukusanyaji_siku','select=afisa&deleted_at=is.null&limit=5000');
+    const seen=new Map();(rows||[]).forEach(r=>{const n=mkNorm(r.afisa),k=n.toLowerCase();if(n&&!seen.has(k))seen.set(k,n);});
+    const dl=$('mk-afisa-list');if(dl)dl.innerHTML=[...seen.values()].sort((a,b)=>a.localeCompare(b)).map(n=>`<option value="${escH(n)}"></option>`).join('');
+    mkAfisaMajinaYamepakiwa=true;
+  }catch(_e){}
+}
+function tafutaAfisaMakusanyoPole(){clearTimeout(mkAfisaTimer);mkAfisaTimer=setTimeout(tafutaAfisaMakusanyo,300);}
+function mkAfisaMuda(aina){
+  const k=$('mk-afisa-kutoka'),h=$('mk-afisa-hadi');
+  if(aina==='mwezi'){const m=leoISO().slice(0,7),[y,mm]=m.split('-').map(Number);k.value=m+'-01';h.value=m+'-'+String(new Date(y,mm,0).getDate()).padStart(2,'0');}
+  else{k.value='';h.value='';}
+  tafutaAfisaMakusanyo();
+}
+function mkAfisaSafisha(){['mk-afisa-tafuta','mk-afisa-kutoka','mk-afisa-hadi'].forEach(i=>{$(i).value='';});tafutaAfisaMakusanyo();}
+async function tafutaAfisaMakusanyo(){
+  if(!$('mk-afisa-tafuta'))return;
+  const q=mkNorm($('mk-afisa-tafuta').value),k=$('mk-afisa-kutoka').value,h=$('mk-afisa-hadi').value;
+  const tb=$('tbody-mk-afisa'),ms=$('mk-afisa-muhtasari'),er=$('mk-afisa-hitilafu');
+  const my=++mkAfisaToken;er.style.display='none';
+  if(q.length<2){ms.innerHTML='';tb.innerHTML=safuTupu(9,'Andika jina la afisa (herufi 2 au zaidi) ili kuona rekodi zake zote.');return;}
+  tb.innerHTML=safuTupu(9,'Inatafuta…');
+  try{
+    let f='deleted_at=is.null&afisa=ilike.'+encodeURIComponent('*'+q.replace(/[*%,()]/g,' ')+'*');
+    if(k)f+='&tarehe=gte.'+k;if(h)f+='&tarehe=lte.'+h;
+    const rows=await DB.get('ukusanyaji_siku',f+'&order=tarehe.desc,created_at.desc&limit=1000');
+    if(my!==mkAfisaToken)return;
+    const g=kusanyaMakusanyo(rows||[]);
+    const kadi=(t,v)=>`<div class="card" style="min-width:130px;"><div style="font-size:11px;color:var(--a-muted);">${t}</div><div style="font-size:16px;font-weight:700;">${v}</div></div>`;
+    ms.innerHTML=(rows||[]).length?`<div style="display:flex;gap:10px;flex-wrap:wrap;margin:10px 0;">${kadi('JUMLA',pesa(g.jumla.jumla))}${kadi('CASH',pesa(g.jumla.cash))}${kadi('LIPA NAMBA',pesa(g.jumla.lipa))}${kadi('SIKU',g.siku.length)}${kadi('REKODI',rows.length)}</div>${g.maafisa.length>1?`<p style="font-size:12px;color:var(--a-muted);margin:0 0 8px;">Majina yaliyopatikana: ${g.maafisa.map(a=>escH(a.afisa)).join(', ')}</p>`:''}${rows.length>=1000?'<p style="font-size:12px;color:#c0392b;">Rekodi 1000 za kwanza tu — punguza tarehe.</p>':''}`:'';
+    const sasa=Date.now(),ruhusa=userRole==='gm'||userRole==='cashier';
+    const seli=(v)=>`<td class="num">${v?pesa(v):'—'}</td>`;
+    tb.innerHTML=(rows||[]).length?rows.map(r=>{
+      const ndani=sasa-new Date(r.created_at).getTime()<24*3600*1000;
+      const saa=r.created_at?new Date(r.created_at).toLocaleTimeString('sw-TZ',{hour:'2-digit',minute:'2-digit',timeZone:'Africa/Dar_es_Salaam'}):'—';
+      const kitendo=ruhusa&&(userRole==='gm'||ndani)?`<button class="btn sm danger" onclick="futaMakusanyo('${r.id}')">Futa</button>`:'—';
+      return`<tr><td>${r.tarehe}</td><td><strong>${escH(r.afisa)}</strong></td>${seli(r.cash)}${seli(r.lipa)}${seli((r.nmb||0)+(r.crdb||0))}<td class="num"><strong>${pesa(jumlaYaMakusanyo(r))}</strong></td><td>${escH(r.rekodi_jina||'—')}</td><td>${saa}</td><td>${kitendo}</td></tr>`;
+    }).join(''):safuTupu(9,'Hakuna rekodi za "'+escH(q)+'".');
+  }catch(e){
+    if(my!==mkAfisaToken)return;
+    tb.innerHTML=safuTupu(9,'—');er.style.display='block';er.textContent='Imeshindwa kutafuta: '+e.message;
+  }
+}
 let makusanyoToken=0;
 async function renderMakusanyo(){
   if(!$('makusanyo')||!$('mk-siku'))return;
@@ -8076,6 +8348,7 @@ async function renderMakusanyo(){
   if(!$('mk-mwezi').value)$('mk-mwezi').value=leoISO().slice(0,7);
   const siku=$('mk-siku').value,mwezi=$('mk-mwezi').value,[y,m]=mwezi.split('-').map(Number);
   const kutoka=mwezi+'-01',hadi=mwezi+'-'+String(new Date(y,m,0).getDate()).padStart(2,'0');
+  mkAfisaPakiaMajina();if(!$('mk-afisa-tafuta').value)tafutaAfisaMakusanyo();
   const my=++makusanyoToken;
   try{
     const [rSiku,rMwezi]=await Promise.all([pakiaMakusanyo(siku,siku),pakiaMakusanyo(kutoka,hadi)]);
