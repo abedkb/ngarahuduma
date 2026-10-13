@@ -308,9 +308,12 @@ footer b{color:var(--rg);font-weight:600;}
 #adminApp .card{background:var(--a-panel);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border-radius:var(--a-radius);padding:16px 18px;box-shadow:var(--a-shadow),inset 0 1px 0 rgba(255,255,255,0.06);border:1px solid var(--a-line);transition:transform .25s,box-shadow .25s;}
 #adminApp .card:hover{transform:translateY(-3px);box-shadow:0 16px 40px rgba(0,0,0,0.45),inset 0 1px 0 rgba(255,255,255,0.08);}
 #adminApp .c-label{font-size:11px;color:var(--a-muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
-#adminApp .cards.mz-cards{grid-template-columns:repeat(auto-fit,minmax(min(100%,185px),1fr));}
+#adminApp .cards.mz-cards{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;}
+@media(max-width:900px){#adminApp .cards.mz-cards{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:520px){#adminApp .cards.mz-cards{grid-template-columns:minmax(0,1fr);}}
 #adminApp .mz-cards .card{min-width:0;overflow:hidden;}
-#adminApp .mz-cards .c-value{font-size:clamp(15px,1.6vw,20px);line-height:1.25;overflow-wrap:anywhere;word-break:break-word;}
+#adminApp .mz-cards .card{padding:18px 20px;}
+#adminApp .mz-cards .c-value{font-size:clamp(17px,2vw,24px);line-height:1.25;overflow-wrap:anywhere;word-break:break-word;}
 #adminApp .c-value{font-size:21px;font-weight:700;margin-top:8px;line-height:1;font-family:'IBM Plex Mono',monospace;}
 #adminApp .c-badge{display:inline-flex;align-items:center;margin-top:8px;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600;}
 #adminApp .badge-green{background:var(--a-green-light);color:var(--a-green);}
@@ -1316,7 +1319,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
           <p style="font-size:12px;color:var(--a-muted);margin:4px 0 10px;">Andika jina la aliyekabidhi fedha na kiasi kwa kila njia ya malipo: Cash, Lipa Namba, NMB, CRDB. Orodhesha wote, kisha uhifadhi mara moja. (Cash tu ndiyo huingia kwenye Salio la Cash.)</p>
           <div class="grid-scroll-hint">↔ Telezesha jedwali kulia ili kuona sehemu iliyobaki</div>
           <div class="table-wrap"><table class="grid-entry">
-            <thead><tr><th>#</th><th>Aliyekabidhi (Jina)</th><th>Maelezo (hiari)</th><th class="num">Cash</th><th class="num">Lipa Namba</th><th class="num">NMB</th><th class="num">CRDB</th><th class="num">Jumla<small class="oto-lebo">AUTO</small></th><th></th></tr></thead>
+            <thead><tr><th>#</th><th>Aliyekabidhi (Jina)</th><th>Maelezo</th><th class="num">Cash</th><th class="num">Lipa Namba</th><th class="num">NMB</th><th class="num">CRDB</th><th class="num">Jumla<small class="oto-lebo">AUTO</small></th><th></th></tr></thead>
             <tbody id="mapatoGridBody"></tbody>
           </table></div>
           <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;">
@@ -1333,7 +1336,9 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       <div class="section" id="bsmSection">
         <div class="section-header"><h3>🏦 Bank Slips kutoka kwa Cashier</h3>
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-            <input type="month" id="bsm-mwezi" onchange="renderBankSlips('bsm')" style="width:auto"/>
+            <input type="date" id="bsm-siku" onchange="renderBankSlips('bsm')" style="width:auto" title="Chagua tarehe ya kuona slip"/>
+            <button class="btn sm secondary" type="button" onclick="slipLeo('bsm')">Leo</button>
+            <button class="btn sm secondary" type="button" id="bsm-modi" onclick="slipBadiliModi('bsm')">Mwezi Wote</button>
           </div>
         </div>
         <div class="section-body">
@@ -1558,7 +1563,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
           <div class="form-grid" style="margin-top:12px;">
             <div class="field"><label>Alicholipa Awali (hiari, TZS)</label><input type="number" min="0" step="0.01" id="mdw-awali" placeholder="0" oninput="hesabuGridMdaiwa()"/></div>
             <div class="field"><label>Salio la Deni</label><input type="text" id="mdw-salio" readonly placeholder="auto"/></div>
-            <div class="field"><label>Maelezo (hiari)</label><input type="text" id="mdw-maelezo" autocomplete="off" placeholder="mfano: mkopo wa mwezi wa 10"/></div>
+            <div class="field"><label>Maelezo</label><input type="text" id="mdw-maelezo" autocomplete="off" placeholder="mfano: mkopo wa mwezi wa 10"/></div>
           </div>
           <div id="mdwErrors" class="grid-errors"></div>
           <div class="controls">
@@ -1622,7 +1627,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
             <div class="field"><label>Jina la Mteja</label><input type="text" id="wn-jina" autocomplete="off" placeholder="mfano: Mzee Kajubi Construction"/><div class="field-error" id="err-wn-jina">Jina linahitajika</div></div>
             <div class="field"><label>Namba ya Simu</label><input type="tel" id="wn-simu" placeholder="mfano: 0764 XXX XXX"/><div class="field-error" id="err-wn-simu">Namba inahitajika</div></div>
             <div class="field"><label>Mahali</label><input type="text" id="wn-mahali" placeholder="mfano: Ngara, Kagera"/></div>
-            <div class="field"><label>Maelezo (hiari)</label><input type="text" id="wn-maelezo" placeholder="mfano: Mkandarasi wa kawaida"/></div>
+            <div class="field"><label>Maelezo</label><input type="text" id="wn-maelezo" placeholder="mfano: Mkandarasi wa kawaida"/></div>
             <div class="field"><label>Tawi</label><select id="wn-tawi"></select></div>
           </div>
           <div class="controls">
@@ -1728,7 +1733,9 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       <div class="section" id="bsSection">
         <div class="section-header"><h3>🏦 Amana Benki — Bank Slip</h3>
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-            <input type="month" id="bs-mwezi" onchange="renderBankSlips('bs')" style="width:auto"/>
+            <input type="date" id="bs-siku" onchange="renderBankSlips('bs')" style="width:auto" title="Chagua tarehe ya kuona slip"/>
+            <button class="btn sm secondary" type="button" onclick="slipLeo('bs')">Leo</button>
+            <button class="btn sm secondary" type="button" id="bs-modi" onclick="slipBadiliModi('bs')">Mwezi Wote</button>
           </div>
         </div>
         <div class="section-body">
@@ -2412,7 +2419,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
     </div>
     <div class="field" style="margin-bottom:10px"><label>Kiasi cha Malipo (TZS)</label><input type="number" id="mp-kiasi" placeholder="0" min="1"/></div>
     <div class="field" style="margin-bottom:10px"><label>Tarehe ya Malipo</label><input type="date" id="mp-tarehe"/></div>
-    <div class="field"><label>Maelezo (hiari)</label><input type="text" id="mp-maelezo" placeholder="mfano: Malipo ya kwanza"/></div>
+    <div class="field"><label>Maelezo</label><input type="text" id="mp-maelezo" placeholder="mfano: Malipo ya kwanza"/></div>
     <div id="mp-notify" style="margin-top:10px;font-size:13px;display:none;padding:8px 12px;border-radius:8px;"></div>
     <div class="modal-actions">
       <button class="btn secondary" onclick="fungaAdminModal()">Ghairi</button>
@@ -8752,13 +8759,17 @@ async function pakiaBankSlips(kutoka,hadi,mpya){
   if(!Array.isArray(rows))throw new Error((rows&&rows.message)||'Imeshindwa kupata slip');
   bankSlipsCache.set(key,{t:Date.now(),rows});return rows;
 }
-const mweziWaSlip=(prefix)=>{const el=$(prefix+'-mwezi');if(el&&!el.value)el.value=leoISO().slice(0,7);return el?el.value:leoISO().slice(0,7);};
+const sikuYaSlip=(prefix)=>{const el=$(prefix+'-siku');if(el&&!el.value)el.value=leoISO();return el&&el.value?el.value:leoISO();};
+const _slipModi={};      // 'siku' (default: only the chosen day, today at first) or 'mwezi' (the whole month of the chosen day)
+function slipLeo(prefix){const el=$(prefix+'-siku');if(el)el.value=leoISO();_slipModi[prefix]='siku';renderBankSlips(prefix);}
+function slipBadiliModi(prefix){_slipModi[prefix]=_slipModi[prefix]==='mwezi'?'siku':'mwezi';renderBankSlips(prefix);}
 const _slipToken={};
 async function renderBankSlips(prefix){
   const ruhusa=prefix==='bs'?(userRole==='cashier'||userRole==='gm'):(userRole==='matumizi'||userRole==='gm');
   if(!ruhusa||!$(prefix+'Section'))return;
-  const mwezi=mweziWaSlip(prefix),[y,m]=mwezi.split('-').map(Number);
-  const kutoka=mwezi+'-01',hadi=mwezi+'-'+String(new Date(y,m,0).getDate()).padStart(2,'0');
+  const siku=sikuYaSlip(prefix),mwezi=siku.slice(0,7),[y,m]=mwezi.split('-').map(Number),kwaMwezi=_slipModi[prefix]==='mwezi';
+  const kutoka=kwaMwezi?mwezi+'-01':siku,hadi=kwaMwezi?mwezi+'-'+String(new Date(y,m,0).getDate()).padStart(2,'0'):siku;
+  {const b=$(prefix+'-modi');if(b)b.textContent=kwaMwezi?'Siku Moja Tu':'Mwezi Wote';const jl=$(prefix+'Jumla'),lb=jl&&jl.previousElementSibling;if(lb)lb.textContent=kwaMwezi?'Jumla ya Mwezi':'Jumla ya Siku';}
   const my=_slipToken[prefix]=(_slipToken[prefix]||0)+1,hit=$(prefix+'-hitilafu');
   try{
     const rows=await pakiaBankSlips(kutoka,hadi);
@@ -8771,7 +8782,7 @@ async function renderBankSlips(prefix){
       const ndani=sasa-new Date(r.created_at).getTime()<24*3600*1000;
       const futa=(userRole==='gm'||(userRole==='cashier'&&ndani))?`<button class="btn sm danger" onclick="futaBankSlip('${r.id}')">Futa</button>`:'—';
       return`<tr><td>${r.tarehe}</td><td><strong>${escH(r.benki)}</strong></td><td class="num"><strong>${pesa(r.kiasi)}</strong></td><td>${escH(r.rejea||'—')}</td><td>${escH(r.rekodi_jina||'—')}</td><td><button class="btn sm secondary" onclick="onyeshaSlip('${r.id}')">👁 Ona Slip</button></td><td>${futa}</td></tr>`;
-    }).join(''):safuTupu(7,'Hakuna slip za mwezi huu.');
+    }).join(''):safuTupu(7,kwaMwezi?'Hakuna slip za mwezi huu.':'Hakuna slip za tarehe '+siku+'. Chagua tarehe nyingine au bonyeza "Mwezi Wote".');
   }catch(e){
     if(my!==_slipToken[prefix])return;
     hit.style.display='block';hit.textContent='Imeshindwa kupata slip: '+e.message+(/relation|bank_slips|schema cache/i.test(e.message)?' — endesha ngara-huduma-bank-slips-migration.sql kwanza.':'');
