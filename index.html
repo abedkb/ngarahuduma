@@ -1002,7 +1002,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
         <button class="btn sm secondary" onclick="$('dash-tarehe').value=tareheYaLeo();renderDashibodi();">Leo</button>
       </div>
       <div class="cards">
-        <div class="card"><div class="c-label">Jumla ya Manunuzi</div><div class="c-value" id="cardManunuzi">—</div><span class="c-badge badge-gray" id="cardManunuziBadge">Matumizi</span></div>
+        <div class="card"><div class="c-label">Jumla ya Manunuzi</div><div class="c-value" id="cardManunuzi">—</div></div>
         <div class="card"><div class="c-label">Jumla ya Mauzo</div><div class="c-value" id="cardMauzo">—</div><span class="c-badge badge-green">Mapato</span></div>
         <div class="card" id="cardFaidaWrap"><div class="c-label">Faida Halisi</div><div class="c-value" id="cardFaida">—</div><span class="c-badge" id="faidaBadge">—</span><div id="faidaNote" style="font-size:11px;margin-top:6px;color:#E8A33D;"></div></div>
         <div class="card"><div class="c-label">Madeni</div><div class="c-value" id="cardMadeni">—</div><span class="c-badge badge-amber">Ya msimamizi</span></div>
@@ -3844,7 +3844,7 @@ async function endeshaKwaKikomo(kazi,kikomo){
 // Tables that change rarely (or that only the person saving them cares about at once). A routine
 // background refresh skips them; every 5th refresh — and every refresh you cause by saving — loads all 14.
 const MAFUTA_IDX=new Set([7,8,12]);   // mafuta_mauzo, mafuta_manunuzi, mafuta_mauzo_serikali — not loaded for the Cashier
-const BARIDI=new Set([1,3,5,8,9,11,12]);   // manunuzi, matumizi_ledger, wanunuzi, mafuta_manunuzi, matumizi_salio_awali, mauzo_serikali, mafuta_mauzo_serikali
+const BARIDI=new Set([3,5,8,9,11,12]);   // manunuzi, matumizi_ledger, wanunuzi, mafuta_manunuzi, matumizi_salio_awali, mauzo_serikali, mafuta_mauzo_serikali
 function fetchAllTables(hotOnly,lazima=true){
   const kazi=[
       ()=>DB.getKama('bidhaa','deleted_at=is.null&order=jina.asc',lazima),
@@ -3919,7 +3919,7 @@ function loadAllPoll(){
   if(document.hidden||_loadRunning||_loadPending)return;
   if(Date.now()-_lastActivity>IDLE_MS)return;            // nobody is looking: don't ask the server for nobody
   _pollTick++;
-  _startLoad(_pollTick%5!==0,false);                      // 4 routine refreshes, then 1 full one — and nothing is redrawn if nothing changed
+  _startLoad(_pollTick%3!==0,false);                      // 2 routine refreshes, then 1 full one (so a General Manager correction reaches everyone within ~1.5 min) — and nothing is redrawn if nothing changed
 }
 // Someone touches an idle or just-returned-to screen: catch up straight away (at most once every 20 seconds).
 function _kamaTena(){if(isAdmin&&!document.hidden&&Date.now()-_lastFullLoad>20000)loadAll();}
@@ -4119,8 +4119,11 @@ function hesabuGridUnunuzi(){
   [...b.children].forEach((tr,i)=>{
     tr.querySelector('.sn').textContent=i+1;
     const jina=tr.querySelector('.g-jina').value.trim(),idadi=parseFloat(tr.querySelector('.g-idadi').value)||0,rate=parseInt(tr.querySelector('.g-rate').value)||0;
-    const ex=jina&&allBidhaa.find(p=>p.jina.toLowerCase()===jina.toLowerCase()&&p.tawi===tawi);
-    tr.querySelector('.g-hint').textContent=(!jina?'':ex?`Ipo stoo: ${ex.idadi} ${ex.kipimo||'pc'} · bei sasa ${pesa(ex.bei_kuuzia)}`:'Bidhaa mpya')+(tr._tarehe?` · 📅 ${tr._tarehe}`:'');
+    // The same name at a DIFFERENT price is a different product: the hint says which one this row will add to.
+    const zote=jina?allBidhaa.filter(p=>p.tawi===tawi&&ufunguoWaJina(p.jina)===ufunguoWaJina(jina)):[];
+    const ex=jina&&(rate?(zote.find(p=>(Number(p.bei_kuuzia)||0)===rate)||zote.find(p=>!(Number(p.bei_kuuzia)>0))):(zote.length===1?zote[0]:null));
+    const maelezo=!jina?'':ex?`Ipo stoo: ${ex.idadi} ${ex.kipimo||'pc'} · bei sasa ${pesa(ex.bei_kuuzia)}`:zote.length?(rate?`Bidhaa mpya kwa bei hii — zilizopo bei: ${zote.map(p=>pesa(p.bei_kuuzia)).join(', ')}`:`Ipo kwa bei: ${zote.map(p=>pesa(p.bei_kuuzia)).join(', ')} — weka RATE`):'Bidhaa mpya';
+    tr.querySelector('.g-hint').textContent=maelezo+(tr._tarehe?` · 📅 ${tr._tarehe}`:'');
     tr.querySelector('.g-jumla').textContent=(idadi&&rate)?pesa(Math.round(idadi*rate)):'—';
     if(idadi&&rate)jumla+=Math.round(idadi*rate);
   });
@@ -4180,14 +4183,16 @@ async function _ongezaUununuziImpl(){
 
   // One record per item (RATE and JUMLA exactly as on the paper Purchase Form), all sent in ONE request.
   const safu=mistari.map(l=>({tarehe:tareheMaalumu()||l.tarehe||tarehe,jina:l.jina,tawi,aina,kipimo:l.kipimo,idadi:l.idadi,bei_kununulia:l.rate,jumla:Math.round(l.idadi*l.rate),msambazaji,jina_muhusika:jinaMuhusika,jina_dereva:l.dereva||'',namba_gari:l.gari||''}));
-  // Stock: one update per DISTINCT item (the same item listed twice is added up). RATE is the item's selling price.
-  // The buying price is not asked of the sales officer, so an existing item keeps whatever buying price it has.
+  // Stock: one update per DISTINCT product = the same name AND the same RATE (the item's selling price), the same item listed twice
+  // at that rate is added up. The same name at a DIFFERENT rate is a different product: it gets its own stock record, and an
+  // existing product's price is never overwritten. The buying price is not asked of the sales officer, so it is kept as it is.
   const kwaJina=new Map();
-  mistari.forEach(l=>{const k=ufunguoWaJina(l.jina),g=kwaJina.get(k);if(g){g.idadi=Math.round((g.idadi+l.idadi)*1000)/1000;g.rate=l.rate;}else kwaJina.set(k,{jina:l.jina,kipimo:l.kipimo,idadi:l.idadi,rate:l.rate});});
+  mistari.forEach(l=>{const k=ufunguoWaJina(l.jina)+'|'+l.rate,g=kwaJina.get(k);if(g){g.idadi=Math.round((g.idadi+l.idadi)*1000)/1000;}else kwaJina.set(k,{jina:l.jina,kipimo:l.kipimo,idadi:l.idadi,rate:l.rate});});
   const bidhaaCalls=[];
   kwaJina.forEach(g=>{
-    const existing=allBidhaa.find(p=>ufunguoWaJina(p.jina)===ufunguoWaJina(g.jina)&&p.tawi===tawi);
-    if(existing)bidhaaCalls.push({op:'patch',table:'bidhaa',filter:`id=eq.${existing.id}`,data:{idadi:Math.round((Number(existing.idadi)+g.idadi)*1000)/1000,bei_kuuzia:g.rate}});
+    const zote=allBidhaa.filter(p=>ufunguoWaJina(p.jina)===ufunguoWaJina(g.jina)&&p.tawi===tawi);
+    const existing=zote.find(p=>(Number(p.bei_kuuzia)||0)===g.rate)||zote.find(p=>!(Number(p.bei_kuuzia)>0));      // same price, or one that has no price yet
+    if(existing)bidhaaCalls.push({op:'patch',table:'bidhaa',filter:`id=eq.${existing.id}`,data:Number(existing.bei_kuuzia)>0?{idadi:Math.round((Number(existing.idadi)+g.idadi)*1000)/1000}:{idadi:Math.round((Number(existing.idadi)+g.idadi)*1000)/1000,bei_kuuzia:g.rate}});
     else bidhaaCalls.push({op:'post',table:'bidhaa',data:{jina:g.jina,jina_sw:'',tawi,aina,kipimo:g.kipimo,bei_kununulia:0,bei_kuuzia:g.rate,idadi:g.idadi,kiwango_chini:10,onyesha_dukani:false}});
   });
   const calls=[{op:'post',table:'manunuzi',data:safu},...bidhaaCalls];
@@ -4270,11 +4275,35 @@ function chapishaPurchaseForm(id){
 
 /* ─── MAUZO — El Dorado-style single-line quick-add, with invoice generation ─── */
 let currentOmbiNo=null,currentOmbiTawiChanzo=null; // set while "same ombi" (transfer batch) continuation is active
+// What the sales grid offers for each product. The text that goes into the box is the exact name — unless two products share a
+// name (different price, unit or branch), when it is made unique so each can be told apart and picked on its own.
+let _chaguoCache=null,_chaguoKey='';
+function chaguoZaBidhaaMauzo(){
+  const kk=viewingTawi+'|'+allBidhaa.length+'|'+(userTawi||'');
+  if(_chaguoCache&&_chaguoKey===kk)return _chaguoCache;
+  return(_chaguoCache=_chaguoYaMsingi(),_chaguoKey=kk,_chaguoCache);
+}
+function _chaguoYaMsingi(){
+  const list=filterByTawi(allBidhaa).filter(p=>!p._pending).slice().sort((a,b)=>String(a.jina).localeCompare(String(b.jina))||(Number(a.bei_kuuzia)||0)-(Number(b.bei_kuuzia)||0));
+  const hesabu=new Map();list.forEach(p=>{const k=jinaSafiYaBidhaa(p.jina).toLowerCase();hesabu.set(k,(hesabu.get(k)||0)+1);});
+  const tumiaTawi=viewingTawi==='yote'&&!ninaTawiLaKazi();
+  const kuonekana=new Set();
+  return list.map(p=>{
+    const nzima=jinaSafiYaBidhaa(p.jina),mara=hesabu.get(nzima.toLowerCase())>1;
+    let value=nzima;
+    if(mara)value=`${nzima} — ${tumiaTawi?(BRANCHES[p.tawi]||p.tawi)+' — ':''}TZS ${Number(p.bei_kuuzia||0).toLocaleString('en-US')}${p.kipimo?' / '+p.kipimo:''}`;
+    while(kuonekana.has(value.toLowerCase()))value+=' ·';
+    kuonekana.add(value.toLowerCase());
+    const k=p.category||p.aina,lebo=[CAT_LABEL[k]||k,p.jina_sw,'TZS '+Number(p.bei_kuuzia||0).toLocaleString('en-US'),'stoo '+fmtIdadi(p.idadi)+' '+(p.kipimo||'pc')].filter(Boolean).join(' · ');
+    return{value,lebo,p};
+  });
+}
 function jaziChaguoBidhaa(){
-  // Type-ahead suggestions for the product boxes in the sales grid: this branch's product names, A–Z.
-  const list=filterByTawi(allBidhaa).slice().sort((a,b)=>a.jina.localeCompare(b.jina));
+  // Type-ahead suggestions for the product boxes in the sales grid. Each suggestion shows its category, Swahili name, price and
+  // stock beside the name, and the browser matches what is typed against all of it.
+  _chaguoCache=null;
   const dl=$('m-bidhaa-suggestions');
-  if(dl)dl.innerHTML=list.map(p=>`<option value="${escH(p.jina)}"></option>`).join('');
+  if(dl)dl.innerHTML=chaguoZaBidhaaMauzo().map(c=>`<option value="${escH(c.value)}" label="${escH(c.lebo)}"></option>`).join('');
   hesabuGridMauzo();      // stock numbers may have changed — refresh the hints (never touches what was typed)
 }
 // Typing a name narrows it down and, the moment it matches exactly one
@@ -4295,6 +4324,26 @@ const NENO_LA_MATAIRI=/(tyre|tire|tairi|matairi)|\b\d{2,3}(?:\.\d{1,2})?\s*[\/-]
 // Rose's own tyre list (from her sheet). A name is also matched ignoring capitals and stray spaces around brackets.
 const MATAIRI_YA_ROSE=['315/80R22.5 (6550) Mixx','315/80R22.5 (0396) Box','315/80R22.5 (0200) KK','385/65R22.5 (0201) Super single','385/65R22.5 (6551) Super single','11R22.5 (6601) Mixx','825R16 (0125) KK','825R16 (0216) Mixx','750R16 (0327) Mixx','750R16 (0429) KK','700R16 (0082) Mixx','205/65R15 (0209)','195/70R14 (0208)','195/65R15 (0140)','185/70R14 (0207)'];
 const kawaidishaJina=(s)=>String(s||'').toLowerCase().replace(/\s+/g,' ').replace(/\s*\(\s*/g,' (').replace(/\s*\)\s*/g,') ').replace(/\s+/g,' ').trim();
+// ── SEARCHING PRODUCTS ──
+// A product is found by ANY of its identities — name, Swahili name, category, unit, label, branch, price — and every word typed
+// must be found somewhere (so "pvc 4", "pvc nchi" or "saruji 25000" all work). Capitals, quote marks and stray spaces are ignored.
+// Two products are NEVER merged because they look alike: a different spelling or a different price is a different product.
+const sawazishaUtafutaji=(t)=>String(t==null?'':t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/["'`”“″′’‘]/g,'').replace(/[^a-z0-9./]+/g,' ').replace(/\s+/g,' ').trim();
+function sifaZaBidhaa(p){
+  const k=p.category||p.aina;
+  return sawazishaUtafutaji([p.jina,p.jina_sw,CAT_LABEL[k]||k,p.aina,p.kipimo,KIPIMO_LABEL[p.kipimo],p.badge,BRANCHES[p.tawi],p.bei_kuuzia,p.maelezo_sw,p.maelezo_en].filter(x=>x!=null&&x!=='').join(' '));
+}
+function bidhaaInalingana(p,q){
+  const t=sawazishaUtafutaji(q);if(!t)return true;
+  const h=sifaZaBidhaa(p),hs=h.replace(/ /g,'');
+  return t.split(' ').every(w=>h.includes(w)||hs.includes(w));
+}
+// The stock record a purchase was added to: same name and branch, preferring the one at the purchase's RATE (a name can have several prices).
+function bidhaaYaUnunuzi(m){
+  const zote=allBidhaa.filter(x=>x.jina.toLowerCase()===String(m.jina||'').toLowerCase()&&x.tawi===m.tawi);
+  return zote.find(x=>(Number(x.bei_kuuzia)||0)===(Number(m.bei_kununulia)||0))||zote[0]||null;
+}
+const jinaSafiYaBidhaa=(j)=>String(j==null?'':j).trim().replace(/\s+/g,' ');
 const MATAIRI_YA_ROSE_KEY=new Set(MATAIRI_YA_ROSE.map(kawaidishaJina));
 const niBidhaaYaMairi=(jina)=>NENO_LA_MATAIRI.test(String(jina||''))||MATAIRI_YA_ROSE_KEY.has(kawaidishaJina(jina));
 // A tyre on HER list, however it is spelled in Abel's stock: the same name, or the same size AND code ("315/80R22.5 (6550) MIXX" = "315/80R22.5(6550)")
@@ -4592,21 +4641,22 @@ function renderBinCardSuggestions(){
 function onBinCardSearchInput(){
   const q=($('bc-search').value||'').trim().toLowerCase();
   if(!q)return;
-  const matches=allBidhaa.filter(p=>p.jina.toLowerCase().includes(q)||(p.jina_sw||'').toLowerCase().includes(q));
+  const matches=allBidhaa.filter(p=>bidhaaInalingana(p,q));
   if(matches.length===1)$('bc-bidhaa-id').value=matches[0].id;
 }
 function generateBinCard(){
   const q=($('bc-search').value||'').trim().toLowerCase();
   let p=allBidhaa.find(x=>String(x.id)===$('bc-bidhaa-id').value);
-  if(!p||!p.jina.toLowerCase().includes(q)){
-    const matches=allBidhaa.filter(x=>x.jina.toLowerCase().includes(q));
+  if(!p||!bidhaaInalingana(p,q)){
+    const matches=allBidhaa.filter(x=>bidhaaInalingana(x,q));
     if(matches.length===1)p=matches[0];
   }
   if(!p){toast('Chagua bidhaa sahihi kwanza — andika jina kamili kama linavyoonekana kwenye Stock');return;}
 
-  const ins=allManunuzi.filter(m=>!m._pending&&m.tawi===p.tawi&&m.jina.toLowerCase()===p.jina.toLowerCase())
+  const mafungu=allBidhaa.filter(x=>x.tawi===p.tawi&&x.jina.toLowerCase()===p.jina.toLowerCase()).length>1;      // the same name kept at several prices: each price has its own card
+  const ins=allManunuzi.filter(m=>!m._pending&&m.tawi===p.tawi&&m.jina.toLowerCase()===p.jina.toLowerCase()&&(!mafungu||(Number(m.bei_kununulia)||0)===(Number(p.bei_kuuzia)||0)))
     .map(m=>({tarehe:m.tarehe,created_at:m.created_at,in:m.idadi,out:0,bei:m.bei_kununulia,cash:0,order:0,purchase:m.jumla,jina:m.jina_muhusika||'—'}));
-  const outs=allMauzo.filter(s=>!s._pending&&s.deleted_at==null&&s.tawi===p.tawi&&s.jina.toLowerCase()===p.jina.toLowerCase()&&s.hali_order!=='Inasubiri'&&s.hali_order!=='Imekataliwa')
+  const outs=allMauzo.filter(s=>!s._pending&&s.deleted_at==null&&s.tawi===p.tawi&&s.jina.toLowerCase()===p.jina.toLowerCase()&&(!mafungu||s.bidhaa_id==null||String(s.bidhaa_id)===String(p.id))&&s.hali_order!=='Inasubiri'&&s.hali_order!=='Imekataliwa')
     .map(s=>({tarehe:s.tarehe,created_at:s.created_at,in:0,out:s.idadi,bei:s.bei_kuuzia,cash:s.aina==='Taslimu'?s.jumla:0,order:s.aina==='Mkopo'?s.jumla:0,purchase:0,jina:s.muuzaji||'—'}));
 
   const rows=ins.concat(outs).sort((a,b)=>(a.tarehe||'').localeCompare(b.tarehe||'')||(a.created_at||'').localeCompare(b.created_at||''));
@@ -5209,8 +5259,10 @@ function futaSafuMauzo(btn){
   hesabuGridMauzo();
 }
 function bidhaaKwaJina(jina){
-  const q=String(jina||'').trim().toLowerCase();if(!q)return null;
-  return filterByTawi(allBidhaa).find(p=>p.jina.toLowerCase()===q)||null;
+  const q=jinaSafiYaBidhaa(jina).toLowerCase();if(!q)return null;
+  const c=chaguoZaBidhaaMauzo().find(x=>x.value.toLowerCase()===q);          // exactly what the suggestion list offers
+  if(c)return c.p;
+  return filterByTawi(allBidhaa).find(p=>jinaSafiYaBidhaa(p.jina).toLowerCase()===q)||null;
 }
 function safuMauzoImetumika(tr){return['.g-bidhaa','.g-idadi','.g-punguzo'].some(s=>tr.querySelector(s).value.trim()!=='');}
 function hesabuSafuMauzo(tr){
@@ -5241,8 +5293,8 @@ function onSafuMauzo(el){
 // Leaving the product box with a partial name that matches exactly ONE product completes it.
 function kamilishaJinaMauzo(el){
   const q=el.value.trim().toLowerCase();if(!q||bidhaaKwaJina(el.value))return;
-  const m=filterByTawi(allBidhaa).filter(p=>p.jina.toLowerCase().includes(q)||(p.jina_sw||'').toLowerCase().includes(q));
-  if(m.length===1){el.value=m[0].jina;onSafuMauzo(el);}
+  const m=chaguoZaBidhaaMauzo().filter(c=>bidhaaInalingana(c.p,el.value));
+  if(m.length===1){el.value=m[0].value;onSafuMauzo(el);}
 }
 // Reads every filled row and checks it. ALL the problems are reported together, so they can be fixed in one go.
 function somaGridMauzo(){
@@ -5645,7 +5697,7 @@ async function futaLaini(jedwali,id){
   if(!Array.isArray(r)||!r.length)throw new Error((r&&r.message)||'Rekodi haikufutwa — huna ruhusa au imeshabadilika. Pakia upya ukurasa kisha ujaribu tena.');
   return r;
 }
-async function futaManunuzi(id,onDone){funguaModalFuta(async()=>{const p=allManunuzi.find(x=>x.id===id);await futaLaini('manunuzi',id);if(p){const b=allBidhaa.find(x=>x.jina.toLowerCase()===p.jina.toLowerCase()&&x.tawi===p.tawi);if(b)await DB.patch('bidhaa',`id=eq.${b.id}`,{idadi:Math.max(0,b.idadi-p.idadi)});}toast('Rekodi imefutwa (bado inaweza kurudishwa kwenye Zilizofutwa)');if(onDone)await onDone();loadAllBaada();});}
+async function futaManunuzi(id,onDone){funguaModalFuta(async()=>{const p=allManunuzi.find(x=>x.id===id);await futaLaini('manunuzi',id);if(p){const b=bidhaaYaUnunuzi(p);if(b)await DB.patch('bidhaa',`id=eq.${b.id}`,{idadi:Math.max(0,b.idadi-p.idadi)});}toast('Rekodi imefutwa (bado inaweza kurudishwa kwenye Zilizofutwa)');if(onDone)await onDone();loadAllBaada();});}
 async function futaGharama(id){funguaModalFuta(async()=>{await DB.patch('matumizi_ledger',`id=eq.${id}`,{deleted_at:new Date().toISOString()});toast('Rekodi imefutwa (bado inaweza kurudishwa kwenye Zilizofutwa)');loadAllBaada();});}
 async function futaBidhaa(id,onDone){
   const p=allBidhaa.find(x=>x.id===id);if(!p)return;
@@ -5855,7 +5907,13 @@ async function hifadhiHaririBidhaa(){
       const up=await uploadPhoto(editUploadFile);
       patch.img=up.url;patch.media_type=up.type==='video'?'video':'image';
     }
+    const kabla=allBidhaa.find(x=>x.id===editingBidhaaId);
     await DB.patch('bidhaa',`id=eq.${editingBidhaaId}`,patch);
+    // Changing a product's selling price changes the RATE of its purchases at that price — keep both in step.
+    if(kabla&&(Number(kabla.bei_kuuzia)||0)!==bei_u){
+      const ya=allManunuzi.filter(m=>!m.deleted_at&&m.tawi===kabla.tawi&&String(m.jina||'').toLowerCase()===String(kabla.jina||'').toLowerCase()&&(Number(m.bei_kununulia)||0)===(Number(kabla.bei_kuuzia)||0));
+      for(const m of ya)await DB.patch('manunuzi',`id=eq.${m.id}`,{bei_kununulia:bei_u,jumla:Math.round(m.idadi*bei_u)});
+    }
     if(ombiId){await maliziaOmbi(ombiId,'Imesahihishwa','Bidhaa imesahihishwa na Meneja Mkuu');ombiInayoshughulikiwa=null;}
     toast(`✅ "${jina}" imesasishwa!`);
     fungaAdminModal();editingBidhaaId=null;editUploadFile=null;
@@ -5877,28 +5935,25 @@ function renderKadiYaStock(){
   if(sec)sec.style.display=mauzoOfisa&&!PETROL_BRANCHES[viewingTawi]?'':'none';
   if(!mauzoOfisa)return;
   const tb=$('tbody-dash-stoki');if(!tb)return;
-  const q=($('dash-stoki-tafuta')?$('dash-stoki-tafuta').value:'').trim().toLowerCase();
-  // One row per product: spelling, capitals, spaces and quote marks do not make a new product, and if the same product is kept in more than one unit its quantities are listed together on the one row.
-  const funguo=(j)=>kawaidishaJina(j).replace(/["'`”“″′’‘]/g,'').replace(/[^a-z0-9.\/]+/g,'');
+  const q=($('dash-stoki-tafuta')?$('dash-stoki-tafuta').value:'').trim();
+  // One row per distinct product: the same exact name AND price. A different spelling or price is its own row; the same product
+  // kept in more than one unit has its quantities listed together on the one row.
   const m=new Map();
   filterByTawi(allBidhaa).filter(p=>!p._pending).forEach(p=>{
-    const k=funguo(p.jina)||kawaidishaJina(p.jina);
-    const x=m.get(k)||{jina:p.jina,vipimo:new Map()};
+    const k=jinaSafiYaBidhaa(p.jina)+'|'+(Number(p.bei_kuuzia)||0);
+    const x=m.get(k)||{jina:jinaSafiYaBidhaa(p.jina),bei:Number(p.bei_kuuzia)||0,vipimo:new Map(),ps:[]};
+    x.ps.push(p);
     const kp=String(p.kipimo||'pc').toLowerCase();
     const v=x.vipimo.get(kp)||{kp:p.kipimo||'pc',idadi:0,chini:0};
     v.idadi+=Number(p.idadi)||0;v.chini+=Number(p.kiwango_chini)||0;x.vipimo.set(kp,v);m.set(k,x);
   });
-  let l=[...m.values()].map(x=>{
-    const v=[...x.vipimo.values()].sort((a,b)=>b.idadi-a.idadi);
-    const wote=v.every(y=>y.idadi<=0),ndogo=!wote&&v.some(y=>y.idadi<=y.chini);
-    return{jina:x.jina,v,rank:wote?0:(ndogo?1:2)};
-  });
+  let l=[...m.values()].map(x=>({jina:x.jina,bei:x.bei,ps:x.ps,v:[...x.vipimo.values()].sort((a,b)=>b.idadi-a.idadi)}));
   const sm=$('dash-stoki-muhtasari');if(sm)sm.innerHTML=`Bidhaa <strong>${l.length}</strong>`;
-  if(q)l=l.filter(x=>(x.jina+' '+x.v.map(y=>y.kp).join(' ')).toLowerCase().includes(q));
-  l.sort((a,b)=>a.jina.localeCompare(b.jina));
+  if(q)l=l.filter(x=>x.ps.some(p=>bidhaaInalingana(p,q)));
+  l.sort((a,b)=>a.jina.localeCompare(b.jina)||a.bei-b.bei);
   tb.innerHTML=l.length?l.map((x,i)=>{
     const kiasi=x.v.map(y=>`<strong>${fmtIdadi(y.idadi)}</strong> <span style="font-size:.85em;color:var(--a-muted);">${escH(y.kp)}</span>`).join(' &nbsp;·&nbsp; ');
-    return`<tr><td style="color:var(--a-muted);">${i+1}</td><td>${escH(x.jina)}</td><td class="num">${kiasi}</td></tr>`;}).join(''):safuTupu(3,q?'Hakuna bidhaa inayolingana.':'Hakuna bidhaa kwenye stoo.');
+    return`<tr><td style="color:var(--a-muted);">${i+1}</td><td>${escH(x.jina)}${x.bei?` <span style="font-size:.85em;color:var(--a-muted);">· ${pesa(x.bei)}</span>`:''}</td><td class="num">${kiasi}</td></tr>`;}).join(''):safuTupu(3,q?'Hakuna bidhaa inayolingana.':'Hakuna bidhaa kwenye stoo.');
 }
 const fmtIdadi=(q)=>{const r=Math.round(Number(q)*1000)/1000;return r.toLocaleString('en-US',{maximumFractionDigits:3});};
 function renderDashibodi(){
@@ -5943,7 +5998,6 @@ function renderDashibodi(){
   // records today for an earlier date still shows on today's card instead of seeming to vanish.
   const manunuziZaIngizo=tareheMaalumu()?[]:filterByTawi(allManunuzi).filter(p=>p.tarehe!==dashDate&&p.created_at&&isoYaMtaa(new Date(p.created_at))===dashDate);
   const manunuziKadi=t.jumla_manunuzi+manunuziZaIngizo.reduce((a,b)=>a+(b.jumla||0),0);
-  {const bg=$('cardManunuziBadge');if(bg)bg.textContent=manunuziZaIngizo.length?`Matumizi · pamoja na ${manunuziZaIngizo.length} zilizoingizwa leo kwa tarehe nyingine`:'Matumizi';}
   $('cardManunuzi').textContent=pesa(manunuziKadi);$('cardMauzo').textContent=pesa(t.jumla_mauzo);
   $('cardFaida').textContent=pesa(t.faida_halisi);{const n=$('faidaNote');if(n)n.textContent=t.bila_gharama?`⚠ Faida si kamili — mauzo ${t.bila_gharama} hayana bei ya kununulia.`:'';}$('cardMadeni').textContent=pesa(t.madeni_kipindi);$('cardOrder').textContent=pesa(t.order);$('cardOrderSub').textContent=t.order_idadi?`Order ${t.order_idadi} zilizothibitishwa`:'Hakuna Order';
   $('cardCash').textContent=pesa(Math.max(0,t.hela_cash));
@@ -6238,8 +6292,10 @@ function chapishaMatumiziRipoti(){
 }
 function updateJinaSuggestions(){
   const dl=$('t-jina-suggestions');if(!dl)return;
-  const names=[...new Set(allBidhaa.map(p=>p.jina).filter(n=>!naMairiTu()||niBidhaaYaMairi(n)))].sort();
-  dl.innerHTML=names.map(n=>`<option value="${n}"></option>`).join('');
+  const kwaJina=new Map();
+  allBidhaa.filter(p=>!naMairiTu()||niBidhaaYaMairi(p.jina)).forEach(p=>{if(!kwaJina.has(p.jina))kwaJina.set(p.jina,p);});
+  const names=[...kwaJina.keys()].sort();
+  dl.innerHTML=names.map(n=>{const p=kwaJina.get(n),k=p.category||p.aina,lebo=[CAT_LABEL[k]||k,p.jina_sw,'TZS '+Number(p.bei_kuuzia||0).toLocaleString('en-US')].filter(Boolean).join(' · ');return`<option value="${escH(n)}" label="${escH(lebo)}"></option>`;}).join('');
 }
 // STOCK: one card per product (same name = same product, however it was typed), sorted A–Z. Open a card to see
 // every stock record of that product and its full purchase history (purchases + transfers received), newest first.
@@ -6249,15 +6305,21 @@ function badiliStockKundi(key){
   const el=document.querySelector(`.sk-kundi[data-key="${CSS.escape(key)}"]`);if(!el)return;
   const wazi=!el.classList.contains('wazi');stockWazi.set(key,wazi);el.classList.toggle('wazi',wazi);}
 function makundiYaStock(){
-  const tafuta=(($('search-stock')||{}).value||'').trim().toLowerCase();
-  const by=new Map();
-  filterByTawi(allBidhaa).forEach(p=>{const key=kawaidishaJina(p.jina);let g=by.get(key);if(!g){g={key,jina:String(p.jina).trim(),jina_sw:p.jina_sw||'',bidhaa:[],img:p.img};by.set(key,g);}g.bidhaa.push(p);if(!g.img&&p.img)g.img=p.img;if(!g.jina_sw&&p.jina_sw)g.jina_sw=p.jina_sw;});
-  const tawiZangu=new Set(filterByTawi(allBidhaa).map(p=>p.tawi));
-  filterByTawi(allManunuzi).forEach(m=>{const key=kawaidishaJina(m.jina);const g=by.get(key);if(g)(g.manunuzi=g.manunuzi||[]).push(m);});
-  allUhamisho.filter(u=>u.aina==='Stock'&&u.hali==='Imepokelewa'&&(viewingTawi==='yote'&&!ninaTawiLaKazi()?true:tawiZangu.has(u.tawi_muombaji)))
-    .forEach(u=>{const g=by.get(kawaidishaJina(u.jina));if(g)(g.transfer=g.transfer||[]).push(u);});
-  return [...by.values()].filter(g=>!tafuta||`${g.jina} ${g.jina_sw}`.toLowerCase().includes(tafuta)||g.bidhaa.some(p=>`${p.jina} ${p.jina_sw||''}`.toLowerCase().includes(tafuta)))
-    .sort((a,b)=>a.jina.localeCompare(b.jina,'en',{sensitivity:'base'}));
+  const tafuta=(($('search-stock')||{}).value||'').trim();
+  // One card = one distinct product: the same exact name AND the same selling price (the same product kept in several
+  // branches or units is still one card). A different spelling, or a different price, is a card of its own.
+  const by=new Map(),kwaJina=new Map();
+  filterByTawi(allBidhaa).forEach(p=>{
+    const key=jinaSafiYaBidhaa(p.jina)+'|'+(Number(p.bei_kuuzia)||0);
+    let g=by.get(key);
+    if(!g){g={key,jina:jinaSafiYaBidhaa(p.jina),jina_sw:p.jina_sw||'',bidhaa:[],img:p.img};by.set(key,g);}
+    g.bidhaa.push(p);if(!g.img&&p.img)g.img=p.img;if(!g.jina_sw&&p.jina_sw)g.jina_sw=p.jina_sw;
+    const k2=kawaidishaJina(p.jina)+'|'+p.tawi,arr=kwaJina.get(k2)||[];if(!arr.includes(g))arr.push(g);kwaJina.set(k2,arr);
+  });
+  filterByTawi(allManunuzi).forEach(m=>{(kwaJina.get(kawaidishaJina(m.jina)+'|'+m.tawi)||[]).forEach(g=>(g.manunuzi=g.manunuzi||[]).push(m));});
+  allUhamisho.filter(u=>u.aina==='Stock'&&u.hali==='Imepokelewa').forEach(u=>{(kwaJina.get(kawaidishaJina(u.jina)+'|'+u.tawi_muombaji)||[]).forEach(g=>(g.transfer=g.transfer||[]).push(u));});
+  return [...by.values()].filter(g=>!tafuta||g.bidhaa.some(p=>bidhaaInalingana(p,tafuta)))
+    .sort((a,b)=>a.jina.localeCompare(b.jina,'en',{sensitivity:'base'})||(Number(a.bidhaa[0].bei_kuuzia)||0)-(Number(b.bidhaa[0].bei_kuuzia)||0));
 }
 function renderStock(){
   const box=$('stockMakundi');if(!box)return;
@@ -7030,10 +7092,27 @@ function funguaHaririManunuziGM(id,ombiId){
     const p=rekodiYaOmbi('manunuzi',id);if(!p)throw new Error('Rekodi haipo tena');
     const idadi=parseFloat(hv('idadi')),bei=parseInt(hv('bei'));
     if(!(idadi>0)||!Number.isFinite(bei)||bei<0)throw new Error('Idadi na bei lazima ziwe sahihi');
-    const b=allBidhaa.find(x=>x.jina.toLowerCase()===p.jina.toLowerCase()&&x.tawi===p.tawi);
+    const b=bidhaaYaUnunuzi(p);
     const d=Math.round((idadi-p.idadi)*1000)/1000;
+    const beiLaMwanzo=Number(p.bei_kununulia)||0,rateImebadilika=bei!==beiLaMwanzo;
     if(b&&b.idadi+d<0)throw new Error(`Stoo ingekuwa chini ya sifuri (zilizopo ${b.idadi})`);
-    if(b&&d!==0)await DB.patch('bidhaa',`id=eq.${b.id}`,{idadi:Math.round((b.idadi+d)*1000)/1000});
+    if(b&&!rateImebadilika){
+      if(d!==0)await DB.patch('bidhaa',`id=eq.${b.id}`,{idadi:Math.round((b.idadi+d)*1000)/1000});
+    }else if(b){
+      // The rate is the product's selling price: move this purchase's stock to the product at the NEW price, leaving other prices alone.
+      const jl=String(p.jina||'').toLowerCase();
+      const wenginePaBeiHiyo=allManunuzi.filter(x=>x.id!==p.id&&!x.deleted_at&&x.tawi===p.tawi&&String(x.jina||'').toLowerCase()===jl&&(Number(x.bei_kununulia)||0)===beiLaMwanzo).length>0;
+      const lengo=allBidhaa.find(x=>x.id!==b.id&&!x._pending&&x.tawi===p.tawi&&String(x.jina||'').toLowerCase()===jl&&(Number(x.bei_kuuzia)||0)===bei);
+      if(!wenginePaBeiHiyo&&!lengo){
+        await DB.patch('bidhaa',`id=eq.${b.id}`,{bei_kuuzia:bei,bei_kununulia:bei,idadi:Math.round((b.idadi+d)*1000)/1000});
+      }else{
+        const baki=Math.round((b.idadi-p.idadi)*1000)/1000;
+        if(baki<0)throw new Error(`Stoo ya bei ya zamani haitoshi (zilizopo ${b.idadi})`);
+        await DB.patch('bidhaa',`id=eq.${b.id}`,{idadi:baki});
+        if(lengo)await DB.patch('bidhaa',`id=eq.${lengo.id}`,{idadi:Math.round((lengo.idadi+idadi)*1000)/1000});
+        else{const n={...b};['id','created_at','updated_at','deleted_at','_pending'].forEach(k=>delete n[k]);await DB.post('bidhaa',{...n,bei_kuuzia:bei,bei_kununulia:bei,idadi});}
+      }
+    }
     await DB.patch('manunuzi',`id=eq.${p.id}`,{idadi,bei_kununulia:bei,jumla:Math.round(idadi*bei),msambazaji:hv('msambazaji').trim()});
     await kamilishaMarekebisho(ombiId);
   });
