@@ -999,7 +999,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       <div class="controls" style="margin-bottom:12px;">
         <label style="font-size:11px;color:var(--a-muted);text-transform:uppercase;align-self:center;">Taarifa ya Tarehe:</label>
         <input type="date" id="dash-tarehe" onchange="renderDashibodi()"/>
-        <button class="btn sm secondary" onclick="$('dash-tarehe').value=leoISO();renderDashibodi();">Leo</button>
+        <button class="btn sm secondary" onclick="$('dash-tarehe').value=tareheYaLeo();renderDashibodi();">Leo</button>
       </div>
       <div class="cards">
         <div class="card"><div class="c-label">Jumla ya Manunuzi</div><div class="c-value" id="cardManunuzi">—</div><span class="c-badge badge-gray" id="cardManunuziBadge">Matumizi</span></div>
@@ -1230,7 +1230,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
             <div class="field"><label>Bidhaa</label><select id="uh-bidhaa" onchange="jaziUhamishoTawiKwaBidhaa()"></select></div>
             <div class="field"><label>Tawi Unaloomba Uhamisho</label><select id="uh-tawi-chanzo" onchange="updateUhamishoBeiSummary()"></select></div>
             <div class="field"><label>Idadi</label><input type="number" id="uh-idadi" placeholder="1" min="0" step="any" oninput="updateUhamishoBeiSummary()"/><div class="field-error" id="err-uh-idadi">Weka idadi</div></div>
-            <div class="field uh-ya-stock" id="uh-kipimo-wrap"><label>Kipimo Changu cha Kuuzia</label><select id="uh-kipimo-yangu" onchange="updateUbadilishaUhamisho()"><option value="">Sawa na cha chanzo</option><option value="pc">Piece / Pisi</option><option value="bag">Bag / Mifuko</option><option value="roll">Roll / Rola</option><option value="meter">Meter / Mita</option><option value="litre">Litre / Lita</option><option value="kg">Kg / Kilo</option><option value="pack">Pack / Packets</option><option value="sheet">Sheet / Bati</option><option value="box">Box / Kasha</option><option value="set">Set / Seti</option><option value="pair">Pair / Jozi</option><option value="bando">Bando / Bundle</option><option value="ndoo">Ndoo / Bucket</option><option value="kopo">Kopo / Can</option></select></div>
+            <div class="field uh-ya-stock" id="uh-kipimo-wrap"><label>Kipimo Changu cha Kuuzia</label><select id="uh-kipimo-yangu" onchange="updateUbadilishaUhamisho()"><option value="">Sawa na cha chanzo</option><option value="pc">Piece / Pisi</option><option value="bag">Bag / Mifuko</option><option value="roll">Roll / Rola</option><option value="meter">Meter / Mita</option><option value="litre">Litre / Lita</option><option value="kg">Kg / Kilo</option><option value="tonne">Tonne / Tani</option><option value="pack">Pack / Packets</option><option value="sheet">Sheet / Bati</option><option value="box">Box / Kasha</option><option value="set">Set / Seti</option><option value="pair">Pair / Jozi</option><option value="bando">Bando / Bundle</option><option value="ndoo">Ndoo / Bucket</option><option value="kopo">Kopo / Can</option></select></div>
             <div class="field uh-ya-stock" id="uh-uwiano-wrap" style="display:none;"><label id="uh-uwiano-lebo">1 kipimo cha chanzo = vipimo vingapi vyangu?</label><input type="number" id="uh-uwiano" min="0" step="any" placeholder="mfano: 20" oninput="updateUbadilishaUhamisho()"/></div>
             <div class="field uh-ya-stock" id="uh-omba-kwa-wrap" style="display:none;"><label>Idadi niliyoandika ni ya kipimo cha</label><select id="uh-omba-kwa" onchange="updateUhamishoBeiSummary()"><option value="chanzo">Chanzo</option><option value="yangu">Changu</option></select></div>
             <div class="field uh-ya-stock" id="uh-bei-yangu-wrap" style="display:none;"><label id="uh-bei-yangu-lebo">Bei yangu ya kuuza kwa kipimo changu (TZS)</label><input type="number" id="uh-bei-yangu" min="0" placeholder="mfano: 15000" oninput="updateUbadilishaUhamisho()"/></div>
@@ -1452,7 +1452,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
             <div class="field"><label>Bei ya Kununulia (TZS, hiari)</label><input type="number" id="p-bei-gharama" placeholder="0"/></div>
             <div class="field"><label>Idadi Iliyopo</label><input type="number" id="p-idadi" placeholder="1" min="1" value="1"/></div>
             <div class="field"><label>Kipimo</label>
-              <select id="p-kipimo"><option value="pc">Piece / Pisi</option><option value="bag">Bag / Mifuko</option><option value="roll">Roll / Rola</option><option value="meter">Meter / Mita</option><option value="litre">Litre / Lita</option><option value="kg">Kg / Kilo</option><option value="pack">Pack / Packets</option><option value="sheet">Sheet / Bati</option><option value="box">Box / Kasha</option><option value="set">Set / Seti</option><option value="pair">Pair / Jozi</option><option value="bando">Bando / Bundle</option><option value="ndoo">Ndoo / Bucket</option><option value="kopo">Kopo / Can</option></select>
+              <select id="p-kipimo"><option value="pc">Piece / Pisi</option><option value="bag">Bag / Mifuko</option><option value="roll">Roll / Rola</option><option value="meter">Meter / Mita</option><option value="litre">Litre / Lita</option><option value="kg">Kg / Kilo</option><option value="tonne">Tonne / Tani</option><option value="pack">Pack / Packets</option><option value="sheet">Sheet / Bati</option><option value="box">Box / Kasha</option><option value="set">Set / Seti</option><option value="pair">Pair / Jozi</option><option value="bando">Bando / Bundle</option><option value="ndoo">Ndoo / Bucket</option><option value="kopo">Kopo / Can</option></select>
             </div>
             <input type="hidden" id="p-kategoria" value="mengineyo"/>
             <div class="field"><label>Kiwango cha Chini (tahadhari)</label><input type="number" id="p-kiwango-chini" placeholder="10" value="10"></div>
@@ -2501,7 +2501,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       <div class="field"><label>Bei ya Kuuzia (TZS)</label><input type="number" id="e-bei"/></div>
       <div class="field"><label>Bei ya Kununulia (TZS)</label><input type="number" id="e-bei-gharama"/></div>
       <div class="field"><label>Kipimo</label>
-        <select id="e-kipimo"><option value="pc">Piece / Pisi</option><option value="bag">Bag / Mifuko</option><option value="roll">Roll / Rola</option><option value="meter">Meter / Mita</option><option value="litre">Litre / Lita</option><option value="kg">Kg / Kilo</option><option value="pack">Pack / Packets</option><option value="sheet">Sheet / Bati</option><option value="box">Box / Kasha</option><option value="set">Set / Seti</option><option value="pair">Pair / Jozi</option><option value="bando">Bando / Bundle</option><option value="ndoo">Ndoo / Bucket</option><option value="kopo">Kopo / Can</option></select>
+        <select id="e-kipimo"><option value="pc">Piece / Pisi</option><option value="bag">Bag / Mifuko</option><option value="roll">Roll / Rola</option><option value="meter">Meter / Mita</option><option value="litre">Litre / Lita</option><option value="kg">Kg / Kilo</option><option value="tonne">Tonne / Tani</option><option value="pack">Pack / Packets</option><option value="sheet">Sheet / Bati</option><option value="box">Box / Kasha</option><option value="set">Set / Seti</option><option value="pair">Pair / Jozi</option><option value="bando">Bando / Bundle</option><option value="ndoo">Ndoo / Bucket</option><option value="kopo">Kopo / Can</option></select>
       </div>
       <div class="field"><label>Kategoria</label>
         <input type="hidden" id="e-kategoria" value=""/>
@@ -3072,7 +3072,7 @@ async function sendSms(to,message){
 document.addEventListener('wheel',(e)=>{const t=e.target;if(t&&t.tagName==='INPUT'&&t.type==='number'&&document.activeElement===t)t.blur();},{passive:true,capture:true});
 document.addEventListener('keydown',(e)=>{const t=e.target;if(t&&t.tagName==='INPUT'&&t.type==='number'&&(e.key==='ArrowUp'||e.key==='ArrowDown'))e.preventDefault();},true);
 const CAT_LABEL={mabomba:'Mabomba',fittings:'Fittings',umeme:'Umeme',saruji:'Saruji',zana:'Zana',mengineyo:'Mengineyo'};
-const KIPIMO_LABEL={pc:'Piece / Pisi',bag:'Bag / Mifuko',roll:'Roll / Rola',meter:'Meter / Mita',litre:'Litre / Lita',kg:'Kg / Kilo',pack:'Pack / Packets',sheet:'Sheet / Bati',box:'Box / Kasha',set:'Set / Seti',pair:'Pair / Jozi'};
+const KIPIMO_LABEL={pc:'Piece / Pisi',bag:'Bag / Mifuko',roll:'Roll / Rola',meter:'Meter / Mita',litre:'Litre / Lita',kg:'Kg / Kilo',tonne:'Tonne / Tani',pack:'Pack / Packets',sheet:'Sheet / Bati',box:'Box / Kasha',set:'Set / Seti',pair:'Pair / Jozi'};
 
 // ─── Real authentication client (replaces plaintext password checks) ───
 const sbClient=supabase.createClient(SB_URL,SB_KEY);
@@ -3088,8 +3088,21 @@ function sessionImekwisha(){
   setTimeout(()=>{if(!confirm('Muda wa kuingia umekwisha. Bonyeza OK kuingia tena.'))return;try{localStorage.removeItem('nh_cached_profile');}catch(_e){}sbClient.auth.signOut().finally(()=>location.reload());},300);
 }
 async function authHeaders(){
-  let {data:{session}}=await sbClient.auth.getSession();
-  if(!session&&isAdmin){try{const r=await sbClient.auth.refreshSession();session=r&&r.data&&r.data.session||null;}catch(_e){}}
+  let session=null;
+  try{const r0=await sbClient.auth.getSession();session=r0&&r0.data&&r0.data.session||null;}catch(_e){}
+  if(!session&&isAdmin){
+    // Renewing the sign-in can fail simply because the network blinked (phone slept, weak data). That is NOT an expired
+    // sign-in: try again, and if it is still the network, say so quietly — only a refusal by the server asks to sign in again.
+    let mtandao=!navigator.onLine;
+    for(let k=0;k<3&&!session;k++){
+      try{
+        const r=await sbClient.auth.refreshSession();session=r&&r.data&&r.data.session||null;
+        if(!session&&r&&r.error){const e=r.error;mtandao=/retryable|fetch|network|timeout|failed/i.test(String(e.name||'')+' '+String(e.message||''))||!e.status||e.status>=500||!navigator.onLine;if(!mtandao)break;}
+      }catch(_e){mtandao=true;}
+      if(!session&&k<2)await new Promise(ok=>setTimeout(ok,1000*(k+1)));
+    }
+    if(!session&&mtandao)throw new Error('Mtandao si thabiti kwa sasa — jaribu tena baada ya sekunde chache.');
+  }
   if(!session&&isAdmin){sessionImekwisha();throw kosaLaApi(401,{message:'Muda wa kuingia umekwisha — tafadhali ingia tena.'});}
   const token=session?session.access_token:SB_KEY;
   return {'apikey':SB_KEY,'Authorization':'Bearer '+token,'Content-Type':'application/json','Prefer':'return=representation'};
@@ -3969,9 +3982,17 @@ function arifu(id,msg,type,bila){
   if(!bila)tangazaKati(msg,type==='error'?'error':type==='success'?'success':(type==='warning'||type==='warn')?'warn':undefined);
   const el=$(id);if(!el)return;el.textContent=msg;el.className='notify '+type+' show';setTimeout(()=>el.classList.remove('show'),3500);}
 function safuTupu(cols,msg){return`<tr><td colspan="${cols}" class="empty-state"><div class="icon">📭</div>${msg}</td></tr>`;}
+// A branch that is still entering its opening records (e.g. Morena, Benaco) works on ONE fixed date, so nothing is saved or
+// read under today's date by mistake. Only that branch's own officer is bound; the General Manager is not.
+// To release a branch, delete its line here.
+const TAREHE_MAALUM_TAWI={benaco:'2026-10-01'};
+function tareheMaalumu(){return(isAdmin&&userRole!=='gm'&&userRole!=='director'&&userTawi&&TAREHE_MAALUM_TAWI[userTawi])||'';}
+function tareheYaLeo(){return tareheMaalumu()||leoISO();}
+const VIINGIZO_VYA_TAREHE=['t-tarehe','m-tarehe','uh-tarehe','g-tarehe','mapato-tarehe'];
 function setDefaultDates(){
-  const today=leoISO();
+  const today=tareheYaLeo();
   ['t-tarehe','g-tarehe','mapato-tarehe','mk-tarehe','bs-tarehe','ds-tarehe','m-tarehe','uh-tarehe','mf-m-tarehe','mf-p-tarehe','sk-tarehe'].forEach(id=>{const el=$(id);if(el)el.value=today;});
+  VIINGIZO_VYA_TAREHE.forEach(id=>{const el=$(id);if(!el)return;const f=!!tareheMaalumu();el.readOnly=f;el.style.pointerEvents=f?'none':'';el.style.opacity=f?'.75':'';el.title=f?'Tarehe imefungwa — kila rekodi ya tawi hili inaingia kwa tarehe hii':'';});
   if($('filter-mauzo-tarehe')&&!$('filter-mauzo-tarehe').value)$('filter-mauzo-tarehe').value=today;
   if($('mz-kuanzia')&&!$('mz-kuanzia').value)$('mz-kuanzia').value=today;
   if($('mz-hadi')&&!$('mz-hadi').value)$('mz-hadi').value=today;
@@ -4066,7 +4087,7 @@ function hesabu(kuanzia,hadi){
 /* ─── FORMS: MANUNUZI ─── */
 // ── PURCHASE GRID: 10 rows (like the paper Purchase Form) already waiting; fill them in, then save everything at once ──
 const SAFU_MWANZO_UNUNUZI=10;
-const KIPIMO_CHAGUO=`<option value="pc">Piece / Pisi</option><option value="bag">Bag / Mifuko</option><option value="roll">Roll / Rola</option><option value="meter">Meter / Mita</option><option value="litre">Litre / Lita</option><option value="kg">Kg / Kilo</option><option value="pack">Pack / Packets</option><option value="sheet">Sheet / Bati</option><option value="box">Box / Kasha</option><option value="set">Set / Seti</option><option value="pair">Pair / Jozi</option><option value="bando">Bando / Bundle</option><option value="ndoo">Ndoo / Bucket</option><option value="kopo">Kopo / Can</option>`;
+const KIPIMO_CHAGUO=`<option value="pc">Piece / Pisi</option><option value="bag">Bag / Mifuko</option><option value="roll">Roll / Rola</option><option value="meter">Meter / Mita</option><option value="litre">Litre / Lita</option><option value="kg">Kg / Kilo</option><option value="tonne">Tonne / Tani</option><option value="pack">Pack / Packets</option><option value="sheet">Sheet / Bati</option><option value="box">Box / Kasha</option><option value="set">Set / Seti</option><option value="pair">Pair / Jozi</option><option value="bando">Bando / Bundle</option><option value="ndoo">Ndoo / Bucket</option><option value="kopo">Kopo / Can</option>`;
 function safuUnunuziMpya(){
   const tr=document.createElement('tr');tr.className='g-safu';
   tr.innerHTML=`<td class="sn"></td>
@@ -4140,7 +4161,7 @@ async function ongezaUununuzi(){
   try{await _ongezaUununuziImpl();}finally{savingUnunuzi=false;}
 }
 async function _ongezaUununuziImpl(){
-  const tarehe=$('t-tarehe').value,aina=$('t-aina').value,tawi=$('t-tawi').value;
+  const tarehe=tareheMaalumu()||$('t-tarehe').value,aina=$('t-aina').value,tawi=$('t-tawi').value;
   const msambazaji=$('t-msambazaji').value.trim()||'Haijasemwa';
   const jinaMuhusika=myOfficerName()||$('t-jina-muhusika').value.trim();
   // Every filled row of the grid, checked together.
@@ -4158,7 +4179,7 @@ async function _ongezaUununuziImpl(){
   mistari.forEach(l=>{l.jina=jinaSahihi.get(ufunguoWaJina(l.jina));});
 
   // One record per item (RATE and JUMLA exactly as on the paper Purchase Form), all sent in ONE request.
-  const safu=mistari.map(l=>({tarehe:l.tarehe||tarehe,jina:l.jina,tawi,aina,kipimo:l.kipimo,idadi:l.idadi,bei_kununulia:l.rate,jumla:Math.round(l.idadi*l.rate),msambazaji,jina_muhusika:jinaMuhusika,jina_dereva:l.dereva||'',namba_gari:l.gari||''}));
+  const safu=mistari.map(l=>({tarehe:tareheMaalumu()||l.tarehe||tarehe,jina:l.jina,tawi,aina,kipimo:l.kipimo,idadi:l.idadi,bei_kununulia:l.rate,jumla:Math.round(l.idadi*l.rate),msambazaji,jina_muhusika:jinaMuhusika,jina_dereva:l.dereva||'',namba_gari:l.gari||''}));
   // Stock: one update per DISTINCT item (the same item listed twice is added up). RATE is the item's selling price.
   // The buying price is not asked of the sales officer, so an existing item keeps whatever buying price it has.
   const kwaJina=new Map();
@@ -4468,7 +4489,7 @@ function malizaOmbi(){
 }
 async function ombaUhamisho(){
   const stock=($('uh-lengo').value==='Stock');
-  const tarehe=$('uh-tarehe').value,mteja=stock?'— (Stock)':($('uh-mteja').value.trim()||'Mteja wa Kawaida');
+  const tarehe=tareheMaalumu()||$('uh-tarehe').value,mteja=stock?'— (Stock)':($('uh-mteja').value.trim()||'Mteja wa Kawaida');
   const bidId=$('uh-tawi-chanzo').value;let idadi=parseFloat($('uh-idadi').value);
   const simu=stock?'':$('uh-simu').value.trim();
   const jinaMuombaji=myOfficerName()||$('uh-jina-muombaji').value.trim();
@@ -5274,7 +5295,7 @@ function gawaMalipo(thamani,lipwa){
   return sakafu;
 }
 async function _ongezaUuzajiImpl(){
-  const tarehe=$('m-tarehe').value,mteja=$('m-mteja').value.trim()||'Mteja wa Kawaida';
+  const tarehe=tareheMaalumu()||$('m-tarehe').value,mteja=$('m-mteja').value.trim()||'Mteja wa Kawaida';
   const simu=$('m-simu').value.trim();
   const ainaChaguo=$('m-aina').value;                                     // Taslimu | NMB | CRDB | Lipa Namba | Bank | Mkopo
   const aina=ainaChaguo==='Mkopo'?'Mkopo':'Taslimu';                     // stored as Taslimu / Mkopo, so every report keeps working
@@ -5914,13 +5935,13 @@ function renderDashibodi(){
   // date with the picker above to see that day's report instead. Madeni (total
   // still owed) stays a running balance regardless of date, since "today's new
   // debt" would be a far less useful number than what's actually still owed.
-  if(!$('dash-tarehe').value)$('dash-tarehe').value=leoISO();
+  if(!$('dash-tarehe').value)$('dash-tarehe').value=tareheYaLeo();
   const dashDate=$('dash-tarehe').value;
   const t=hesabu(dashDate,dashDate);
   renderKadiYaStock();
   // Purchases count on the day they were DATED — and also on the day they were ENTERED, so a purchase a sales officer
   // records today for an earlier date still shows on today's card instead of seeming to vanish.
-  const manunuziZaIngizo=filterByTawi(allManunuzi).filter(p=>p.tarehe!==dashDate&&p.created_at&&isoYaMtaa(new Date(p.created_at))===dashDate);
+  const manunuziZaIngizo=tareheMaalumu()?[]:filterByTawi(allManunuzi).filter(p=>p.tarehe!==dashDate&&p.created_at&&isoYaMtaa(new Date(p.created_at))===dashDate);
   const manunuziKadi=t.jumla_manunuzi+manunuziZaIngizo.reduce((a,b)=>a+(b.jumla||0),0);
   {const bg=$('cardManunuziBadge');if(bg)bg.textContent=manunuziZaIngizo.length?`Matumizi · pamoja na ${manunuziZaIngizo.length} zilizoingizwa leo kwa tarehe nyingine`:'Matumizi';}
   $('cardManunuzi').textContent=pesa(manunuziKadi);$('cardMauzo').textContent=pesa(t.jumla_mauzo);
@@ -7852,7 +7873,7 @@ function jazaGridUnunuzi(d){
   });
   if(mwisho)onSafuUnunuzi(mwisho.querySelector('.g-jina'));
   [...b.children].forEach(tr=>{if(tr._shaka){tr.classList.add('g-err');mashaka++;}});
-  {const t0=[...b.children].map(tr=>tr._tarehe).find(Boolean);if(t0)$('t-tarehe').value=t0;}
+  {const t0=[...b.children].map(tr=>tr._tarehe).find(Boolean);if(t0&&!tareheMaalumu())$('t-tarehe').value=t0;}
   const tarehePekee=new Set([...b.children].map(tr=>tr._tarehe).filter(Boolean));
   hesabuGridUnunuzi();
   arifu('notifyManunuzi',`✅ Mistari ${mist.length} imesomwa kutoka kwenye picha${tarehePekee.size>1?` (tarehe ${tarehePekee.size} tofauti — kila mstari umehifadhiwa na tarehe yake)`:''}${mashaka?` — ${mashaka} yenye rangi nyekundu haikusomeka vizuri, ihakiki`:''}. Linganisha na karatasi, rekebisha kisha ubonyeze Hifadhi.`,'success');
@@ -7871,7 +7892,7 @@ function jazaMauzoKundi(g,mteja){
   });
   if(mwisho)onSafuMauzo(mwisho.querySelector('.g-bidhaa'));
   [...b.children].forEach(tr=>{if(tr._shaka){tr.classList.add('g-err');mashaka++;}});
-  if(g.tarehe&&$('m-tarehe'))$('m-tarehe').value=g.tarehe;
+  if(g.tarehe&&$('m-tarehe')&&!tareheMaalumu())$('m-tarehe').value=g.tarehe;
   if(mteja&&String(mteja).trim()&&$('m-mteja')&&!$('m-mteja').value.trim())$('m-mteja').value=String(mteja).trim();
   hesabuGridMauzo();
   arifu('notifyMauzo',`✅ Mistari ${g.mist.length} ${g.tarehe?`ya tarehe ${g.tarehe} `:''}imesomwa kutoka kwenye picha${mashaka?` — ${mashaka} yenye rangi nyekundu haipo kwenye stoo ya tawi hili au haikusomeka vizuri, ihakiki`:''}. Linganisha na karatasi kisha ubonyeze Hifadhi.`,'success');
@@ -8446,7 +8467,7 @@ function somaGridMapato(){
 // What a failed save means, in words: the database may not have the new columns yet.
 const ujumbeWaMapatoKosa=(e)=>/lipa_in|nmb_in|crdb_in|mkabidhi|schema cache/i.test(String(e&&e.message))?'Hifadhidata bado haijasasishwa — endesha ngara-huduma-mapato-breakdown-migration.sql kisha ujaribu tena.':e.message;
 async function hifadhiMapato(){
-  const tarehe=$('mapato-tarehe').value;
+  const tarehe=tareheMaalumu()||$('mapato-tarehe').value;
   if(!tarehe){arifu('notifyMapato','❌ Chagua tarehe ya mapato.','error');return;}
   const {safu,makosa}=somaGridMapato();
   onyeshaMakosaGrid('mapatoGridErrors','notifyMapato',makosa);
@@ -8513,7 +8534,7 @@ function somaGridMatumizi(){
   return{safu,makosa};
 }
 async function hifadhiMatumizi(){
-  const tarehe=$('g-tarehe').value;
+  const tarehe=tareheMaalumu()||$('g-tarehe').value;
   if(!tarehe){arifu('notifyGharama','❌ Chagua tarehe ya matumizi.','error');return;}
   const {safu,makosa}=somaGridMatumizi();
   onyeshaMakosaGrid('matumiziGridErrors','notifyGharama',makosa);
