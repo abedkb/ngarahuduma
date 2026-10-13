@@ -7944,9 +7944,17 @@ async function skaniFomu(kind){
   try{
     const image=await punguzaPichaKwaSkani(f);
     const h0=await authHeaders(),h={'apikey':h0.apikey,'Authorization':h0.Authorization,'Content-Type':'application/json'};      // only the headers the function needs (extra ones fail the browser's permission check)
-    const r=await fetch(SCAN_FN_URL,{method:'POST',headers:h,body:JSON.stringify({kind,image,mime:'image/jpeg'})});
-    const d=await r.json().catch(()=>null);
-    if(!r.ok||!d||!d.ok)throw new Error(((d&&d.message)||'Imeshindwa kusoma picha')+(d&&d.detail?' ['+String(d.detail).slice(0,260)+']':''));
+    let r,d=null;
+    for(let jaribio=1;jaribio<=3;jaribio++){      // the reading service is sometimes busy (503): wait a little and try again by itself, up to 3 times
+      r=await fetch(SCAN_FN_URL,{method:'POST',headers:h,body:JSON.stringify({kind,image,mime:'image/jpeg'})});
+      d=await r.json().catch(()=>null);
+      if(r.ok&&d&&d.ok)break;
+      const msongamano=!d||/UNAVAILABLE|high demand|503|429|overload|Imeshindwa kusoma picha sasa hivi/i.test(((d&&d.message)||'')+((d&&d.detail)||''));
+      if(!msongamano||jaribio===3)break;
+      toast(`⏳ Huduma ya kusoma picha ina msongamano — inajaribu tena (${jaribio+1}/3)…`);
+      await new Promise(z=>setTimeout(z,jaribio*5000));
+    }
+    if(!r.ok||!d||!d.ok)throw new Error(d&&/UNAVAILABLE|high demand|503|429/i.test((d.message||'')+(d.detail||''))?'Huduma ya kusoma picha ina msongamano mkubwa sasa hivi. Subiri dakika 2–3 kisha jaribu tena, au jaza fomu kwa mkono.':(((d&&d.message)||'Imeshindwa kusoma picha')+(d&&d.detail?' ['+String(d.detail).slice(0,260)+']':'')));
     return d.data||{};
   }catch(e){toast('❌ '+e.message);return null;}
   finally{skaniInaendelea=false;}
@@ -8985,10 +8993,22 @@ const somaLocal=(k)=>{try{return localStorage.getItem(k);}catch(_e){return null;
 // The OPENING meter of a shift is the CLOSING meter of the shift before it, so the shifts cannot overlap or leave gaps.
 // ═══════════════════════════════════════════════════════════════════════════
 const ZAMU_ZA_KITUO=[
-  {id:'Zamu 1',no:1,maelezo:'07:00 – 16:00',kufunga:'16:00'},
-  {id:'Zamu 2',no:2,maelezo:'16:00 – 21:00',kufunga:'21:00'},
-  {id:'Zamu 3',no:3,maelezo:'21:00 – 07:00',kufunga:'07:00 (asubuhi inayofuata)'}
+  {id:'Zamu 1',no:1,maelezo:'Asubuhi'},
+  {id:'Zamu 2',no:2,maelezo:'Jioni'},
+  {id:'Zamu 3',no:3,maelezo:'Usiku'}
 ];
+// WHO WORKS WHICH MKONO in each shift (Ngara Mjini petrol). Each attendant saves her own mkono(s) on her own — no clock, no time limits.
+//   Asubuhi & Jioni: 3 attendants — Pampu 1 Mkono 1 | Pampu 1 Mkono 2 | Pampu 2 Mkono 2 + Pampu 3 Mkono 2.   Usiku: 2 attendants — Pampu 1 Mkono 1 | Pampu 1 Mkono 2 + Pampu 3 Mkono 2.
+const MHUDUMU_SIKU=[{id:'1',mikono:[[1,1]]},{id:'2',mikono:[[1,2]]},{id:'3',mikono:[[2,2],[3,2]]}];
+const MHUDUMU_USIKU=[{id:'1',mikono:[[1,1]]},{id:'2',mikono:[[1,2],[3,2]]}];
+const NAFASI_ZA_ZAMU={ngaramjinipetrol:{'Zamu 1':MHUDUMU_SIKU,'Zamu 2':MHUDUMU_SIKU,'Zamu 3':MHUDUMU_USIKU}};
+function nafasiZaZamu(tawi,zamu){return(NAFASI_ZA_ZAMU[tawi]||{})[zamu]||null;}
+// the mikono on the screen: the chosen attendant's own mkono(s) → Set of 'p|m'; null = no restriction
+function mikonoIliyochaguliwa(tawi){
+  const v=($('mf-m-pampu')&&$('mf-m-pampu').value)||'',z=($('mf-m-zamu')&&$('mf-m-zamu').value)||'',n=nafasiZaZamu(tawi,z);
+  if(n){const l=v?n.filter(x=>x.id===v):n;return new Set(l.flatMap(x=>x.mikono.map(([p,m])=>p+'|'+m)));}
+  return v?new Set(MIKONO_YA_KITUO.filter(([p])=>String(p)===v).map(([p,m])=>p+'|'+m)):null;
+}
 const VITUO_VYENYE_ZAMU=['ngaramjinipetrol','ushirombopetrol'];      // stations that work in shifts (remove a name here to go back to one closing per day)
 const kituoNiChaZamu=(tawi)=>VITUO_VYENYE_ZAMU.includes(tawi);
 const zamuNo=(z)=>{const x=ZAMU_ZA_KITUO.find(a=>a.id===z);return x?x.no:0;};
@@ -9000,8 +9020,13 @@ function saaYaTz(d){
   return{tarehe:`${p.year}-${p.month}-${p.day}`,saa:(parseInt(p.hour,10)%24),dakika:parseInt(p.minute,10)};
 }
 function sikuBaada(t,n){const d=new Date(t+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10);}
-function zamuYaSasa(){const{saa}=saaYaTz();return saa>=7&&saa<16?'Zamu 1':(saa>=16&&saa<21?'Zamu 2':'Zamu 3');}
-function tareheYaZamuSasa(zamu){const t=saaYaTz();return(zamu==='Zamu 3'&&t.saa<12)?sikuBaada(t.tarehe,-1):t.tarehe;}      // the night shift is recorded under the day it began
+// no clock: the suggestion follows the LAST recorded shift of the station (Asubuhi → Jioni → Usiku → Asubuhi of the next day); a night is filed under the date it began
+function mwishoWaKituo(){
+  const tawi=($('mf-tawi')&&$('mf-tawi').value)||'';if(!tawi||!kituoNiChaZamu(tawi))return null;
+  let l=null;mitaYaMwishoKwaMkono(tawi).forEach(r=>{if(r.zamu&&(!l||funguoLaRekodi(r)>funguoLaRekodi(l)))l=r;});return l;
+}
+function zamuYaSasa(){const l=mwishoWaKituo();if(l){const n=zamuNo(l.zamu);return'Zamu '+(n>=3?1:n+1);}const{saa}=saaYaTz();return saa>=7&&saa<16?'Zamu 1':(saa>=16&&saa<21?'Zamu 2':'Zamu 3');}
+function tareheYaZamuSasa(zamu){const l=mwishoWaKituo();if(l)return zamuNo(zamu)>zamuNo(l.zamu)?l.tarehe:sikuBaada(l.tarehe,1);const t=saaYaTz();return(zamu==='Zamu 3'&&t.saa<12)?sikuBaada(t.tarehe,-1):t.tarehe;}
 function mudaWaKufunga(zamu,tarehe){      // the moment a shift ends
   if(zamu==='Zamu 1')return Date.parse(tarehe+'T16:00:00+03:00');
   if(zamu==='Zamu 2')return Date.parse(tarehe+'T21:00:00+03:00');
@@ -9010,7 +9035,7 @@ function mudaWaKufunga(zamu,tarehe){      // the moment a shift ends
 function zamuIliyotangulia(zamu,tarehe){return zamu==='Zamu 1'?{zamu:'Zamu 3',tarehe:sikuBaada(tarehe,-1)}:(zamu==='Zamu 2'?{zamu:'Zamu 1',tarehe}:{zamu:'Zamu 2',tarehe});}
 let _mitaZaZamu={tawi:'',rows:[],imepatikana:false};
 // the station's latest meter readings — fetched through the database because a shift cannot see the other shifts' records
-async function pakiaMitaZaZamu(tawi){
+async function pakiaMitaZaZamu(tawi,wakatiWaKuhifadhi){
   if(!tawi||!kituoNiChaZamu(tawi))return;
   if(!['petroli','petroli_mauzo','gm'].includes(userRole)||(userRole!=='gm'&&tawi!==userTawi))return;      // only the station's own staff and the GM may read its meters (others got a refusal each time)
   try{
@@ -9019,7 +9044,7 @@ async function pakiaMitaZaZamu(tawi){
     if(!r.ok||!Array.isArray(j))throw new Error('rpc');
     _mitaZaZamu={tawi,rows:j,imepatikana:true};
   }catch(_e){if(_mitaZaZamu.tawi!==tawi)_mitaZaZamu={tawi,rows:[],imepatikana:false};}
-  jazaOpeningZaZamu();
+  if(wakatiWaKuhifadhi)jazaOpeningZaZamu();else onZamuMafuta();      // fresh data: the opening meters AND the suggested shift/date follow the last record
 }
 function rekodiZaMitaYaKituo(tawi){      // what the database gave + what this phone has saved/pending, one list
   const a=(_mitaZaZamu.tawi===tawi?_mitaZaZamu.rows:[]).map(r=>({pampu:String(r.pampu),mkono:String(r.mkono),kusoma_mwisho:Number(r.kusoma_mwisho),tarehe:String(r.tarehe).slice(0,10),zamu:r.zamu||'',created_at:r.created_at||''}));
@@ -9055,18 +9080,20 @@ function wekaZamuFomu(){
   if(userRole==='petroli_mauzo'&&userZamu){sel.innerHTML=ZAMU_ZA_KITUO.filter(z=>z.id===userZamu).map(z=>`<option value="${z.id}">${z.id} (${z.maelezo})</option>`).join('');sel.disabled=true;}
   else{
     sel.innerHTML=(userRole==='petroli_mauzo'?'':'<option value="">— Chagua zamu —</option>')+chaguo;sel.disabled=false;
-    sel.value=ZAMU_ZA_KITUO.some(z=>z.id===sasa)?sasa:(userRole==='petroli_mauzo'?zamuYaSasa():'');
+    sel.value=ZAMU_ZA_KITUO.some(z=>z.id===sasa)?sasa:(chaZamu?zamuYaSasa():'');
   }
-  if(d){d.readOnly=false;d.title='';if(chaZamu&&userRole==='petroli_mauzo'&&userZamu&&!d.dataset.mwenyewe)d.value=tareheYaZamuSasa(userZamu);}      // the date is only a suggestion — it can be any day
+  if(d){d.readOnly=false;d.title='';if(chaZamu&&!d.dataset.mwenyewe)d.value=tareheYaZamuSasa((userRole==='petroli_mauzo'&&userZamu)?userZamu:sel.value||zamuYaSasa());}      // the date is only a suggestion — it can be any day
 }
 function onZamuMafuta(){
   const t=$('mf-tawi'),z=$('mf-m-zamu'),box=$('mfZamuMaelezo');if(!t)return;
-  if(userRole==='petroli_mauzo'&&userZamu&&kituoNiChaZamu(t.value)){const d=$('mf-m-tarehe');if(d&&!d.dataset.mwenyewe)d.value=tareheYaZamuSasa(userZamu);}
+  const sp=$('mf-m-pampu');if(sp&&kituoNiChaZamu(t.value)&&nafasiZaZamu(t.value,z&&z.value)&&sp.dataset.zamu!==z.value){jengaGridMafuta();return;}      // a new shift has its own list of attendants
+  if(kituoNiChaZamu(t.value)){const d=$('mf-m-tarehe'),zz=(userRole==='petroli_mauzo'&&userZamu)?userZamu:(z&&z.value);if(d&&!d.dataset.mwenyewe&&zz)d.value=tareheYaZamuSasa(zz);}
   if(box){
     const x=kituoNiChaZamu(t.value)?ZAMU_ZA_KITUO.find(a=>a.id===(z&&z.value)):null;
     box.style.display=x?'block':'none';
     if(x){const prev=zamuIliyotangulia(x.id,$('mf-m-tarehe').value||leoISO());
-      box.innerHTML=`🕒 <strong>${x.id}</strong> (${x.maelezo}) — inafungwa saa ${x.kufunga}. Mita ya kuanzia ya kila mkono inachukuliwa kutoka <strong>Closing Mita ya ${prev.zamu}</strong> (${prev.tarehe}).`+(x.id==='Zamu 3'?' Zamu hii inarekodiwa chini ya tarehe ilipoanzia.':'');
+      const nf=nafasiZaZamu(t.value,x.id);
+      box.innerHTML=`<strong>${x.maelezo}</strong> (${x.id}) — wahudumu ${nf?nf.length:''}: `+(nf?nf.map(a=>`<strong>Mhudumu ${a.id}</strong> = ${a.mikono.map(([p,m])=>`Pampu ${p} Mkono ${m}`).join(' + ')}`).join(' · '):'')+`. Opening Mita ya kila mkono inachukuliwa kutoka Closing ya mwisho ya mkono huo.`+(x.id==='Zamu 3'?' Usiku unarekodiwa chini ya tarehe ulipoanzia.':'');
       const zimefungwa=[...new Set(rekodiZaMitaYaKituo(t.value).filter(r=>r.zamu===x.id&&r.tarehe===($('mf-m-tarehe').value||leoISO())).map(r=>r.pampu))].sort();
       box.innerHTML+=`<br>${zimefungwa.length?'✅ Zilizokwisha kufungwa kwa zamu hii: <strong>'+zimefungwa.map(pp=>'Pampu '+pp).join(', ')+'</strong>':'Hakuna pampu iliyofungwa bado kwa zamu hii.'} Kila pampu inahifadhiwa peke yake.`;}
   }
@@ -9089,8 +9116,8 @@ function jengaGridMafuta(){
   zilizoandikwa.forEach((v,k)=>window.__mkonoYaliyoandikwa.set(k,v));
   const mpangilio=MPANGILIO_WA_PAMPU[tawi]||null;
   jazaChaguoZaPampu(tawi);
-  const pampuIliyochaguliwa=($('mf-m-pampu')&&$('mf-m-pampu').value)||'';
-  b.innerHTML=MIKONO_YA_KITUO.filter(([p])=>!pampuIliyochaguliwa||String(p)===pampuIliyochaguliwa).map(([p,m])=>{
+  const mikonoYaSkrini=mikonoIliyochaguliwa(tawi);
+  b.innerHTML=MIKONO_YA_KITUO.filter(([p,m])=>!mikonoYaSkrini||mikonoYaSkrini.has(p+'|'+m)).map(([p,m])=>{
     const imewekwa=mpangilio&&mpangilio[p],aina=imewekwa||ainaIliyokumbukwa(tawi,p,m);
     const chaguo=imewekwa?`<option value="${imewekwa}" selected>${imewekwa}</option>`:`<option value="Petroli"${aina==='Petroli'?' selected':''}>Petroli</option><option value="Dizeli"${aina==='Dizeli'?' selected':''}>Dizeli</option>`;
     return`<tr class="g-safu" data-p="${p}" data-m="${m}">
@@ -9109,8 +9136,18 @@ function jengaGridMafuta(){
 function jazaChaguoZaPampu(tawi){
   const sel=$('mf-m-pampu');if(!sel)return;
   const sasa=sel.value,mpangilio=MPANGILIO_WA_PAMPU[tawi]||{},pampu=[...new Set(MIKONO_YA_KITUO.map(([p])=>p))];
-  const hali=sel.dataset.tawi===tawi&&sel.options.length;
+  const zamuSasa=($('mf-m-zamu')&&$('mf-m-zamu').value)||'',nafasi=nafasiZaZamu(tawi,zamuSasa);
+  const lbl=sel.closest('.field')&&sel.closest('.field').querySelector('label');
+  if(nafasi){      // one entry per attendant of this shift
+    if(sel.dataset.tawi===tawi&&sel.dataset.zamu===zamuSasa&&sel.options.length)return;
+    sel.innerHTML=nafasi.map(x=>`<option value="${x.id}">Mhudumu ${x.id} — ${x.mikono.map(([p,m])=>`Pampu ${p} Mkono ${m}`).join(' + ')}</option>`).join('')+'<option value="">Wahudumu wote (pamoja)</option>';
+    sel.dataset.tawi=tawi;sel.dataset.zamu=zamuSasa;sel.value=nafasi.some(x=>x.id===sasa)||sasa===''?sasa:nafasi[0].id;if(!sel.value&&sasa!=='')sel.value=nafasi[0].id;
+    if(lbl)lbl.textContent='Mhudumu wa Kurekodi';return;
+  }
+  if(lbl)lbl.textContent='Pampu ya Kurekodi';
+  const hali=sel.dataset.tawi===tawi&&!sel.dataset.zamu&&sel.options.length;
   if(!hali){
+    delete sel.dataset.zamu;
     sel.innerHTML=pampu.map(p=>`<option value="${p}">Pampu ${p}${mpangilio[p]?' ('+mpangilio[p]+')':''}</option>`).join('')+'<option value="">Pampu zote (pamoja)</option>';
     sel.dataset.tawi=tawi;sel.value=String(pampu[0]);
   }else sel.value=sasa;
@@ -9166,8 +9203,8 @@ function hesabuGridMafuta(){
   const kwaMkono=odaBakiKwaMkono(tawi,tarehe,zamuYaFomu);   // …of which these were written against a specific pampu/mkono
   const bakiBila={Petroli:baki.Petroli,Dizeli:baki.Dizeli}; // …and the rest, with no pampu/mkono given
   kwaMkono.forEach(v=>{bakiBila[v.aina]=Math.max(0,Math.round((bakiBila[v.aina]-v.lita)*100)/100);});
-  const pampuYaFomu=($('mf-m-pampu')&&$('mf-m-pampu').value)||'';
-  if(pampuYaFomu)[...kwaMkono.keys()].forEach(k=>{if(k.split('|')[0]!==pampuYaFomu)kwaMkono.delete(k);});      // another pump's Orders are never read here
+  const mkYaFomu=mikonoIliyochaguliwa(tawi);
+  if(mkYaFomu)[...kwaMkono.keys()].forEach(k=>{if(!mkYaFomu.has(k))kwaMkono.delete(k);});      // another attendant's Orders are never read here
   const wazi={Petroli:[],Dizeli:[]},mistari=[...b.children].map(tr=>{
     const closing=tr.querySelector('.g-mwisho').value,opening=tr.querySelector('.g-awali').value,aina=tr.querySelector('.g-aina').value;
     const l=(closing!==''&&opening!=='')?litaKutokaMita(parseFloat(opening)||0,parseFloat(closing)||0):0;
@@ -9240,12 +9277,12 @@ async function ongezaMafutaMauzo(){
   const tarehe=$('mf-m-tarehe').value,tawi=$('mf-tawi').value;
   if(!tarehe||!tawi){arifu('notifyMafutaMauzo','❌ Chagua tarehe na tawi.','error');return;}
   const chaZamu=kituoNiChaZamu(tawi),zamu=chaZamu?($('mf-m-zamu').value||''):'';
-  if(chaZamu&&!zamu){arifu('notifyMafutaMauzo','❌ Chagua zamu (Zamu 1, Zamu 2 au Zamu 3).','error');return;}
+  if(chaZamu&&!zamu){arifu('notifyMafutaMauzo','❌ Chagua zamu (Asubuhi, Jioni au Usiku).','error');return;}
   if(chaZamu&&userRole==='petroli_mauzo'&&userZamu&&zamu!==userZamu){arifu('notifyMafutaMauzo',`❌ Akaunti hii ni ya ${userZamu} tu.`,'error');return;}
   let openingZaAwali='';
   if(chaZamu){      // take the newest meters from the database first, so the previous shift's closing is the one used
     openingZaAwali=[...$('mfMikonoBody').children].map(tr=>tr.querySelector('.g-awali').value).join('|');
-    await pakiaMitaZaZamu(tawi);
+    await pakiaMitaZaZamu(tawi,true);
     const baada=[...$('mfMikonoBody').children].map(tr=>tr.querySelector('.g-awali').value).join('|');
     if(baada!==openingZaAwali){arifu('notifyMafutaMauzo','⚠ Mita ya kuanzia (Opening) imesasishwa kutoka Closing ya zamu iliyotangulia. Kagua namba kisha bonyeza Hifadhi tena.','error');return;}
   }
@@ -9277,17 +9314,16 @@ async function ongezaMafutaMauzo(){
     const tayari=safu.filter(s=>rekodi.some(r=>sikuHii(r)&&r.pampu===String(s.p)&&r.mkono===String(s.m)));
     if(tayari.length){arifu('notifyMafutaMauzo',`❌ ${zamu} ya ${tarehe} tayari imefungwa kwa ${tayari.map(s=>`Pampu ${s.p} Mkono ${s.m}`).join(', ')}. Marekebisho yanafanywa na meneja.`,'error');return;}
     const niMeneja=userRole!=='petroli_mauzo';
-    // the shift before this one should have closed THIS pump (other pumps do not matter); otherwise its litres would fall into this shift
-    const yaZamu=rekodi.some(r=>r.zamu),kabla=zamuIliyotangulia(zamu,tarehe),pampuZilizohusika=[...new Set(safu.map(s2=>String(s2.p)))];
-    const hazijafungwa=pampuZilizohusika.filter(pp=>!rekodi.some(r=>r.zamu===kabla.zamu&&r.tarehe===kabla.tarehe&&r.pampu===pp));
-    if(yaZamu&&hazijafungwa.length){
-      if(!(await thibitishaTofauti(`${kabla.zamu} Haina Closing ya Pampu Hii`,`${kabla.zamu} ya ${kabla.tarehe} haina closing ya ${hazijafungwa.map(pp=>'Pampu '+pp).join(', ')}. Ukiendelea, lita zote tangu closing ya mwisho ya pampu hiyo zitaingia kwenye ${zamu}. Kama pampu hiyo haikutumika zamu hiyo, unaweza kuendelea.`,[`Zamu inayohifadhiwa: ${zamu} (${tarehe})`,`Zamu iliyotangulia: ${kabla.zamu} (${kabla.tarehe})`],'✔ Endelea','✖ Sitisha')))return;
-    }
     // an opening meter that does not continue from the previous closing (the manager can type one)
     if(niMeneja){
       const m=mitaYaMwishoKwaMkono(tawi),tofauti=safu.filter(s=>{const p=m.get(s.p+'|'+s.m);return p&&Math.abs(p.kusoma_mwisho-s.awali)>0.004;});
       if(tofauti.length&&!(await thibitishaTofauti('Opening Mita Hailingani na Closing ya Awali','Opening Mita ya mikono hii si sawa na Closing Mita iliyorekodiwa mwisho. Kama mita ilibadilishwa au ni marekebisho ya makusudi unaweza kuendelea; kama ni kosa la kuandika, sitisha.',tofauti.map(s=>{const p=m.get(s.p+'|'+s.m);return`Pampu ${s.p} Mkono ${s.m}: Opening ${s.awali} ≠ Closing ya awali ${p.kusoma_mwisho} (${p.zamu||p.tarehe})`;}),'✔ Endelea','✖ Sitisha')))return;
     }
+  }
+  if(zamu&&kituoNiChaZamu(tawi)){      // order check: this shift must come AFTER the last one recorded for the same meters (a night belongs to the date it began, as Zamu 3)
+    const mw=mitaYaMwishoKwaMkono(tawi),mpya=tarehe+'|'+zamuNo(zamu)+'|',nyuma=[];
+    safu.forEach(s=>{const p=mw.get(s.p+'|'+s.m);if(p&&(p.tarehe+'|'+zamuNo(p.zamu)+'|')>mpya)nyuma.push(`Pampu ${s.p} Mkono ${s.m}: ${p.zamu||'rekodi'} ya ${p.tarehe}`);});
+    if(nyuma.length&&!(await thibitishaTofauti('Zamu Hii Iko Nyuma ya Rekodi ya Mwisho',`Unahifadhi ${zamu} ya ${tarehe}, lakini kuna rekodi ya zamu iliyo mbele zaidi. Zamu ya usiku huhifadhiwa kama Zamu 3 chini ya tarehe ilipoanzia. Hakikisha tarehe na zamu ni sahihi, vinginevyo Opening Mita ya zamu zinazofuata itakuwa si sahihi.`,nyuma,'✔ Endelea Kuhifadhi','✖ Kataa — Nirekebishe')))return;
   }
   const njia=njiaZaFomuYaMafuta(),kiasiKinachotarajiwa=round2(safu.reduce((a,s)=>a+s.kiasi,0));
   const siyoCashJ=round2(njia.nmb+njia.crdb+njia.lipa);
