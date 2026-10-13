@@ -1030,7 +1030,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
         <div class="section-body">
           <div id="dash-stoki-muhtasari" style="font-size:12.5px;color:var(--a-muted);margin-bottom:8px;"></div>
           <div class="table-wrap" style="max-height:380px;overflow-y:auto;"><table class="stoki-orodha">
-            <thead><tr><th style="width:40px;">#</th><th>Bidhaa</th><th class="num">Kilichobaki</th><th>Hali</th></tr></thead>
+            <thead><tr><th style="width:40px;">#</th><th>Bidhaa</th><th class="num">Kilichobaki</th></tr></thead>
             <tbody id="tbody-dash-stoki"></tbody>
           </table></div>
         </div>
@@ -1040,7 +1040,6 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
           <div class="section-header"><h3>Tahadhari</h3></div>
           <div class="section-body">
             <div class="alert-box danger" id="alertOrders" style="display:none;"><strong>🛎 Ombi Jipya la Mtandaoni</strong><span id="txtOrders">—</span></div>
-            <div class="alert-box danger" id="alertHifadhi"><strong>⚠ Hifadhi Ndogo</strong><span id="txtHifadhi">Inaangalia...</span></div>
             <div class="alert-box danger" id="alertMadeni"><strong>⚠ Madeni Yaliyokwisha Muda</strong><span id="txtMadeni">Inaangalia...</span></div>
             <div class="alert-box" id="alertHali"><strong>📊 Hali ya Biashara</strong><span id="txtHali">—</span></div>
           </div>
@@ -5393,10 +5392,11 @@ function safishaMauzo(){
 async function futaMauzo(id,onDone){
   funguaModalFuta(async()=>{
     const s=allMauzo.find(x=>x.id===id);
+    await futaLaini('mauzo',id);
     if(s){const b=allBidhaa.find(x=>x.id===s.bidhaa_id)||allBidhaa.find(x=>x.jina===s.jina&&x.tawi===s.tawi);if(b)await DB.patch('bidhaa',`id=eq.${b.id}`,{idadi:b.idadi+s.idadi});
       if(s.aina==='Mkopo'){const c=allWateja.find(x=>x.jina.toLowerCase()===s.mteja.toLowerCase()&&x.tawi===s.tawi);if(c)await DB.patch('wateja',`id=eq.${c.id}`,{deni_lote:Math.max(0,c.deni_lote-s.jumla),bakaa:Math.max(0,c.bakaa-s.bakaa)});}
     }
-    await DB.patch('mauzo',`id=eq.${id}`,{deleted_at:new Date().toISOString()});toast('Rekodi imefutwa (bado inaweza kurudishwa kwenye Zilizofutwa)');if(onDone)await onDone();loadAllBaada();
+    toast('Rekodi imefutwa (bado inaweza kurudishwa kwenye Zilizofutwa)');if(onDone)await onDone();loadAllBaada();
   });
 }
 function onyeshaMauzoYote(){$('filter-mauzo-tarehe').value='';renderMauzo();}
@@ -5609,12 +5609,26 @@ $('bpClose') && $('bpClose').addEventListener('click',()=>closeSheet('bpOverlay'
 
 
 
-function funguaModalFuta(fn){deleteAction=fn;$('modalFuta').classList.add('open');$('btn-thibitisha-futa').onclick=async()=>{await fn();fungaAdminModal()};}
-async function futaManunuzi(id,onDone){funguaModalFuta(async()=>{const p=allManunuzi.find(x=>x.id===id);if(p){const b=allBidhaa.find(x=>x.jina.toLowerCase()===p.jina.toLowerCase()&&x.tawi===p.tawi);if(b)await DB.patch('bidhaa',`id=eq.${b.id}`,{idadi:Math.max(0,b.idadi-p.idadi)});}await DB.patch('manunuzi',`id=eq.${id}`,{deleted_at:new Date().toISOString()});toast('Rekodi imefutwa (bado inaweza kurudishwa kwenye Zilizofutwa)');if(onDone)await onDone();loadAllBaada();});}
+function funguaModalFuta(fn){
+  deleteAction=fn;$('modalFuta').classList.add('open');
+  const kb=$('btn-thibitisha-futa');kb.disabled=false;
+  kb.onclick=async()=>{
+    if(kb.disabled)return;kb.disabled=true;        // one tap only
+    try{await fn();}catch(e){toast('❌ '+(e&&e.message||'Imeshindwa kufuta'));}
+    kb.disabled=false;fungaAdminModal();
+  };
+}
+// Marks a record deleted and CHECKS the database accepted it (it silently skips a row you may not change).
+async function futaLaini(jedwali,id){
+  const r=await DB.patch(jedwali,`id=eq.${id}`,{deleted_at:new Date().toISOString()});
+  if(!Array.isArray(r)||!r.length)throw new Error((r&&r.message)||'Rekodi haikufutwa — huna ruhusa au imeshabadilika. Pakia upya ukurasa kisha ujaribu tena.');
+  return r;
+}
+async function futaManunuzi(id,onDone){funguaModalFuta(async()=>{const p=allManunuzi.find(x=>x.id===id);await futaLaini('manunuzi',id);if(p){const b=allBidhaa.find(x=>x.jina.toLowerCase()===p.jina.toLowerCase()&&x.tawi===p.tawi);if(b)await DB.patch('bidhaa',`id=eq.${b.id}`,{idadi:Math.max(0,b.idadi-p.idadi)});}toast('Rekodi imefutwa (bado inaweza kurudishwa kwenye Zilizofutwa)');if(onDone)await onDone();loadAllBaada();});}
 async function futaGharama(id){funguaModalFuta(async()=>{await DB.patch('matumizi_ledger',`id=eq.${id}`,{deleted_at:new Date().toISOString()});toast('Rekodi imefutwa (bado inaweza kurudishwa kwenye Zilizofutwa)');loadAllBaada();});}
 async function futaBidhaa(id,onDone){
   const p=allBidhaa.find(x=>x.id===id);if(!p)return;
-  funguaModalFuta(async()=>{await DB.patch('bidhaa',`id=eq.${id}`,{deleted_at:new Date().toISOString()});toast(`Bidhaa "${p.jina}" imefutwa (bado inaweza kurudishwa kwenye Zilizofutwa)`);if(onDone)await onDone();loadAllBaada();});
+  funguaModalFuta(async()=>{await futaLaini('bidhaa',id);toast(`Bidhaa "${p.jina}" imefutwa (bado inaweza kurudishwa kwenye Zilizofutwa)`);if(onDone)await onDone();loadAllBaada();});
 }
 
 function funguaMalipo(id){
@@ -5790,9 +5804,9 @@ function funguaHaririBidhaa(id){
   $('e-badge').value=p.badge||'';
   $('e-maelezo-sw').value=p.maelezo_sw||'';
   $('e-maelezo-en').value=p.maelezo_en||'';
-  $('editFileInput').value='';
+  const _fi=$('editFileInput');if(_fi)_fi.value='';
   const blank="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Crect fill='%23F3E6DE' width='90' height='90'/%3E%3C/svg%3E";
-  $('editPreviews').innerHTML=`<div class="preview-item">${p.media_type==='video'?`<video src="${p.img}" autoplay muted loop playsinline></video>`:`<img src="${p.img||blank}"/>`}</div>`;
+  const _pv=$('editPreviews');if(_pv)_pv.innerHTML=`<div class="preview-item">${p.media_type==='video'?`<video src="${p.img}" autoplay muted loop playsinline></video>`:`<img src="${p.img||blank}"/>`}</div>`;
   $('notifyEditBidhaa').classList.remove('show');
   $('modalEditBidhaa').classList.add('open');
 }
@@ -5801,7 +5815,7 @@ function onEditFilePick(input){
   if(!editUploadFile)return;
   const url=URL.createObjectURL(editUploadFile);
   const isVid=isVideoFile(editUploadFile);
-  $('editPreviews').innerHTML=`<div class="preview-item">${isVid?`<video src="${url}" autoplay muted loop playsinline></video>`:`<img src="${url}"/>`}</div>`;
+  const _pv=$('editPreviews');if(_pv)_pv.innerHTML=`<div class="preview-item">${isVid?`<video src="${url}" autoplay muted loop playsinline></video>`:`<img src="${url}"/>`}</div>`;
 }
 async function hifadhiHaririBidhaa(){
   if(!editingBidhaaId)return;
@@ -5858,13 +5872,12 @@ function renderKadiYaStock(){
     const wote=v.every(y=>y.idadi<=0),ndogo=!wote&&v.some(y=>y.idadi<=y.chini);
     return{jina:x.jina,v,rank:wote?0:(ndogo?1:2)};
   });
-  const kwisha=l.filter(x=>x.rank===0).length,ndogo=l.filter(x=>x.rank===1).length;
-  const sm=$('dash-stoki-muhtasari');if(sm)sm.innerHTML=`Bidhaa <strong>${l.length}</strong> · Zilizokwisha <strong style="color:var(--a-red,#f87171)">${kwisha}</strong> · Zinazoisha <strong style="color:#E8A33D">${ndogo}</strong>`;
+  const sm=$('dash-stoki-muhtasari');if(sm)sm.innerHTML=`Bidhaa <strong>${l.length}</strong>`;
   if(q)l=l.filter(x=>(x.jina+' '+x.v.map(y=>y.kp).join(' ')).toLowerCase().includes(q));
-  l.sort((a,b)=>a.rank-b.rank||a.jina.localeCompare(b.jina));      // the ones that need attention first
-  tb.innerHTML=l.length?l.map((x,i)=>{const hali=x.rank===0?'<span class="pill pill-red">Imekwisha</span>':(x.rank===1?'<span class="pill pill-amber">Inaisha</span>':'<span class="pill pill-green">Sawa</span>');
+  l.sort((a,b)=>a.jina.localeCompare(b.jina));
+  tb.innerHTML=l.length?l.map((x,i)=>{
     const kiasi=x.v.map(y=>`<strong>${fmtIdadi(y.idadi)}</strong> <span style="font-size:.85em;color:var(--a-muted);">${escH(y.kp)}</span>`).join(' &nbsp;·&nbsp; ');
-    return`<tr><td style="color:var(--a-muted);">${i+1}</td><td>${escH(x.jina)}</td><td class="num">${kiasi}</td><td>${hali}</td></tr>`;}).join(''):safuTupu(4,q?'Hakuna bidhaa inayolingana.':'Hakuna bidhaa kwenye stoo.');
+    return`<tr><td style="color:var(--a-muted);">${i+1}</td><td>${escH(x.jina)}</td><td class="num">${kiasi}</td></tr>`;}).join(''):safuTupu(3,q?'Hakuna bidhaa inayolingana.':'Hakuna bidhaa kwenye stoo.');
 }
 const fmtIdadi=(q)=>{const r=Math.round(Number(q)*1000)/1000;return r.toLocaleString('en-US',{maximumFractionDigits:3});};
 function renderDashibodi(){
@@ -5914,10 +5927,6 @@ function renderDashibodi(){
   $('cardFaida').textContent=pesa(t.faida_halisi);{const n=$('faidaNote');if(n)n.textContent=t.bila_gharama?`⚠ Faida si kamili — mauzo ${t.bila_gharama} hayana bei ya kununulia.`:'';}$('cardMadeni').textContent=pesa(t.madeni_kipindi);$('cardOrder').textContent=pesa(t.order);$('cardOrderSub').textContent=t.order_idadi?`Order ${t.order_idadi} zilizothibitishwa`:'Hakuna Order';
   $('cardCash').textContent=pesa(Math.max(0,t.hela_cash));
     const bf=filterByTawi(allBidhaa),wf=filterByTawi(watejaKawaida());
-  const ndogo=bf.filter(p=>p.idadi>0&&p.idadi<=p.kiwango_chini).map(p=>p.jina);
-  const zimekwisha=bf.filter(p=>p.idadi===0).map(p=>p.jina);
-  let h=[];if(zimekwisha.length)h.push('Zimekwisha: '+zimekwisha.join(', '));if(ndogo.length)h.push('Ndogo: '+ndogo.join(', '));
-  $('txtHifadhi').textContent=h.length?h.join(' | '):'Viwango vyote ni vizuri ✓';
   const leo=new Date();leo.setHours(0,0,0,0);
   const zp=wf.filter(c=>c.bakaa>0&&c.tarehe_mwisho&&new Date(c.tarehe_mwisho)<leo).map(c=>c.jina);
   $('txtMadeni').textContent=zp.length?zp.join(', '):'Hakuna madeni yaliyokwisha muda ✓';
@@ -6240,16 +6249,13 @@ function renderStock(){
   box.innerHTML=makundi.map(g=>{
     const qtyKwaKipimo={};g.bidhaa.forEach(p=>{const k=p.kipimo||'pc';qtyKwaKipimo[k]=(qtyKwaKipimo[k]||0)+(Number(p.idadi)||0);});
     const qtyTxt=Object.entries(qtyKwaKipimo).map(([k,q])=>`${fmtIdadi(q)} ${escH(k)}`).join(' + ');
-    const jumlaQ=Object.values(qtyKwaKipimo).reduce((a,b)=>a+b,0),chini=Math.max(...g.bidhaa.map(p=>Number(p.kiwango_chini)||0));
-    const hali=jumlaQ<=0?'<span class="pill pill-red">Imekwisha</span>':jumlaQ<=chini?'<span class="pill pill-amber">Ndogo</span>':'<span class="pill pill-green">Ipo ✓</span>';
     const bei=[...new Set(g.bidhaa.map(p=>Number(p.bei_kuuzia)||0))].sort((a,b)=>a-b);
     const historia=[...(g.manunuzi||[]).map(x=>({t:'m',tarehe:x.tarehe,x})),...(g.transfer||[]).map(x=>({t:'u',tarehe:x.tarehe_kupokea||x.tarehe,x}))].sort((a,b)=>String(b.tarehe).localeCompare(String(a.tarehe)));
     const mwisho=historia[0]?historia[0].tarehe:'';
     const wazi=stockWazi.has(g.key)?stockWazi.get(g.key):funguaKwaUtafutaji;
     const rekodi=g.bidhaa.map(p=>{
       const gj=p.bei_kununulia>0,fp=(p.bei_kuuzia>0&&gj)?Math.round(((p.bei_kuuzia-p.bei_kununulia)/p.bei_kuuzia)*100):0;
-      const b=p.idadi<=0?'<span class="pill pill-red">Imekwisha</span>':p.idadi<=p.kiwango_chini?'<span class="pill pill-amber">Ndogo</span>':'<span class="pill pill-green">Ipo ✓</span>';
-      return`<tr>${yote?`<td>${escH(BRANCHES[p.tawi]||p.tawi)}</td>`:''}<td>${escH(p.kipimo||'pc')}</td><td class="col-gharama">${gj?pesa(p.bei_kununulia):'—'}</td><td>${pesa(p.bei_kuuzia)}</td><td class="col-gharama">${gj?`<span class="pill ${fp>=30?'pill-green':fp>=15?'pill-amber':'pill-red'}">${fp}%</span>`:'—'}</td><td class="num"><strong>${fmtIdadi(p.idadi)}</strong></td><td>${b}</td><td><div class="toggle-wrap"><div class="toggle${p.onyesha_dukani?' on':''}" onclick="event.stopPropagation();toggleDukani('${p.id}')"></div></div></td><td>${gmReadOnly?'—':kitufeMarekebisho('bidhaa',p.id)}</td></tr>`;
+      return`<tr>${yote?`<td>${escH(BRANCHES[p.tawi]||p.tawi)}</td>`:''}<td>${escH(p.kipimo||'pc')}</td><td class="col-gharama">${gj?pesa(p.bei_kununulia):'—'}</td><td>${pesa(p.bei_kuuzia)}</td><td class="col-gharama">${gj?`<span class="pill ${fp>=30?'pill-green':fp>=15?'pill-amber':'pill-red'}">${fp}%</span>`:'—'}</td><td class="num"><strong>${fmtIdadi(p.idadi)}</strong></td><td><div class="toggle-wrap"><div class="toggle${p.onyesha_dukani?' on':''}" onclick="event.stopPropagation();toggleDukani('${p.id}')"></div></div></td><td>${gmReadOnly?'—':kitufeMarekebisho('bidhaa',p.id)}</td></tr>`;
     }).join('');
     const hist=historia.length?historia.map(h=>{const x=h.x;
       return h.t==='m'
@@ -6262,11 +6268,11 @@ function renderStock(){
         <img src="${g.img||blank}" style="width:38px;height:38px;object-fit:cover;border-radius:6px" alt=""/>
         <div style="min-width:0;"><div class="sk-jina">${escH(g.jina)}${g.jina_sw?` <span style="font-weight:500;color:var(--a-muted);">/ ${escH(g.jina_sw)}</span>`:''}</div>
           <div class="sk-dogo">${bei.length?`Bei: ${bei.length>1?pesa(bei[0])+' – '+pesa(bei[bei.length-1]):pesa(bei[0])}`:''}${g.bidhaa.length>1?` · rekodi ${g.bidhaa.length} za stock`:''}${historia.length?` · manunuzi/transfer ${historia.length}`:''}${mwisho?` · mwisho ${escH(mwisho)}`:''}</div></div>
-        <div class="sk-qty">${qtyTxt} <div style="margin-top:3px;">${hali}</div></div>
+        <div class="sk-qty">${qtyTxt}</div>
       </div>
       <div class="sk-mwili">
         <h4>📦 Stock iliyopo</h4>
-        <div class="table-wrap"><table><thead><tr>${yote?'<th>Tawi</th>':''}<th>UNIT</th><th class="col-gharama">Bei ya Kununulia</th><th>RATE</th><th class="col-gharama">Faida %</th><th class="num">QTY</th><th>Hali</th><th>Dukani</th><th>Kitendo</th></tr></thead><tbody>${rekodi}</tbody></table></div>
+        <div class="table-wrap"><table><thead><tr>${yote?'<th>Tawi</th>':''}<th>UNIT</th><th class="col-gharama">Bei ya Kununulia</th><th>RATE</th><th class="col-gharama">Faida %</th><th class="num">QTY</th><th>Dukani</th><th>Kitendo</th></tr></thead><tbody>${rekodi}</tbody></table></div>
         <h4>🧾 Historia ya Manunuzi na Transfer (mpya kwanza)</h4>
         <div class="table-wrap"><table><thead><tr><th>Tarehe</th><th>Aina</th>${yote?'<th>Tawi</th>':''}<th class="num">QTY</th><th class="num">RATE</th><th class="num">Jumla</th><th>Msambazaji / Chanzo</th></tr></thead><tbody>${hist}</tbody></table></div>
       </div>
@@ -6907,16 +6913,21 @@ function futaKwaOmbi(id){
   if(o.jedwali==='mauzo_serikali')return futaSerikaliRekodi(o.rekodi_id,done);
   if(o.jedwali==='mafuta_mauzo_serikali')return futaSerikaliMafutaRekodi(o.rekodi_id,done);
 }
-async function kataaOmbi(id){
-  const sababu=prompt('Sababu ya kukataa (itamfikia mwombaji):');
-  if(sababu===null)return;
-  await maliziaOmbi(id,'Imekataliwa',sababu.trim()||'Ombi halikukubaliwa');
-  toast('Ombi limekataliwa');loadAllBaada();
+function kataaOmbi(id){
+  const o=allMaombi.find(x=>x.id===id);if(!o)return;
+  fomuHariri('✖ Kataa Ombi',o.muhtasari||'',[{id:'sababu',label:'Sababu ya kukataa (itamfikia mwombaji)',value:'',full:true}],async()=>{
+    const sababu=hv('sababu').trim();
+    if(sababu.length<3)throw new Error('Andika sababu fupi ya kukataa');
+    await maliziaOmbi(id,'Imekataliwa',sababu);
+    fungaAdminModal();toast('Ombi limekataliwa');loadAllBaada();
+  },'✖ Kataa Ombi');
 }
 async function maliziaOmbi(id,hali,jibu){
   const o=allMaombi.find(x=>x.id===id);
-  await DB.patch('maombi_marekebisho',`id=eq.${id}`,{hali,jibu,resolved_at:new Date().toISOString()});
+  const r=await DB.patch('maombi_marekebisho',`id=eq.${id}`,{hali,jibu,resolved_at:new Date().toISOString()});
+  if(!Array.isArray(r)||!r.length)throw new Error((r&&r.message)||'Ombi halikuweza kufungwa — huna ruhusa kwa ombi hili (tawi la faragha?).');
   if(o){o.hali=hali;o.jibu=jibu;}
+  try{renderMarekebisho();}catch(_e){}
   const phone=o&&BRANCH_PHONE[o.tawi];
   if(phone&&!phone.includes('TODO'))sendSms(phone,`MAREKEBISHO (${hali}): ${(o.muhtasari||'').slice(0,90)}. ${jibu||''}`);
 }
@@ -6938,7 +6949,8 @@ async function badiliDeniMteja(tawi,jina,simu,dJumla,dKil,dBakaa){
 }
 
 // ── generic small "edit record" modal used by the GM correction editors ──
-function fomuHariri(title,info,fields,save){
+function fomuHariri(title,info,fields,save,lebo){
+  $('hr-save-btn').textContent=lebo||'💾 Hifadhi Marekebisho';
   $('hr-title').textContent=title;$('hr-info').textContent=info;
   $('hr-fields').innerHTML=fields.map(f=>`<div class="field${f.full?' full':''}"><label>${f.label}</label><input id="hr-${f.id}" type="${f.type||'text'}" value="${escH(f.value)}"/></div>`).join('');
   hririSave=save;$('notifyHr').className='notify';$('modalHariri').classList.add('open');
@@ -6970,15 +6982,15 @@ function funguaHaririMauzoGM(id,ombiId){
   ],async()=>{
     const s=rekodiYaOmbi('mauzo',id);if(!s)throw new Error('Rekodi haipo tena');
     const mteja=hv('mteja').trim()||'Mteja wa Kawaida',simu=hv('simu').trim();
-    const idadi=parseInt(hv('idadi')),bei=parseInt(hv('bei')),punguzo=parseInt(hv('punguzo'))||0;
-    if(!idadi||idadi<1||!Number.isFinite(bei)||bei<0)throw new Error('Idadi na bei lazima ziwe sahihi');
-    const jumla=Math.max(0,idadi*bei-punguzo);
+    const idadi=parseFloat(hv('idadi')),bei=parseInt(hv('bei')),punguzo=parseInt(hv('punguzo'))||0;
+    if(!(idadi>0)||!Number.isFinite(bei)||bei<0)throw new Error('Idadi na bei lazima ziwe sahihi');
+    const jumla=Math.max(0,Math.round(idadi*bei)-punguzo);
     const kilicholipwa=s.aina==='Taslimu'?jumla:Math.min(parseInt(hv('kil'))||0,jumla);
     const bakaa=jumla-kilicholipwa;
     const b=allBidhaa.find(x=>String(x.id)===String(s.bidhaa_id))||allBidhaa.find(x=>x.jina===s.jina&&x.tawi===s.tawi);
-    const d=idadi-s.idadi; // extra units taken from stock (+) or given back (-)
+    const d=Math.round((idadi-s.idadi)*1000)/1000; // extra units taken from stock (+) or given back (-)
     if(b&&d>b.idadi)throw new Error(`Stoo haitoshi — zimebaki ${b.idadi} tu`);
-    if(b&&d!==0)await DB.patch('bidhaa',`id=eq.${b.id}`,{idadi:b.idadi-d});
+    if(b&&d!==0)await DB.patch('bidhaa',`id=eq.${b.id}`,{idadi:Math.round((b.idadi-d)*1000)/1000});
     if(s.aina==='Mkopo'){
       await badiliDeniMteja(s.tawi,s.mteja,null,-s.jumla,-s.kilicholipwa,-s.bakaa);
       await badiliDeniMteja(s.tawi,mteja,simu,jumla,kilicholipwa,bakaa);
@@ -6995,13 +7007,13 @@ function funguaHaririManunuziGM(id,ombiId){
     {id:'msambazaji',label:'Msambazaji',value:p0.msambazaji||'',full:true}
   ],async()=>{
     const p=rekodiYaOmbi('manunuzi',id);if(!p)throw new Error('Rekodi haipo tena');
-    const idadi=parseInt(hv('idadi')),bei=parseInt(hv('bei'));
-    if(!idadi||idadi<1||!Number.isFinite(bei)||bei<0)throw new Error('Idadi na bei lazima ziwe sahihi');
+    const idadi=parseFloat(hv('idadi')),bei=parseInt(hv('bei'));
+    if(!(idadi>0)||!Number.isFinite(bei)||bei<0)throw new Error('Idadi na bei lazima ziwe sahihi');
     const b=allBidhaa.find(x=>x.jina.toLowerCase()===p.jina.toLowerCase()&&x.tawi===p.tawi);
-    const d=idadi-p.idadi;
+    const d=Math.round((idadi-p.idadi)*1000)/1000;
     if(b&&b.idadi+d<0)throw new Error(`Stoo ingekuwa chini ya sifuri (zilizopo ${b.idadi})`);
-    if(b&&d!==0)await DB.patch('bidhaa',`id=eq.${b.id}`,{idadi:b.idadi+d});
-    await DB.patch('manunuzi',`id=eq.${p.id}`,{idadi,bei_kununulia:bei,jumla:idadi*bei,msambazaji:hv('msambazaji').trim()});
+    if(b&&d!==0)await DB.patch('bidhaa',`id=eq.${b.id}`,{idadi:Math.round((b.idadi+d)*1000)/1000});
+    await DB.patch('manunuzi',`id=eq.${p.id}`,{idadi,bei_kununulia:bei,jumla:Math.round(idadi*bei),msambazaji:hv('msambazaji').trim()});
     await kamilishaMarekebisho(ombiId);
   });
 }
