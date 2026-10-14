@@ -929,6 +929,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
     <button class="a-tab-btn" data-page="wateja"><span class="t-icon">💳</span><span class="t-label">Madeni</span></button>
     <button class="a-tab-btn" data-page="wanunuzi"><span class="t-icon">📣</span><span class="t-label">Wateja</span></button>
     <button class="a-tab-btn" data-page="kila-siku"><span class="t-icon">📅</span><span class="t-label">Siku</span></button>
+    <button class="a-tab-btn" data-page="ripoti-makusanyo"><span class="t-icon">📊</span><span class="t-label">Ripoti ya Makusanyo</span></button>
     <button class="a-tab-btn" data-page="makusanyo"><span class="t-icon">💵</span><span class="t-label">Makusanyo</span></button>
     <button class="a-tab-btn" data-page="ripoti"><span class="t-icon">📈</span><span class="t-label">Ripoti</span></button>
     <button class="a-tab-btn" data-page="fomu"><span class="t-icon">🖨</span><span class="t-label">Fomu</span></button>
@@ -985,6 +986,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       <button class="nav-btn" data-page="wanunuzi"><span class="icon">📣</span>Wateja</button>
       <button class="nav-btn" data-page="kila-siku"><span class="icon">📅</span>Summary ya Siku</button>
       <button class="nav-btn" data-page="makusanyo"><span class="icon">💵</span>Makusanyo</button>
+      <button class="nav-btn" data-page="ripoti-makusanyo"><span class="icon">📊</span>Ripoti ya Makusanyo</button>
       <button class="nav-btn" data-page="ripoti"><span class="icon">📈</span>Ripoti</button>
       <button class="nav-btn" data-page="fomu"><span class="icon">🖨</span>Fomu</button>
       <button class="nav-btn" data-page="mafuta"><span class="icon">⛽</span>Mafuta</button>
@@ -1382,9 +1384,10 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       <div class="section" id="bsmSection">
         <div class="section-header"><h3>🏦 Bank Slips kutoka kwa Cashier</h3>
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-            <input type="date" id="bsm-siku" onchange="renderBankSlips('bsm')" style="width:auto" title="Chagua tarehe ya kuona slip"/>
+            <label style="font-size:12px;color:var(--a-muted);">Kuanzia</label><input type="date" id="bsm-siku" onchange="renderBankSlips('bsm')" style="width:auto" title="Tarehe ya kuanzia"/>
+            <label style="font-size:12px;color:var(--a-muted);">Hadi</label><input type="date" id="bsm-siku-hadi" onchange="renderBankSlips('bsm')" style="width:auto" title="Tarehe ya mwisho"/>
             <button class="btn sm secondary" type="button" onclick="slipLeo('bsm')">Leo</button>
-            <button class="btn sm secondary" type="button" id="bsm-modi" onclick="slipBadiliModi('bsm')">Mwezi Wote</button>
+            <button class="btn sm secondary" type="button" id="bsm-modi" onclick="slipBadiliModi('bsm')">Mwezi Huu</button>
           </div>
         </div>
         <div class="section-body">
@@ -1746,16 +1749,22 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       <div class="section" id="mkSikuSection">
         <div class="section-header"><h3>📅 Rekodi za Makusanyo ya Siku</h3>
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-            <input type="date" id="mk-siku" onchange="renderMakusanyo()" style="width:auto" title="Chagua tarehe ya kuona makusanyo"/>
-            <button class="btn sm secondary" onclick="$('mk-siku').value=sikuBaada(leoISO(),-1);renderMakusanyo()">Jana</button>
-            <button class="btn sm secondary" onclick="$('mk-siku').value=leoISO();renderMakusanyo()">Leo</button>
+            <label style="font-size:12px;color:var(--a-muted);">Kuanzia</label><input type="date" id="mk-siku" onchange="renderMakusanyo()" style="width:auto" title="Tarehe ya kuanzia"/>
+            <label style="font-size:12px;color:var(--a-muted);">Hadi</label><input type="date" id="mk-siku-hadi" onchange="renderMakusanyo()" style="width:auto" title="Tarehe ya mwisho"/>
+            <button class="btn sm secondary" onclick="mkSikuMuda('jana')">Jana</button>
+            <button class="btn sm secondary" onclick="mkSikuMuda('leo')">Leo</button>
+            <button class="btn sm secondary" onclick="mkSikuMuda('mwezi')">Mwezi Huu</button>
           </div>
         </div>
         <div class="section-body">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px;">
+            <input type="search" id="mk-siku-tafuta" list="mk-majina" oninput="onyeshaSikuMakusanyo()" placeholder="🔍 Tafuta kwa jina la afisa…" style="flex:1;min-width:200px;" autocomplete="off"/>
+            <span id="mk-siku-tarehe-lbl" style="font-size:12px;color:var(--a-muted);"></span>
+          </div>
           <div id="mk-siku-hitilafu" class="grid-errors"></div>
           
           <div class="table-wrap"><table>
-            <thead><tr><th>Afisa</th><th class="num">Cash</th><th class="num">Lipa Namba</th><th class="num">Jumla</th><th>Aliyeingiza</th><th>Saa</th><th>Kitendo</th></tr></thead>
+            <thead><tr><th>#</th><th>Tarehe</th><th>Afisa</th><th class="num">Cash</th><th class="num">Lipa Namba</th><th class="num">Jumla</th><th>Aliyeingiza</th><th>Saa</th><th>Kitendo</th></tr></thead>
             <tbody id="tbody-mk-siku-rekodi"><tr class="loading-row"><td colspan="9">Inapakia...</td></tr></tbody>
           </table></div>
         </div>
@@ -1802,7 +1811,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
           <div id="mk-afisa-hitilafu" class="notify" style="display:none;"></div>
           <div id="mk-afisa-muhtasari"></div>
           <div class="table-wrap"><table>
-            <thead><tr><th>Tarehe</th><th>Afisa</th><th class="num">Cash</th><th class="num">Lipa Namba</th><th class="num">Benki</th><th class="num">Jumla</th><th>Aliyeingiza</th><th>Saa</th><th></th></tr></thead>
+            <thead><tr><th>#</th><th>Tarehe</th><th>Afisa</th><th class="num">Cash</th><th class="num">Lipa Namba</th><th class="num">Benki</th><th class="num">Jumla</th><th>Aliyeingiza</th><th>Saa</th><th></th></tr></thead>
             <tbody id="tbody-mk-afisa"></tbody>
           </table></div>
         </div>
@@ -1811,9 +1820,10 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       <div class="section" id="bsSection">
         <div class="section-header"><h3>🏦 Amana Benki — Bank Slip</h3>
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-            <input type="date" id="bs-siku" onchange="renderBankSlips('bs')" style="width:auto" title="Chagua tarehe ya kuona slip"/>
+            <label style="font-size:12px;color:var(--a-muted);">Kuanzia</label><input type="date" id="bs-siku" onchange="renderBankSlips('bs')" style="width:auto" title="Tarehe ya kuanzia"/>
+            <label style="font-size:12px;color:var(--a-muted);">Hadi</label><input type="date" id="bs-siku-hadi" onchange="renderBankSlips('bs')" style="width:auto" title="Tarehe ya mwisho"/>
             <button class="btn sm secondary" type="button" onclick="slipLeo('bs')">Leo</button>
-            <button class="btn sm secondary" type="button" id="bs-modi" onclick="slipBadiliModi('bs')">Mwezi Wote</button>
+            <button class="btn sm secondary" type="button" id="bs-modi" onclick="slipBadiliModi('bs')">Mwezi Huu</button>
           </div>
         </div>
         <div class="section-body">
@@ -1863,12 +1873,12 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
           <p id="mk-mwezi-zamani" style="display:none;font-size:11.5px;color:#E8A33D;margin:2px 0 6px;"></p>
           <h4 style="margin:14px 0 8px;">Taarifa ya Kila Afisa wa Mauzo</h4>
           <div class="table-wrap"><table>
-            <thead><tr><th>Afisa</th><th>Tawi</th><th class="num">Cash</th><th class="num">Lipa Namba</th><th class="num">Jumla</th><th class="num">% ya Jumla</th><th class="num">Siku</th><th class="num">Wastani / Siku</th><th>Siku Bora</th></tr></thead>
-            <tbody id="tbody-mk-mwezi-afisa"><tr class="loading-row"><td colspan="11">Inapakia...</td></tr></tbody>
+            <thead><tr><th>#</th><th>Afisa</th><th>Tawi</th><th class="num">Cash</th><th class="num">Lipa Namba</th><th class="num">Jumla</th><th class="num">% ya Jumla</th><th class="num">Siku</th><th class="num">Wastani / Siku</th></tr></thead>
+            <tbody id="tbody-mk-mwezi-afisa"><tr class="loading-row"><td colspan="9">Inapakia...</td></tr></tbody>
           </table></div>
           <h4 style="margin:18px 0 8px;">Siku kwa Siku</h4>
           <div class="table-wrap"><table>
-            <thead><tr><th>Tarehe</th><th class="num">Cash</th><th class="num">Lipa Namba</th><th class="num">Jumla</th><th class="num">Maafisa</th></tr></thead>
+            <thead><tr><th>#</th><th>Tarehe</th><th class="num">Cash</th><th class="num">Lipa Namba</th><th class="num">Jumla</th><th class="num">Maafisa</th></tr></thead>
             <tbody id="tbody-mk-mwezi-siku"><tr class="loading-row"><td colspan="7">Inapakia...</td></tr></tbody>
           </table></div>
         </div>
@@ -2420,6 +2430,46 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
         <div class="section-body"><div class="table-wrap"><table>
           <thead><tr><th>S/N</th><th>Jina</th><th>Tarehe</th><th>Wateja</th><th class="num">Kiasi (TZS)</th></tr></thead>
           <tbody id="tbody-ro-afisa"></tbody>
+        </table></div></div>
+      </div>
+    </section>
+
+    <section id="ripoti-makusanyo" class="page">
+      <div class="topbar"><div class="topbar-left"><h2>Ripoti ya Makusanyo — Kila Mwezi</h2><p>Makusanyo ya kila afisa wa mauzo: jumla ya kila siku, jumla ya mwezi, na JUMLA KUU wa maafisa wote.</p></div></div>
+      <div class="section">
+        <div class="section-header"><h3>📊 Chagua Mwezi</h3></div>
+        <div class="section-body">
+          <div id="notifyRm" class="notify"></div>
+          <div class="form-grid">
+            <div class="field"><label>Mwezi</label><input type="month" id="rm-mwezi" onchange="onyeshaRipotiMakusanyo(true)"/></div>
+          </div>
+          <div class="controls">
+            <button class="btn secondary" onclick="onyeshaRipotiMakusanyo(true)">🔄 Onyesha Upya</button>
+            <button class="btn secondary" onclick="chapishaRipotiMakusanyo('zote')">🖨 Chapisha Ripoti (Muhtasari + Kila Afisa)</button>
+            <button class="btn gold" onclick="pakuaRipotiMakusanyoExcel()">⬇ Excel ya Mwezi</button>
+          </div>
+          <p style="font-size:11.5px;color:var(--a-muted);margin-top:8px;">Excel ina karatasi ya <b>MUHTASARI</b> (kila afisa na jumla yake, JUMLA KUU) na karatasi moja kwa kila afisa (tarehe, Cash, Lipa Namba na TOTAL).</p>
+        </div>
+      </div>
+      <div class="cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:14px;margin-bottom:18px;">
+        <div class="card" style="border-left:3px solid var(--a-rg)"><div class="c-label">Jumla Kuu</div><div class="c-value" id="rm-c-jumla">—</div><span class="c-badge badge-gray" id="rm-c-jumla-sub">—</span></div>
+        <div class="card"><div class="c-label">Cash</div><div class="c-value" id="rm-c-cash">—</div></div>
+        <div class="card"><div class="c-label">Lipa Namba</div><div class="c-value" id="rm-c-lipa">—</div></div>
+        <div class="card"><div class="c-label">Maafisa</div><div class="c-value" id="rm-c-maafisa">—</div><span class="c-badge badge-gray">walikabidhi</span></div>
+        <div class="card"><div class="c-label">Mwezi Uliopita</div><div class="c-value" id="rm-c-uliopita">—</div><span class="c-badge badge-gray" id="rm-c-tofauti">—</span></div>
+      </div>
+      <div class="section">
+        <div class="section-header"><h3 id="rm-kichwa">🧾 Muhtasari wa Mwezi</h3><button class="btn sm secondary" onclick="chapishaRipotiMakusanyo('muhtasari')">🖨 Chapisha Muhtasari</button></div>
+        <div class="section-body"><div class="table-wrap"><table>
+          <thead><tr><th>S/N</th><th>Afisa</th><th>Tawi</th><th class="num">Siku</th><th class="num">Cash</th><th class="num">Lipa Namba</th><th class="num">Benki</th><th class="num">Jumla (TZS)</th><th class="num">%</th><th>Kitendo</th></tr></thead>
+          <tbody id="tbody-rm-muhtasari"><tr class="loading-row"><td colspan="10">Inapakia...</td></tr></tbody>
+        </table></div></div>
+      </div>
+      <div class="section" id="rmAfisaSection" style="display:none;">
+        <div class="section-header"><h3 id="rm-afisa-kichwa">📄 Afisa</h3><div style="display:flex;gap:6px;flex-wrap:wrap;"><button class="btn sm secondary" onclick="chapishaRipotiMakusanyo('afisa')">🖨 Chapisha</button><button class="btn sm secondary" onclick="document.getElementById('rmAfisaSection').style.display='none'">Funga ✕</button></div></div>
+        <div class="section-body"><div class="table-wrap"><table>
+          <thead><tr><th>S/N</th><th>Tarehe</th><th class="num">Cash</th><th class="num">Lipa Namba</th><th class="num">Benki</th><th class="num">Jumla (TZS)</th></tr></thead>
+          <tbody id="tbody-rm-afisa"></tbody>
         </table></div></div>
       </div>
     </section>
@@ -3026,7 +3076,7 @@ const BRANCHES={
   ngaramjinipetrol:'Ngara Mjini Petrol Station',
   ushirombopetrol:'Ushirombo Petrol Station'
 };
-const HARDWARE_BRANCHES={ngaramjini:'Main Shop',benaco:'Benaco',godownabel:'Nakatunga Godown — Abel',godownjonathan:'Nakatunga Godown — Jonathan',godownsubira:'Nakatunga Godown — Subira',nakatunga:'Nakatunga',runzeweduka:'Runzewe — Duka',runzewestore:'Runzewe — Store',ushirombo:'Ushirombo',citycentre:"Diana's Shop",matumizibranch:'Matumizi Branch'};
+const HARDWARE_BRANCHES={ngaramjini:BRANCHES.ngaramjini,benaco:BRANCHES.benaco,godownabel:BRANCHES.godownabel,godownjonathan:BRANCHES.godownjonathan,godownsubira:BRANCHES.godownsubira,nakatunga:BRANCHES.nakatunga,runzeweduka:BRANCHES.runzeweduka,runzewestore:BRANCHES.runzewestore,ushirombo:BRANCHES.ushirombo,citycentre:BRANCHES.citycentre,matumizibranch:BRANCHES.matumizibranch};
 const PETROL_BRANCHES={ngaramjinipetrol:'Ngara Mjini Petrol Station',ushirombopetrol:'Ushirombo Petrol Station'};
 function populateBranchSelect(id,branchMap,withAllOption){
   const sel=document.getElementById(id);if(!sel)return;
@@ -3728,11 +3778,11 @@ function enterAdmin(role='gm',tawi=null,jina=''){
 }
 // Pages each role may access. GM sees everything across all branches.
 const ROLE_PAGES={
-  gm:['dashibodi','mauzo','mapato','gharama','hifadhi','wateja','wanunuzi','kila-siku','makusanyo','ripoti','fomu','takataka','serikali','serikali-mafuta','serikali-wateja','ripoti-order','marekebisho','mafuta','fomu-mafuta','mdaiwa-mpya','ripoti-madeni'],
+  gm:['dashibodi','mauzo','mapato','gharama','hifadhi','wateja','wanunuzi','kila-siku','makusanyo','ripoti','fomu','takataka','serikali','serikali-mafuta','serikali-wateja','ripoti-order','ripoti-makusanyo','marekebisho','mafuta','fomu-mafuta','mdaiwa-mpya','ripoti-madeni'],
   deski:['dashibodi','maagizo','mauzo','uhamisho','pokea','hifadhi','wateja','fomu','marekebisho'],
   matumizi:['mauzo','hifadhi','uhamisho','pokea','wateja','fomu','marekebisho','mapato','gharama'],   // works as a branch sales officer (for the branch on her profile) AND keeps the cash book
   madeni:['wateja','mdaiwa-mpya','ripoti-madeni'],      // Abdul: the debts + his collection report
-  cashier:['dashibodi','makusanyo'],   // Makusanyo: the one place the Cashier can ENTER data (daily collections)
+  cashier:['dashibodi','makusanyo','ripoti-makusanyo'],   // Makusanyo: the one place the Cashier can ENTER data (daily collections)
   serikali:['serikali','serikali-wateja'],        // Madeni ya Serikali (Rehema): prepares invoices + owns the debts (corrects her invoices directly — no Marekebisho tab, no Ripoti ya Order)
   serikali_mauzo:['serikali','ripoti-order'],                                  // Mauzo ya Serikali (Felister, Anania): sends orders to the branches
   serikali_mafuta:['serikali-mafuta','serikali-wateja','marekebisho'],
@@ -4111,6 +4161,7 @@ function switchPage(page){
   if(page==='fomu'&&$('fm-mz-kuanzia')&&!$('fm-mz-kuanzia').value){const t=leoISO();$('fm-mz-kuanzia').value=t.slice(0,8)+'01';$('fm-mz-hadi').value=t;}
   if(page==='serikali-mafuta')onMweziStatement();
   if(page==='ripoti-order')onyeshaRipotiOrder(true);
+  if(page==='ripoti-makusanyo')onyeshaRipotiMakusanyo(true);
   if(page==='uhamisho'||page==='pokea'){loadAll();const bn=$('uhBannerIncoming');if(bn)bn.style.display='none';}      // always the latest requests
 }
 document.querySelectorAll('#adminApp .nav-btn').forEach(btn=>{
@@ -8357,9 +8408,166 @@ function htmlYaMaafisaSiku(rows){
   const g=kusanyaMakusanyo(rows||[]);
   if(!g.maafisa.length)return '<div class="empty-state" style="grid-column:1/-1;"><div class="icon">📭</div>Hakuna makusanyo yaliyoingizwa kwa tarehe hii.</div>';
   const njia=(l,v)=>`<div><span>${l}</span><b>${v?pesa(v):'—'}</b></div>`;
-  const kadi=(jina,tawi,x,jumla)=>`<div class="mk-kadi${jumla?' jumla':''}"><div class="mk-jina">${escH(jina)}</div><div class="mk-tawi">${tawi?escH(BRANCHES[tawi]||tawi):'&nbsp;'}</div><div class="mk-njia">${njia('Cash',x.cash)}${njia('Lipa Namba',x.lipa)}${njia('NMB',x.nmb)}${njia('CRDB',x.crdb)}</div><div class="mk-yote">Jumla<b>${pesa(x.jumla)}</b></div></div>`;
+  const kadi=(jina,tawi,x,jumla)=>`<div class="mk-kadi${jumla?' jumla':''}"><div class="mk-jina">${escH(jina)}</div><div class="mk-tawi">${tawi?escH(mkTawi(tawi)):'&nbsp;'}</div><div class="mk-njia">${njia('Cash',x.cash)}${njia('Lipa Namba',x.lipa)}${njia('NMB',x.nmb)}${njia('CRDB',x.crdb)}</div><div class="mk-yote">Jumla<b>${pesa(x.jumla)}</b></div></div>`;
   return g.maafisa.map(a=>kadi(a.afisa,a.tawi,a,false)).join('')+kadi(`JUMLA — MAAFISA ${g.maafisa.length}`,'',g.jumla,true);
 }
+// ═══════════════════════════════════════════════════════════════════════════
+// RIPOTI YA MAKUSANYO — the monthly report of the daily collections (Cashier + General Manager).
+// Every sales officer gets: each day's Cash / Lipa Namba, the month total, and the company's JUMLA KUU.
+// The screen, the printout and the Excel all come from ONE calculation (dataYaRipotiMakusanyo), so they never disagree.
+// ═══════════════════════════════════════════════════════════════════════════
+const rm={rows:[],mwezi:'',afisa:null};
+let _rmToken=0;
+function dataYaRipotiMakusanyo(rows){
+  const by=new Map();
+  (rows||[]).forEach(r=>{
+    const jn=mkJinaSahihi(r.afisa),k=jn.toLowerCase();if(!k)return;
+    let a=by.get(k);
+    if(!a){a={ufunguo:k,afisa:jn,tawi:r.tawi||tawiYaAfisa(jn),cash:0,lipa:0,benki:0,jumla:0,siku:new Map()};by.set(k,a);}
+    const c=Number(r.cash)||0,l=Number(r.lipa)||0,b=(Number(r.nmb)||0)+(Number(r.crdb)||0);
+    a.cash+=c;a.lipa+=l;a.benki+=b;a.jumla+=c+l+b;
+    const d=a.siku.get(r.tarehe)||{tarehe:r.tarehe,cash:0,lipa:0,benki:0,jumla:0};
+    d.cash+=c;d.lipa+=l;d.benki+=b;d.jumla+=c+l+b;a.siku.set(r.tarehe,d);
+  });
+  const maafisa=[...by.values()].map(a=>({...a,siku:[...a.siku.values()].sort((x,y)=>x.tarehe.localeCompare(y.tarehe))})).filter(a=>a.jumla!==0).sort((x,y)=>y.jumla-x.jumla);
+  const jumla=maafisa.reduce((t,a)=>{t.cash+=a.cash;t.lipa+=a.lipa;t.benki+=a.benki;t.jumla+=a.jumla;return t;},{cash:0,lipa:0,benki:0,jumla:0});
+  return{maafisa,jumla,benkiIpo:jumla.benki>0};
+}
+const rmKichwa=(mwezi)=>{const [y,m]=mwezi.split('-').map(Number);return `MAKUSANYO MWEZI WA ${MWEZI_WA_NAMBA[m-1]} (${m}) ${y}`;};
+async function onyeshaRipotiMakusanyo(pakiaUpya){
+  if(!$('rm-mwezi')||(userRole!=='cashier'&&userRole!=='gm'))return;
+  if(!$('rm-mwezi').value)$('rm-mwezi').value=leoISO().slice(0,7);
+  const mwezi=$('rm-mwezi').value,uliopita=roMweziUliopita(mwezi),my=++_rmToken;
+  if(pakiaUpya)futaAkibaMakusanyo();
+  $('tbody-rm-muhtasari').innerHTML='<tr class="loading-row"><td colspan="10">Inapakia...</td></tr>';
+  let rows,prev;
+  try{
+    [rows,prev]=await Promise.all([pakiaMakusanyo(mwezi+'-01',mwishoWaMwezi(mwezi)),pakiaMakusanyo(uliopita+'-01',mwishoWaMwezi(uliopita)).catch(()=>[])]);
+    $('notifyRm').className='notify';
+  }catch(e){if(my!==_rmToken)return;arifu('notifyRm','❌ Imeshindwa kupata makusanyo: '+escH(e.message),'error');rows=[];prev=[];}
+  if(my!==_rmToken)return;
+  rm.rows=rows;rm.mwezi=mwezi;
+  const d=dataYaRipotiMakusanyo(rows),dp=dataYaRipotiMakusanyo(prev);
+  $('rm-kichwa').textContent='🧾 '+rmKichwa(mwezi);
+  $('rm-c-jumla').textContent=pesa(d.jumla.jumla);$('rm-c-jumla-sub').textContent=roMweziJina(mwezi);
+  $('rm-c-cash').textContent=pesa(d.jumla.cash);$('rm-c-lipa').textContent=pesa(d.jumla.lipa);
+  $('rm-c-maafisa').textContent=d.maafisa.length;$('rm-c-uliopita').textContent=pesa(dp.jumla.jumla);
+  const tf=$('rm-c-tofauti');
+  if(dp.jumla.jumla>0){const p=(d.jumla.jumla-dp.jumla.jumla)/dp.jumla.jumla*100;tf.textContent=`${p>=0?'▲':'▼'} ${Math.abs(p).toFixed(1)}% · ${roMweziJina(uliopita)}`;tf.className='c-badge '+(p>=0?'badge-green':'badge-red');}
+  else{tf.textContent=roMweziJina(uliopita);tf.className='c-badge badge-gray';}
+  const sel=(v)=>`<td class="num">${v?pesa(v):'—'}</td>`;
+  $('tbody-rm-muhtasari').innerHTML=d.maafisa.length
+    ?d.maafisa.map((a,i)=>`<tr><td>${i+1}</td><td><strong>${escH(a.afisa)}</strong></td><td>${escH(mkTawi(a.tawi))}</td><td class="num">${a.siku.length}</td>${sel(a.cash)}${sel(a.lipa)}${sel(a.benki)}<td class="num"><strong>${pesa(a.jumla)}</strong></td><td class="num">${d.jumla.jumla?(a.jumla/d.jumla.jumla*100).toFixed(1):'0.0'}</td><td><button class="btn sm secondary" onclick="onyeshaAfisaRipotiMakusanyo('${escH(a.ufunguo).replace(/'/g,"\\'")}')">📄 Fungua</button></td></tr>`).join('')
+      +`<tr style="font-weight:700;background:rgba(255,138,87,0.10);"><td></td><td colspan="2">JUMLA KUU</td><td></td>${sel(d.jumla.cash)}${sel(d.jumla.lipa)}${sel(d.jumla.benki)}<td class="num">${pesa(d.jumla.jumla)}</td><td class="num">100</td><td></td></tr>`
+    :safuTupu(10,`Hakuna makusanyo yaliyoingizwa ${roMweziJina(mwezi)}.`);
+  if(rm.afisa&&d.maafisa.some(a=>a.ufunguo===rm.afisa))onyeshaAfisaRipotiMakusanyo(rm.afisa,true);else $('rmAfisaSection').style.display='none';
+}
+function onyeshaAfisaRipotiMakusanyo(ufunguo,kimya){
+  const d=dataYaRipotiMakusanyo(rm.rows),a=d.maafisa.find(x=>x.ufunguo===ufunguo);if(!a)return;
+  rm.afisa=ufunguo;
+  $('rm-afisa-kichwa').textContent=`📄 ${a.afisa}${a.tawi?' — '+mkTawi(a.tawi):''} · ${roMweziJina(rm.mwezi)}`;
+  const sel=(v)=>`<td class="num">${v?pesa(v):'—'}</td>`;
+  $('tbody-rm-afisa').innerHTML=a.siku.map((s,i)=>`<tr><td>${i+1}</td><td>${tareheFupi(s.tarehe)}</td>${sel(s.cash)}${sel(s.lipa)}${sel(s.benki)}<td class="num"><strong>${pesa(s.jumla)}</strong></td></tr>`).join('')
+    +`<tr style="font-weight:700;background:rgba(255,138,87,0.10);"><td colspan="2">TOTAL</td>${sel(a.cash)}${sel(a.lipa)}${sel(a.benki)}<td class="num">${pesa(a.jumla)}</td></tr>`;
+  const s=$('rmAfisaSection');s.style.display='';if(!kimya)s.scrollIntoView({behavior:'smooth',block:'start'});
+}
+// ── printable sheets ──
+function htmlMuhtasariRipotiMakusanyo(d,mwezi){
+  const b=d.benkiIpo,n=(v)=>v?fmt0(v):'';
+  return `${roKichwaKaratasi(rmKichwa(mwezi),'')}
+    <table class="inv-table stmt-tbl"><thead><tr><th>S/N</th><th>NAME</th><th>TAWI</th><th class="num">CASH</th><th class="num">LIPA NAMBA</th>${b?'<th class="num">BENKI</th>':''}<th class="num">TOTAL (TZS)</th></tr></thead><tbody>
+    ${d.maafisa.map((a,i)=>`<tr><td style="text-align:center;">${i+1}</td><td><b>${escH(a.afisa)}</b></td><td>${a.tawi?escH(mkTawi(a.tawi)):''}</td><td class="num">${n(a.cash)}</td><td class="num">${n(a.lipa)}</td>${b?`<td class="num">${n(a.benki)}</td>`:''}<td class="num">${fmt0(a.jumla)}</td></tr>`).join('')}
+    <tr class="stmt-due"><td></td><td colspan="2">JUMLA KUU</td><td class="num">${fmt0(d.jumla.cash)}</td><td class="num">${fmt0(d.jumla.lipa)}</td>${b?`<td class="num">${fmt0(d.jumla.benki)}</td>`:''}<td class="num">${fmt0(d.jumla.jumla)}</td></tr></tbody></table>`;
+}
+function htmlAfisaRipotiMakusanyo(a,mwezi,benkiIpo){
+  const b=benkiIpo,n=(v)=>v?fmt0(v):'';
+  return `${roKichwaKaratasi(`MAKUSANYO — ${a.afisa}${a.tawi?' ('+mkTawi(a.tawi).toUpperCase()+')':''} — ${roMweziJina(mwezi).toUpperCase()}`,'')}
+    <table class="inv-table stmt-tbl"><thead><tr><th>S/N</th><th>NAME</th><th>DATE</th><th class="num">CASH</th><th class="num">LIPA NAMBA</th>${b?'<th class="num">BENKI</th>':''}<th class="num">TOTAL (TZS)</th></tr></thead><tbody>
+    ${a.siku.map((s,i)=>`<tr><td style="text-align:center;">${i+1}</td><td>${i===0?`<b>${escH(a.afisa)}</b>`:''}</td><td>${tareheFupi(s.tarehe)}</td><td class="num">${n(s.cash)}</td><td class="num">${n(s.lipa)}</td>${b?`<td class="num">${n(s.benki)}</td>`:''}<td class="num">${fmt0(s.jumla)}</td></tr>`).join('')}
+    <tr class="stmt-tot"><td></td><td>TOTAL</td><td></td><td class="num">${fmt0(a.cash)}</td><td class="num">${fmt0(a.lipa)}</td>${b?`<td class="num">${fmt0(a.benki)}</td>`:''}<td class="num">${fmt0(a.jumla)}</td></tr></tbody></table>`;
+}
+function chapishaRipotiMakusanyo(nini){
+  if(!rm.mwezi){toast('Chagua mwezi kwanza');return;}
+  const d=dataYaRipotiMakusanyo(rm.rows);
+  if(!d.maafisa.length){toast('Hakuna makusanyo mwezi huu');return;}
+  const ukurasa='<div class="ro-ukurasa"></div>';
+  let html;
+  if(nini==='afisa'){const a=d.maafisa.find(x=>x.ufunguo===rm.afisa);if(!a)return;html=htmlAfisaRipotiMakusanyo(a,rm.mwezi,d.benkiIpo);}
+  else if(nini==='muhtasari')html=htmlMuhtasariRipotiMakusanyo(d,rm.mwezi);
+  else html=htmlMuhtasariRipotiMakusanyo(d,rm.mwezi)+d.maafisa.map(a=>ukurasa+htmlAfisaRipotiMakusanyo(a,rm.mwezi,d.benkiIpo)).join('');
+  setWaPhone('roOverlay','');$('roPrintBody').innerHTML=html;
+  $('roOverlay').dataset.jina=`ripoti-makusanyo-${rm.mwezi}${nini==='afisa'?'-'+String(rm.afisa).replace(/\s+/g,'-'):''}`;
+  openSheet('roOverlay');
+}
+// ── Excel: MUHTASARI + one sheet per officer ──
+async function pakuaRipotiMakusanyoExcel(){
+  if(!rm.mwezi){toast('Chagua mwezi kwanza');return;}
+  const d=dataYaRipotiMakusanyo(rm.rows);
+  if(!d.maafisa.length){toast('Hakuna makusanyo mwezi huu');return;}
+  const faili=`Ripoti_Makusanyo_${roMweziJina(rm.mwezi).replace(' ','_')}.xlsx`;
+  try{
+    if(typeof ExcelJS==='undefined'){toast('⏳ Inapakia zana ya Excel...');await pakiaMaktaba('exceljs');}
+    const wb=jengaKitabuChaRipotiMakusanyo(d,rm.mwezi,ExcelJS);
+    pakuaFailiLaExcel(await wb.xlsx.writeBuffer(),faili);
+  }catch(e){
+    try{
+      if(typeof XLSX==='undefined')await pakiaMaktaba('xlsx');
+      const wb=XLSX.utils.book_new(),b=d.benkiIpo,kichwa=['S/N','NAME','TAWI','CASH','LIPA NAMBA',...(b?['BENKI']:[]),'TOTAL (TZS)'];
+      XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([[rmKichwa(rm.mwezi)],[],kichwa,...d.maafisa.map((a,i)=>[i+1,a.afisa,a.tawi?mkTawi(a.tawi):'',a.cash,a.lipa,...(b?[a.benki]:[]),a.jumla]),['','JUMLA KUU','',d.jumla.cash,d.jumla.lipa,...(b?[d.jumla.benki]:[]),d.jumla.jumla]]),'MUHTASARI');
+      const tumika=new Set(['MUHTASARI']);
+      d.maafisa.forEach(a=>{let j=a.afisa.replace(/[\\\/\?\*\[\]:]/g,' ').trim().slice(0,28)||'AFISA',k=j,i=2;while(tumika.has(k))k=j.slice(0,26)+' '+(i++);tumika.add(k);
+        XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([[`MAKUSANYO — ${a.afisa} — ${roMweziJina(rm.mwezi)}`],[],['S/N','DATE','CASH','LIPA NAMBA',...(b?['BENKI']:[]),'TOTAL (TZS)'],...a.siku.map((s,x)=>[x+1,s.tarehe,s.cash,s.lipa,...(b?[s.benki]:[]),s.jumla]),['','TOTAL',a.cash,a.lipa,...(b?[a.benki]:[]),a.jumla]]),k);});
+      XLSX.writeFile(wb,faili);toast('ℹ Excel imetengenezwa bila rangi (zana ya rangi haikupatikana).');
+    }catch(_e){toast('❌ Excel haikutengenezwa — angalia mtandao wako.');}
+  }
+}
+function jengaKitabuChaRipotiMakusanyo(d,mwezi,Lib){
+  const wb=new Lib.Workbook();wb.creator='Ngara Huduma Company Limited';wb.created=new Date();
+  const K=STMT_KAMPUNI,NAVY='FF0B4C8C',ORANGE='FFE8590C',TINT='FFDCE6F2',WHITE='FFFFFFFF',GRAY='FF55606E',INK='FF1D2733',ZEBRA='FFF4F7FB',b=d.benkiIpo;
+  const nyembamba={style:'thin',color:{argb:'FF7F93AD'}},sanduku={top:nyembamba,left:nyembamba,bottom:nyembamba,right:nyembamba};
+  const tareheX=(iso)=>{const [y,m,dd]=iso.split('-').map(Number);return (Date.UTC(y,m-1,dd)-Date.UTC(1899,11,30))/86400000;};
+  const herufi=(c)=>{let s='';while(c>0){const m=(c-1)%26;s=String.fromCharCode(65+m)+s;c=Math.floor((c-1)/26);}return s;};
+  const kipindi=roMweziJina(mwezi).toUpperCase();
+  const kichwa=(ws,mwisho,cheo)=>{
+    ws.mergeCells(`A1:${mwisho}1`);const t=ws.getCell('A1');t.value=cheo;t.font={name:'Calibri',size:14,bold:true,color:{argb:WHITE}};t.fill={type:'pattern',pattern:'solid',fgColor:{argb:NAVY}};t.alignment={horizontal:'center',vertical:'middle'};ws.getRow(1).height=24;
+    [[K.jina,{size:13,bold:true,color:{argb:NAVY}}],[K.tin],[K.anwani],[K.barua],['DATE: '+maandishiYaTarehe(leoISO()),{bold:true,color:{argb:INK}}],[K.simu]].forEach(([v,o],i)=>{
+      const r=i+2;ws.mergeCells(`A${r}:${mwisho}${r}`);const c=ws.getCell('A'+r);c.value=v;c.font=Object.assign({name:'Calibri',size:10,color:{argb:GRAY}},o||{});c.alignment={horizontal:'left',indent:1};});
+    return 9;
+  };
+  const kichwaJedwali=(ws,r,vichwa)=>{vichwa.forEach((h,ix)=>{const c=ws.getCell(r,ix+1);c.value=h;c.font={name:'Calibri',size:10.5,bold:true,color:{argb:WHITE}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:ORANGE}};c.alignment={horizontal:ix>=vichwa.length-(b?3:2)?'right':'center',vertical:'middle'};c.border=sanduku;});ws.getRow(r).height=20;};
+  const seli=(ws,r,col,v,fmt,al,zebra,bold)=>{const c=ws.getCell(r,col);c.value=v;c.font={name:'Calibri',size:10,bold:!!bold,color:{argb:INK}};c.border=sanduku;c.alignment={horizontal:al||'left',vertical:'middle'};if(fmt)c.numFmt=fmt;if(zebra)c.fill={type:'pattern',pattern:'solid',fgColor:{argb:ZEBRA}};return c;};
+  // a total line: label in column 2, SUM formulas for the money columns (first money column .. last)
+  const jumlaMstari=(ws,r,cols,kwanza,r0,r1,lebo,vals,rangi)=>{
+    for(let col=1;col<=cols;col++){const c=ws.getCell(r,col);c.border=sanduku;c.fill={type:'pattern',pattern:'solid',fgColor:{argb:rangi||TINT}};c.font={name:'Calibri',size:10.5,bold:true,color:{argb:rangi?WHITE:NAVY}};}
+    ws.getCell(r,2).value=lebo;
+    for(let col=kwanza;col<=cols;col++){const L=herufi(col),c=ws.getCell(r,col);c.value={formula:`SUM(${L}${r0}:${L}${r1})`,result:vals[col-kwanza]};c.numFmt='#,##0';c.alignment={horizontal:'right'};}
+    ws.getRow(r).height=19;
+  };
+  const pesaCols=b?['cash','lipa','benki','jumla']:['cash','lipa','jumla'];
+  // ── MUHTASARI ──
+  const cM=3+pesaCols.length,wsM=wb.addWorksheet('MUHTASARI',{properties:{tabColor:{argb:NAVY}},pageSetup:{paperSize:9,orientation:'portrait',fitToPage:true,fitToWidth:1,fitToHeight:0}});
+  wsM.columns=[{width:6},{width:22},{width:28},...pesaCols.map(()=>({width:16}))];
+  let r=kichwa(wsM,herufi(cM),`RIPOTI YA MAKUSANYO — ${kipindi}`);
+  wsM.mergeCells(`A${r}:${herufi(cM)}${r}`);{const h=wsM.getCell('A'+r);h.value=rmKichwa(mwezi);h.font={name:'Calibri',size:12,bold:true,color:{argb:NAVY}};}r++;
+  kichwaJedwali(wsM,r,['S/N','NAME','TAWI','CASH','LIPA NAMBA',...(b?['BENKI']:[]),'TOTAL (TZS)']);r++;const r0=r;
+  d.maafisa.forEach((a,i)=>{seli(wsM,r,1,i+1,null,'center',i%2);seli(wsM,r,2,a.afisa,null,'left',i%2,true);seli(wsM,r,3,a.tawi?mkTawi(a.tawi):'',null,'left',i%2);
+    pesaCols.forEach((k,x)=>seli(wsM,r,4+x,a[k]||null,'#,##0','right',i%2,k==='jumla'));r++;});
+  jumlaMstari(wsM,r,cM,4,r0,r-1,'JUMLA KUU',pesaCols.map(k=>d.jumla[k]),NAVY);
+  // ── one sheet per officer ──
+  const cA=2+pesaCols.length+1,zilizotumika=new Set(['MUHTASARI']);
+  d.maafisa.forEach(a=>{
+    let jina=a.afisa.replace(/[\\\/\?\*\[\]:]/g,' ').trim().slice(0,28)||'AFISA',k=jina,i=2;while(zilizotumika.has(k))k=jina.slice(0,26)+' '+(i++);zilizotumika.add(k);
+    const ws=wb.addWorksheet(k,{properties:{tabColor:{argb:ORANGE}},pageSetup:{paperSize:9,orientation:'portrait',fitToPage:true,fitToWidth:1,fitToHeight:0}});
+    ws.columns=[{width:6},{width:22},{width:15},...pesaCols.map(()=>({width:16}))];
+    let rr=kichwa(ws,herufi(cA),`MAKUSANYO — ${a.afisa}${a.tawi?' ('+mkTawi(a.tawi).toUpperCase()+')':''} — ${kipindi}`);
+    kichwaJedwali(ws,rr,['S/N','NAME','DATE','CASH','LIPA NAMBA',...(b?['BENKI']:[]),'TOTAL (TZS)']);rr++;const s0=rr;
+    a.siku.forEach((s,j)=>{seli(ws,rr,1,j+1,null,'center',j%2);seli(ws,rr,2,j===0?a.afisa:null,null,'left',j%2,true);seli(ws,rr,3,tareheX(s.tarehe),'dd-mmm-yyyy','center',j%2);
+      pesaCols.forEach((kk,x)=>seli(ws,rr,4+x,s[kk]||null,'#,##0','right',j%2,kk==='jumla'));rr++;});
+    jumlaMstari(ws,rr,cA,4,s0,rr-1,'TOTAL',pesaCols.map(kk=>a[kk]));
+  });
+  return wb;
+}
+
 // ── data: fetched for the day / month being looked at (a short cache; saving or deleting clears it) ──
 let makusanyoCache=new Map();
 async function pakiaMakusanyo(kutoka,hadi,mpya){
@@ -8372,12 +8580,23 @@ async function pakiaMakusanyo(kutoka,hadi,mpya){
 }
 function futaAkibaMakusanyo(){makusanyoCache.clear();mkAfisaMajinaYamepakiwa=false;}
 // Groups rows by officer (names compared ignoring capitals/extra spaces) and by day.
+// Two names that are the same person: their records are shown (and totalled) together under the real name.
+// Tawi shown beside each collecting officer (the three Nakatunga godown officers share one place)
+const mkTawi=(t)=>!t?'—':(/^godown/.test(t)?'Nakatunga - Godown':(BRANCHES[t]||t));
+const MK_ALIAS={'abely':'Abel','abery':'Abel','abel':'Abel','mrema':'Neema','neema':'Neema','josephina':'Josephina','josephin':'Josephina'};
+// "Abely Shop", "JOSEPHiNA SHOP", "Josephina Sh0p" … → just the person's name (no "Shop", no capital/typo differences)
+const mkJinaSahihi=(n)=>{
+  let t=String(n||'').trim().replace(/\s+/g,' ').replace(/0/g,'o').replace(/\s*sh[o0]p\s*$/i,'').trim();
+  const k=t.toLowerCase();
+  if(MK_ALIAS[k])return MK_ALIAS[k];
+  return t.replace(/\S+/g,w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase());
+};
 function kusanyaMakusanyo(rows){
   const kwaAfisa=new Map(),kwaSiku=new Map(),jumla={cash:0,lipa:0,nmb:0,crdb:0,benki:0,jumla:0};
   rows.forEach(r=>{
-    const k=String(r.afisa||'').trim().toLowerCase().replace(/\s+/g,' ');
+    const jina=mkJinaSahihi(r.afisa),k=jina.toLowerCase();
     let a=kwaAfisa.get(k);
-    if(!a){a={afisa:r.afisa,tawi:r.tawi||tawiYaAfisa(r.afisa),cash:0,lipa:0,nmb:0,crdb:0,benki:0,jumla:0,siku:new Map()};kwaAfisa.set(k,a);}
+    if(!a){a={afisa:jina,tawi:r.tawi||tawiYaAfisa(jina),cash:0,lipa:0,nmb:0,crdb:0,benki:0,jumla:0,siku:new Map()};kwaAfisa.set(k,a);}
     let d=kwaSiku.get(r.tarehe);
     if(!d){d={tarehe:r.tarehe,cash:0,lipa:0,nmb:0,crdb:0,benki:0,jumla:0,maafisa:new Set()};kwaSiku.set(r.tarehe,d);}
     const j=jumlaYaMakusanyo(r);
@@ -8420,7 +8639,7 @@ function hesabuGridMakusanyo(){
     const jina=tr.querySelector('.g-afisa').value.trim(),tawi=tawiYaAfisa(jina),v={};
     NJIA_ZA_MAKUSANYO.forEach(([k])=>{v[k]=parseInt(tr.querySelector('.g-'+k).value)||0;jumla[k]+=v[k];});
     const j=jumlaYaMakusanyo(v);jumla.yote+=j;
-    tr.querySelector('.g-hint').textContent=!jina?'':tawi?(BRANCHES[tawi]||tawi):'Jina jipya (si kwenye orodha ya maafisa)';
+    tr.querySelector('.g-hint').textContent=!jina?'':tawi?mkTawi(tawi):'Jina jipya (si kwenye orodha ya maafisa)';
     tr.querySelector('.g-jumla').textContent=j?pesa(j):'—';
   });
   const bx=$('makusanyoGridJumla');
@@ -8518,25 +8737,37 @@ function onyeshaNotiYaZamani(id,benki){
   el.style.display=benki>0?'block':'none';
   if(benki>0)el.textContent=`ℹ Jumla inajumuisha ${pesa(benki)} zilizoingizwa zamani kupitia NMB/CRDB (hazionyeshwi tena kama safu).`;
 }
-function onyeshaSikuMakusanyo(rows){
+let mkSikuRows=[];
+function mkSikuMuda(aina){
+  const k=$('mk-siku'),h=$('mk-siku-hadi'),leo=leoISO();
+  if(aina==='jana'){k.value=h.value=sikuBaada(leo,-1);}
+  else if(aina==='mwezi'){k.value=leo.slice(0,7)+'-01';h.value=mwishoWaMwezi(leo.slice(0,7));}
+  else{k.value=h.value=leo;}
+  renderMakusanyo();
+}
+function onyeshaSikuMakusanyo(rowsMpya){
+  if(Array.isArray(rowsMpya))mkSikuRows=rowsMpya;
+  const q=mkNorm(($('mk-siku-tafuta')||{}).value).toLowerCase();
+  const rows=q?mkSikuRows.filter(r=>(mkNorm(r.afisa)+' '+mkJinaSahihi(r.afisa)).toLowerCase().includes(q)):mkSikuRows;
   const g=kusanyaMakusanyo(rows);
   onyeshaJumlaMakusanyo('mkSiku',g.jumla);onyeshaNotiYaZamani('mk-siku-zamani',0);
   const seli=(v)=>`<td class="num">${v?pesa(v):'—'}</td>`;
   [['mkSikuNmb',g.jumla.nmb],['mkSikuCrdb',g.jumla.crdb]].forEach(([id,v])=>{const el=$(id);if(el)el.textContent=pesa(v);});
-  const lb=$('mk-siku-tarehe-lbl');if(lb)lb.textContent=$('mk-siku').value||'';
+  const k=$('mk-siku').value,h=$('mk-siku-hadi').value||k;
+  const lb=$('mk-siku-tarehe-lbl');if(lb)lb.textContent=(k===h?tareheFupi(k):tareheFupi(k)+' → '+tareheFupi(h))+(q?` · "${q}" · rekodi ${rows.length}`:` · rekodi ${rows.length}`);
   const kd=$('mk-siku-kadi');if(kd)kd.innerHTML=htmlYaMaafisaSiku(rows);
   const sasa=Date.now(),ruhusa=userRole==='gm'||userRole==='cashier';
   $('tbody-mk-siku-rekodi').innerHTML=rows.length
-    ?rows.map(r=>{
+    ?rows.map((r,ix)=>{
       const ndani=sasa-new Date(r.created_at).getTime()<24*3600*1000;
       const saa=r.created_at?new Date(r.created_at).toLocaleTimeString('sw-TZ',{hour:'2-digit',minute:'2-digit',timeZone:'Africa/Dar_es_Salaam'}):'—';
       const kitendo=ruhusa&&(userRole==='gm'||ndani)?`<button class="btn sm danger" onclick="futaMakusanyo('${r.id}')">Futa</button>`:'—';
-      return`<tr><td>${escH(r.afisa)}</td>${seli(r.cash)}${seli(r.lipa)}<td class="num"><strong>${pesa(jumlaYaMakusanyo(r))}</strong></td><td>${escH(r.rekodi_jina||'—')}</td><td>${saa}</td><td>${kitendo}</td></tr>`;
+      return`<tr><td>${ix+1}</td><td>${tareheFupi(r.tarehe)}</td><td>${escH(mkJinaSahihi(r.afisa))}</td>${seli(r.cash)}${seli(r.lipa)}<td class="num"><strong>${pesa(jumlaYaMakusanyo(r))}</strong></td><td>${escH(r.rekodi_jina||'—')}</td><td>${saa}</td><td>${kitendo}</td></tr>`;
     }).join('')
-    :safuTupu(9,'Hakuna rekodi.');
+    :safuTupu(9,q?'Hakuna rekodi za "'+escH(q)+'" katika kipindi hiki.':'Hakuna rekodi.');
   if(rows.length){      // a total row for each column
     const j=rows.reduce((a,r)=>{a.cash+=Number(r.cash)||0;a.lipa+=Number(r.lipa)||0;a.jumla+=jumlaYaMakusanyo(r);return a;},{cash:0,lipa:0,jumla:0});
-    $('tbody-mk-siku-rekodi').innerHTML+=`<tr style="font-weight:700;background:rgba(255,138,87,0.10);"><td>JUMLA</td><td class="num">${pesa(j.cash)}</td><td class="num">${pesa(j.lipa)}</td><td class="num">${pesa(j.jumla)}</td><td colspan="3"></td></tr>`;
+    $('tbody-mk-siku-rekodi').innerHTML+=`<tr style="font-weight:700;background:rgba(255,138,87,0.10);"><td colspan="3">JUMLA</td><td class="num">${pesa(j.cash)}</td><td class="num">${pesa(j.lipa)}</td><td class="num">${pesa(j.jumla)}</td><td colspan="3"></td></tr>`;
   }
 }
 function onyeshaMweziMakusanyo(rows){
@@ -8544,16 +8775,16 @@ function onyeshaMweziMakusanyo(rows){
   onyeshaJumlaMakusanyo('mkMwezi',g.jumla);onyeshaNotiYaZamani('mk-mwezi-zamani',g.jumla.benki);
   const seli=(v)=>`<td class="num">${v?pesa(v):'—'}</td>`;
   $('tbody-mk-mwezi-afisa').innerHTML=g.maafisa.length
-    ?g.maafisa.map(a=>{
-      const siku=[...a.siku.entries()],bora=siku.reduce((m,x)=>x[1]>m[1]?x:m,siku[0]);
+    ?g.maafisa.map((a,ix)=>{
+      const siku=[...a.siku.entries()];
       const asilimia=g.jumla.jumla?Math.round(a.jumla/g.jumla.jumla*1000)/10:0;
-      return`<tr><td><strong>${escH(a.afisa)}</strong></td><td>${a.tawi?escH(BRANCHES[a.tawi]||a.tawi):'—'}</td>${seli(a.cash)}${seli(a.lipa)}<td class="num"><strong>${pesa(a.jumla)}</strong></td><td class="num">${asilimia}%</td><td class="num">${siku.length}</td><td class="num">${pesa(Math.round(a.jumla/siku.length))}</td><td>${bora?`${bora[0]} (${pesa(bora[1])})`:'—'}</td></tr>`;
+      return`<tr><td>${ix+1}</td><td><strong>${escH(a.afisa)}</strong></td><td>${escH(mkTawi(a.tawi))}</td>${seli(a.cash)}${seli(a.lipa)}<td class="num"><strong>${pesa(a.jumla)}</strong></td><td class="num">${asilimia}%</td><td class="num">${siku.length}</td><td class="num">${pesa(Math.round(a.jumla/siku.length))}</td></tr>`;
     }).join('')+
-      `<tr style="background:rgba(255,138,87,0.10);font-weight:700;"><td colspan="2">JUMLA YA MAAFISA WOTE (${g.maafisa.length})</td>${seli(g.jumla.cash)}${seli(g.jumla.lipa)}<td class="num">${pesa(g.jumla.jumla)}</td><td class="num">100%</td><td class="num">${g.siku.length}</td><td class="num">${g.siku.length?pesa(Math.round(g.jumla.jumla/g.siku.length)):'—'}</td><td></td></tr>`
-    :safuTupu(11,'Hakuna makusanyo yaliyoingizwa kwa mwezi huu.');
+      `<tr style="background:rgba(255,138,87,0.10);font-weight:700;"><td colspan="3">JUMLA YA MAAFISA WOTE (${g.maafisa.length})</td>${seli(g.jumla.cash)}${seli(g.jumla.lipa)}<td class="num">${pesa(g.jumla.jumla)}</td><td class="num">100%</td><td class="num">${g.siku.length}</td><td class="num">${g.siku.length?pesa(Math.round(g.jumla.jumla/g.siku.length)):'—'}</td></tr>`
+    :safuTupu(9,'Hakuna makusanyo yaliyoingizwa kwa mwezi huu.');
   $('tbody-mk-mwezi-siku').innerHTML=g.siku.length
-    ?g.siku.map(d=>`<tr><td>${d.tarehe}</td>${seli(d.cash)}${seli(d.lipa)}<td class="num"><strong>${pesa(d.jumla)}</strong></td><td class="num">${d.maafisa.size}</td></tr>`).join('')+
-      `<tr style="background:rgba(255,138,87,0.10);font-weight:700;"><td>JUMLA YA MWEZI</td>${seli(g.jumla.cash)}${seli(g.jumla.lipa)}<td class="num">${pesa(g.jumla.jumla)}</td><td></td></tr>`
+    ?g.siku.map((d,ix)=>`<tr><td>${ix+1}</td><td>${d.tarehe}</td>${seli(d.cash)}${seli(d.lipa)}<td class="num"><strong>${pesa(d.jumla)}</strong></td><td class="num">${d.maafisa.size}</td></tr>`).join('')+
+      `<tr style="background:rgba(255,138,87,0.10);font-weight:700;"><td colspan="2">JUMLA YA MWEZI</td>${seli(g.jumla.cash)}${seli(g.jumla.lipa)}<td class="num">${pesa(g.jumla.jumla)}</td><td></td></tr>`
     :safuTupu(7,'Hakuna makusanyo yaliyoingizwa kwa mwezi huu.');
 }
 // ── search one officer's records (cashier + GM) ──
@@ -8563,7 +8794,7 @@ async function mkAfisaPakiaMajina(){
   if(mkAfisaMajinaYamepakiwa)return;
   try{
     const rows=await DB.get('ukusanyaji_siku','select=afisa&deleted_at=is.null&limit=5000');
-    const seen=new Map();(rows||[]).forEach(r=>{const n=mkNorm(r.afisa),k=n.toLowerCase();if(n&&!seen.has(k))seen.set(k,n);});
+    const seen=new Map();(rows||[]).forEach(r=>{const n=mkJinaSahihi(r.afisa),k=n.toLowerCase();if(n&&!seen.has(k))seen.set(k,n);});
     const dl=$('mk-afisa-list');if(dl)dl.innerHTML=[...seen.values()].sort((a,b)=>a.localeCompare(b)).map(n=>`<option value="${escH(n)}"></option>`).join('');
     mkAfisaMajinaYamepakiwa=true;
   }catch(_e){}
@@ -8581,10 +8812,12 @@ async function tafutaAfisaMakusanyo(){
   const q=mkNorm($('mk-afisa-tafuta').value),k=$('mk-afisa-kutoka').value,h=$('mk-afisa-hadi').value;
   const tb=$('tbody-mk-afisa'),ms=$('mk-afisa-muhtasari'),er=$('mk-afisa-hitilafu');
   const my=++mkAfisaToken;er.style.display='none';
-  if(q.length<2){ms.innerHTML='';tb.innerHTML=safuTupu(9,'Andika jina la afisa (herufi 2 au zaidi) ili kuona rekodi zake zote.');return;}
-  tb.innerHTML=safuTupu(9,'Inatafuta…');
+  if(q.length<2){ms.innerHTML='';tb.innerHTML=safuTupu(10,'Andika jina la afisa (herufi 2 au zaidi) ili kuona rekodi zake zote.');return;}
+  tb.innerHTML=safuTupu(10,'Inatafuta…');
   try{
-    let f='deleted_at=is.null&afisa=ilike.'+encodeURIComponent('*'+q.replace(/[*%,()]/g,' ')+'*');
+    const safi=q.replace(/[*%,()]/g,' ').trim().toLowerCase();
+    const vyote=new Set([safi]);Object.entries(MK_ALIAS).forEach(([ali,halisi])=>{if(halisi.toLowerCase().includes(safi)||ali.includes(safi)){vyote.add(ali);vyote.add(halisi.toLowerCase());}});if(safi.includes('jos')||'josephina'.includes(safi))vyote.add('joseph');
+    let f='deleted_at=is.null&or='+encodeURIComponent('('+[...vyote].map(v=>'afisa.ilike.*'+v+'*').join(',')+')');
     if(k)f+='&tarehe=gte.'+k;if(h)f+='&tarehe=lte.'+h;
     const rows=await DB.get('ukusanyaji_siku',f+'&order=tarehe.desc,created_at.desc&limit=1000');
     if(my!==mkAfisaToken)return;
@@ -8593,15 +8826,15 @@ async function tafutaAfisaMakusanyo(){
     ms.innerHTML=(rows||[]).length?`<div style="display:flex;gap:10px;flex-wrap:wrap;margin:10px 0;">${kadi('JUMLA',pesa(g.jumla.jumla))}${kadi('CASH',pesa(g.jumla.cash))}${kadi('LIPA NAMBA',pesa(g.jumla.lipa))}${kadi('SIKU',g.siku.length)}${kadi('REKODI',rows.length)}</div>${g.maafisa.length>1?`<p style="font-size:12px;color:var(--a-muted);margin:0 0 8px;">Majina yaliyopatikana: ${g.maafisa.map(a=>escH(a.afisa)).join(', ')}</p>`:''}${rows.length>=1000?'<p style="font-size:12px;color:#c0392b;">Rekodi 1000 za kwanza tu — punguza tarehe.</p>':''}`:'';
     const sasa=Date.now(),ruhusa=userRole==='gm'||userRole==='cashier';
     const seli=(v)=>`<td class="num">${v?pesa(v):'—'}</td>`;
-    tb.innerHTML=(rows||[]).length?rows.map(r=>{
+    tb.innerHTML=(rows||[]).length?rows.map((r,ix)=>{
       const ndani=sasa-new Date(r.created_at).getTime()<24*3600*1000;
       const saa=r.created_at?new Date(r.created_at).toLocaleTimeString('sw-TZ',{hour:'2-digit',minute:'2-digit',timeZone:'Africa/Dar_es_Salaam'}):'—';
       const kitendo=ruhusa&&(userRole==='gm'||ndani)?`<button class="btn sm danger" onclick="futaMakusanyo('${r.id}')">Futa</button>`:'—';
-      return`<tr><td>${r.tarehe}</td><td><strong>${escH(r.afisa)}</strong></td>${seli(r.cash)}${seli(r.lipa)}${seli((r.nmb||0)+(r.crdb||0))}<td class="num"><strong>${pesa(jumlaYaMakusanyo(r))}</strong></td><td>${escH(r.rekodi_jina||'—')}</td><td>${saa}</td><td>${kitendo}</td></tr>`;
-    }).join(''):safuTupu(9,'Hakuna rekodi za "'+escH(q)+'".');
+      return`<tr><td>${ix+1}</td><td>${r.tarehe}</td><td><strong>${escH(mkJinaSahihi(r.afisa))}</strong></td>${seli(r.cash)}${seli(r.lipa)}${seli((r.nmb||0)+(r.crdb||0))}<td class="num"><strong>${pesa(jumlaYaMakusanyo(r))}</strong></td><td>${escH(r.rekodi_jina||'—')}</td><td>${saa}</td><td>${kitendo}</td></tr>`;
+    }).join(''):safuTupu(10,'Hakuna rekodi za "'+escH(q)+'".');
   }catch(e){
     if(my!==mkAfisaToken)return;
-    tb.innerHTML=safuTupu(9,'—');er.style.display='block';er.textContent='Imeshindwa kutafuta: '+e.message;
+    tb.innerHTML=safuTupu(10,'—');er.style.display='block';er.textContent='Imeshindwa kutafuta: '+e.message;
   }
 }
 let makusanyoToken=0;
@@ -8627,14 +8860,16 @@ async function renderMakusanyo(){
   if(!$('makusanyo')||!$('mk-siku'))return;
   if(userRole!=='cashier'&&userRole!=='gm')return;
   if(!$('mk-siku').value)$('mk-siku').value=leoISO();
+  if(!$('mk-siku-hadi').value)$('mk-siku-hadi').value=$('mk-siku').value;
+  if($('mk-siku-hadi').value<$('mk-siku').value){const t=$('mk-siku').value;$('mk-siku').value=$('mk-siku-hadi').value;$('mk-siku-hadi').value=t;}
   if($('mk-tarehe')&&!$('mk-tarehe').value)$('mk-tarehe').value=leoISO();      // new entries follow today's date unless changed
   if(!$('mk-mwezi').value)$('mk-mwezi').value=leoISO().slice(0,7);
-  const siku=$('mk-siku').value,mwezi=$('mk-mwezi').value,[y,m]=mwezi.split('-').map(Number);
+  const siku=$('mk-siku').value,sikuHadi=$('mk-siku-hadi').value,mwezi=$('mk-mwezi').value,[y,m]=mwezi.split('-').map(Number);
   const kutoka=mwezi+'-01',hadi=mwezi+'-'+String(new Date(y,m,0).getDate()).padStart(2,'0');
   mkAfisaPakiaMajina();if(!$('mk-afisa-tafuta').value)tafutaAfisaMakusanyo();
   const my=++makusanyoToken;
   try{
-    const [rSiku,rMwezi]=await Promise.all([pakiaMakusanyo(siku,siku),pakiaMakusanyo(kutoka,hadi)]);
+    const [rSiku,rMwezi]=await Promise.all([pakiaMakusanyo(siku,sikuHadi),pakiaMakusanyo(kutoka,hadi)]);
     if(my!==makusanyoToken)return;
     ['mk-siku-hitilafu','mk-mwezi-hitilafu'].forEach(id=>{$(id).style.display='none';});
     onyeshaSikuMakusanyo(rSiku);onyeshaMweziMakusanyo(rMwezi);
@@ -8913,16 +9148,18 @@ async function pakiaBankSlips(kutoka,hadi,mpya){
   bankSlipsCache.set(key,{t:Date.now(),rows});return rows;
 }
 const sikuYaSlip=(prefix)=>{const el=$(prefix+'-siku');if(el&&!el.value)el.value=leoISO();return el&&el.value?el.value:leoISO();};
-const _slipModi={};      // 'siku' (default: only the chosen day, today at first) or 'mwezi' (the whole month of the chosen day)
-function slipLeo(prefix){const el=$(prefix+'-siku');if(el)el.value=leoISO();_slipModi[prefix]='siku';renderBankSlips(prefix);}
-function slipBadiliModi(prefix){_slipModi[prefix]=_slipModi[prefix]==='mwezi'?'siku':'mwezi';renderBankSlips(prefix);}
+function slipLeo(prefix){const k=$(prefix+'-siku'),h=$(prefix+'-siku-hadi');if(k)k.value=leoISO();if(h)h.value=leoISO();renderBankSlips(prefix);}
+function slipBadiliModi(prefix){const k=$(prefix+'-siku'),h=$(prefix+'-siku-hadi'),m=leoISO().slice(0,7);if(k)k.value=m+'-01';if(h)h.value=mwishoWaMwezi(m);renderBankSlips(prefix);}
 const _slipToken={};
 async function renderBankSlips(prefix){
   const ruhusa=prefix==='bs'?(userRole==='cashier'||userRole==='gm'):(userRole==='matumizi'||userRole==='gm');
   if(!ruhusa||!$(prefix+'Section'))return;
-  const siku=sikuYaSlip(prefix),mwezi=siku.slice(0,7),[y,m]=mwezi.split('-').map(Number),kwaMwezi=_slipModi[prefix]==='mwezi';
-  const kutoka=kwaMwezi?mwezi+'-01':siku,hadi=kwaMwezi?mwezi+'-'+String(new Date(y,m,0).getDate()).padStart(2,'0'):siku;
-  {const b=$(prefix+'-modi');if(b)b.textContent=kwaMwezi?'Siku Moja Tu':'Mwezi Wote';const jl=$(prefix+'Jumla'),lb=jl&&jl.previousElementSibling;if(lb)lb.textContent=kwaMwezi?'Jumla ya Mwezi':'Jumla ya Siku';}
+  const kEl=$(prefix+'-siku'),hEl=$(prefix+'-siku-hadi');
+  if(kEl&&!kEl.value)kEl.value=leoISO();
+  if(hEl&&!hEl.value)hEl.value=kEl.value;
+  if(hEl.value<kEl.value){const t=kEl.value;kEl.value=hEl.value;hEl.value=t;}
+  const kutoka=kEl.value,hadi=hEl.value,kwaKipindi=kutoka!==hadi,siku=kutoka;
+  {const jl=$(prefix+'Jumla'),lb=jl&&jl.previousElementSibling;if(lb)lb.textContent=kwaKipindi?'Jumla ya Kipindi':'Jumla ya Siku';}
   const my=_slipToken[prefix]=(_slipToken[prefix]||0)+1,hit=$(prefix+'-hitilafu');
   try{
     const rows=await pakiaBankSlips(kutoka,hadi);
@@ -8935,7 +9172,7 @@ async function renderBankSlips(prefix){
       const ndani=sasa-new Date(r.created_at).getTime()<24*3600*1000;
       const futa=(userRole==='gm'||(userRole==='cashier'&&ndani))?`<button class="btn sm danger" onclick="futaBankSlip('${r.id}')">Futa</button>`:'—';
       return`<tr><td>${r.tarehe}</td><td><strong>${escH(r.benki)}</strong></td><td class="num"><strong>${pesa(r.kiasi)}</strong></td><td>${escH(r.rejea||'—')}</td><td>${escH(r.rekodi_jina||'—')}</td><td><button class="btn sm secondary" onclick="onyeshaSlip('${r.id}')">👁 Ona Slip</button></td><td>${futa}</td></tr>`;
-    }).join(''):safuTupu(7,kwaMwezi?'Hakuna slip za mwezi huu.':'Hakuna slip za tarehe '+siku+'. Chagua tarehe nyingine au bonyeza "Mwezi Wote".');
+    }).join(''):safuTupu(7,kwaKipindi?'Hakuna slip katika kipindi hiki. Badilisha tarehe.':'Hakuna slip za tarehe '+siku+'. Badilisha tarehe au bonyeza "Mwezi Huu".');
   }catch(e){
     if(my!==_slipToken[prefix])return;
     hit.style.display='block';hit.textContent='Imeshindwa kupata slip: '+e.message+(/relation|bank_slips|schema cache/i.test(e.message)?' — endesha ngara-huduma-bank-slips-migration.sql kwanza.':'');
