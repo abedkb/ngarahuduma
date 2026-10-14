@@ -2302,7 +2302,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
           <div id="odaInvoiceKiungo" style="display:none;margin:-4px 0 12px;"></div>
           <datalist id="oda-wateja"></datalist>
           <div class="form-grid">
-            <div class="field"><label>Jina la Mteja (Kampuni / Taasisi / Mteja Binafsi) *</label><input type="text" id="oda-mteja" list="oda-wateja" autocomplete="off" placeholder="mfano: ALPHA OIL"/></div>
+            <div class="field"><label>Jina la Mteja (Kampuni / Taasisi / Mteja Binafsi) *</label><input type="text" id="oda-mteja" list="oda-wateja" autocomplete="off" placeholder="mfano: ALPHA OIL" oninput="jazaMtejaOda()" onchange="jazaMtejaOda()"/><div id="oda-mteja-hint" style="font-size:11.5px;color:var(--a-muted);margin-top:3px;min-height:14px;"></div></div>
             <div class="field"><label>Aina ya Mteja</label><select id="oda-aina-taasisi"><option value="Kampuni">Kampuni</option><option value="Serikali">Taasisi ya Serikali</option><option value="Mteja Binafsi">Mteja Binafsi</option></select></div>
             <div class="field"><label>Simu ya Mteja</label><input type="tel" id="oda-simu" autocomplete="off" placeholder="mfano: 0764 XXX XXX"/></div>
                       </div>
@@ -9855,7 +9855,7 @@ function somaGridOda(){
 }
 function futaOdaMafuta(){
   { const kb=$('odaInvoiceKiungo');if(kb)kb.style.display='none'; }
-  ['oda-mteja','oda-simu','oda-mradi','oda-tarehe-mwisho'].forEach(id=>{const e=$(id);if(e)e.value='';});
+  ['oda-mteja','oda-simu','oda-mradi','oda-tarehe-mwisho'].forEach(id=>{const e=$(id);if(e)e.value='';});_odaAutoSimu='';{const h=$('oda-mteja-hint');if(h)h.textContent='';}
   jengaGridOda();onyeshaMakosaGrid('odaErrors','notifyOda',[]);odaRef=null;
 }
 async function gawaPampuKwaOda(inv,safu){
@@ -9896,6 +9896,7 @@ async function hifadhiOdaMafuta(){
     sahauKumbukumbu('oda_mafuta');      // not (known to be) saved — a retry must not be met with "you already saved this" (the same order id makes a retry safe)
     arifu('notifyOda',`❌ Haikuhifadhiwa: ${msg} Orodha yako bado ipo.`,'error');return;
   }
+  odaKumbukaHifadhi(mteja,$('oda-aina-taasisi').value,$('oda-simu').value.trim());
   ['Dizeli','Petroli'].forEach(a=>{const s=safu.filter(x=>x.aina===a).pop();if(s)hifadhiLocal(`nh_oda_bei_${userTawi}_${a}`,String(s.bei));});
   if(!d.tena)safu.slice().reverse().forEach(s=>allSerikaliMafuta.unshift({id:'tmp-'+idMpya(),invoice_no:d.invoice_no,tarehe:s.tarehe,mteja,tawi:userTawi,aina:s.aina,lita:s.lita,bei_kwa_lita_serikali:s.bei,jumla:Math.round(s.lita*s.bei),gari:s.gari,namba_agizo:s.agizo||null,pampu:s.pampu||null,mkono:s.mkono||null,hali_malipo:'Haijalipwa',rekodi_jina:userJina||null,created_at:new Date().toISOString()}));
   const inv=d.invoice_no;let onyoPampu='';
@@ -9905,11 +9906,41 @@ async function hifadhiOdaMafuta(){
   const kb=$('odaInvoiceKiungo');if(kb){kb.style.display='block';kb.innerHTML=`<button class="btn sm secondary" type="button" onclick="onyeshaInvoiceSerikaliMafutaNo('${escH(inv)}')">🖨 Fungua / Chapisha Invoice ${escH(inv)}</button>`;}
   loadAllBaada();
 }
+// ── Remembered Order customers: name → type + phone, so a returning customer is filled in by typing/choosing the name ──
+const ODA_KUMBUKA_KEY='nh_oda_wateja_v1';
+function odaKumbukaSoma(){try{return JSON.parse(localStorage.getItem(ODA_KUMBUKA_KEY)||'{}')||{};}catch(_e){return {};}}
+function odaKumbukaHifadhi(jina,aina,simu){
+  const k=jinaKey(jina);if(!k)return;
+  const m=odaKumbukaSoma(),old=m[k]||{};
+  m[k]={jina:String(jina).trim().replace(/\s+/g,' '),aina:aina||old.aina||'',simu:(simu&&simu!=='Haijasemwa')?simu:(old.simu||'')};
+  try{localStorage.setItem(ODA_KUMBUKA_KEY,JSON.stringify(m));}catch(_e){}
+}
+// Everything known: saved on this device + the customers already in the system (fuel Order customers and their past orders)
+function odaWatejaWanaojulikana(){
+  const m=new Map();
+  Object.values(odaKumbukaSoma()).forEach(c=>m.set(jinaKey(c.jina),{jina:c.jina,aina:c.aina||'',simu:c.simu||''}));
+  allWateja.filter(w=>w.aina_mteja==='Taasisi'&&w.chanzo==='Mafuta').forEach(w=>{
+    const k=jinaKey(w.jina),o=m.get(k)||{jina:String(w.jina).trim(),aina:'',simu:''};
+    if(w.aina_taasisi)o.aina=w.aina_taasisi;if(w.simu&&w.simu!=='Haijasemwa')o.simu=w.simu;m.set(k,o);
+  });
+  allSerikaliMafuta.forEach(r=>{const k=jinaKey(r.mteja);if(k&&!m.has(k))m.set(k,{jina:String(r.mteja).trim(),aina:'',simu:''});});
+  return m;
+}
+let _odaAutoSimu='';
+function jazaMtejaOda(){
+  const inp=$('oda-mteja'),hint=$('oda-mteja-hint');if(!inp)return;
+  const c=odaWatejaWanaojulikana().get(jinaKey(inp.value));
+  if(!c){if(hint)hint.textContent=inp.value.trim().length>2?'Mteja mpya — taarifa zake zitakumbukwa baada ya kuhifadhi.':'';return;}
+  const ainaEl=$('oda-aina-taasisi'),simuEl=$('oda-simu');
+  if(c.aina&&ainaEl&&[...ainaEl.options].some(o=>o.value===c.aina))ainaEl.value=c.aina;
+  if(c.simu&&simuEl&&(!simuEl.value.trim()||simuEl.value===_odaAutoSimu)){simuEl.value=c.simu;_odaAutoSimu=c.simu;}
+  if(hint)hint.textContent='✓ Mteja anayejulikana — aina'+(c.simu?' na simu':'')+' zimejazwa.';
+}
 function renderOdaMafuta(){
   const tb=$('tbody-oda-mafuta');if(!tb)return;
   if($('odaGridBody')&&!$('odaGridBody').children.length)jengaGridOda();
   const dl=$('oda-wateja');
-  if(dl)dl.innerHTML=[...new Set([...allSerikaliMafuta.map(s=>s.mteja),...allWateja.filter(w=>w.chanzo==='Mafuta').map(w=>w.jina)].filter(Boolean))].sort().map(n=>`<option value="${escH(n)}"></option>`).join('');
+  if(dl)dl.innerHTML=[...odaWatejaWanaojulikana().values()].sort((a,b)=>a.jina.localeCompare(b.jina)).map(c=>`<option value="${escH(c.jina)}" label="${escH([c.aina,c.simu].filter(Boolean).join(' · '))}"></option>`).join('');
   if(userRole!=='petroli')return;
   const kwaInvoice=new Map();
   allSerikaliMafuta.filter(s=>s.tawi===userTawi).forEach(s=>{
