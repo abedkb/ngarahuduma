@@ -1034,6 +1034,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       </div>
       <div class="cards" id="dashCards">
         <div class="card"><div class="c-label">Jumla ya Manunuzi</div><div class="c-value" id="cardManunuzi">—</div></div>
+        <div class="card" style="border-left:3px solid var(--a-amber,#E8A33D)"><div class="c-label">Manunuzi ya Mwezi</div><div class="c-value" id="cardManunuziMwezi">—</div><span class="c-badge badge-amber" id="cardManunuziMweziSub">—</span></div>
         <div class="card"><div class="c-label">Jumla ya Mauzo</div><div class="c-value" id="cardMauzo">—</div><span class="c-badge badge-green">Mapato</span></div>
         <div class="card" id="cardFaidaWrap"><div class="c-label">Faida Halisi</div><div class="c-value" id="cardFaida">—</div><span class="c-badge" id="faidaBadge">—</span><div id="faidaNote" style="font-size:11px;margin-top:6px;color:#E8A33D;"></div></div>
         <div class="card"><div class="c-label">Madeni</div><div class="c-value" id="cardMadeni">—</div><span class="c-badge badge-amber">Ya msimamizi</span></div>
@@ -6080,10 +6081,8 @@ function renderDashibodi(){
   const dashDate=$('dash-tarehe').value;
   const t=hesabu(dashDate,dashDate);
   renderKadiYaStock();
-  // Purchases count on the day they were DATED — and also on the day they were ENTERED, so a purchase a sales officer
-  // records today for an earlier date still shows on today's card instead of seeming to vanish.
-  const manunuziZaIngizo=tareheMaalumu()?[]:filterByTawi(allManunuzi).filter(p=>p.tarehe!==dashDate&&p.created_at&&isoYaMtaa(new Date(p.created_at))===dashDate);
-  const manunuziKadi=t.jumla_manunuzi+manunuziZaIngizo.reduce((a,b)=>a+(b.jumla||0),0);
+  // Purchases count ONLY on the day they are dated (a purchase is never also counted on the day it was typed in).
+  const manunuziKadi=t.jumla_manunuzi;
   { const mw=dashDate.slice(0,7),zaMwezi=filterByTawi(allManunuzi).filter(p=>!p.deleted_at&&(p.tarehe||'').slice(0,7)===mw);
     const el=$('cardManunuziMwezi'),sb=$('cardManunuziMweziSub');
     if(el)el.textContent=pesa(round2(zaMwezi.reduce((a,x)=>a+(Number(x.jumla)||0),0)));
