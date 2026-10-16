@@ -1273,7 +1273,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
             <div class="field" id="uh-lengo-wrap"><label>Ombi Hili ni la</label><select id="uh-lengo" onchange="togglaLengoUhamisho()"><option value="Stock">📦 Kuongeza Stock yangu</option><option value="Mauzo">🧾 Mteja (mauzo)</option></select></div>
             <div class="field uh-ya-mteja"><label>Jina la Mteja</label><input type="text" id="uh-mteja" autocomplete="off" placeholder="Mteja wa Kawaida (hiari)"/></div>
             <div class="field"><label>Jina Lako (Muombaji wa Uhamisho)</label><input type="text" id="uh-jina-muombaji" autocomplete="off" placeholder="Jina lako kamili"/><div class="field-error" id="err-uh-jina-muombaji">Jina linahitajika</div></div>
-            <div class="field"><label>Bidhaa</label><select id="uh-bidhaa" onchange="jaziUhamishoTawiKwaBidhaa()"></select></div>
+            <div class="field"><label>Bidhaa</label><input type="search" id="uh-bidhaa-tafuta" autocomplete="off" placeholder="🔍 Tafuta bidhaa — jina, aina, bei au tawi" oninput="jaziUhamishoChaguoBidhaa()" onkeydown="if(event.key==='Enter')event.preventDefault()" style="margin-bottom:6px;"/><select id="uh-bidhaa" onchange="jaziUhamishoTawiKwaBidhaa()"></select><div id="uh-bidhaa-idadi" style="font-size:11px;color:var(--a-muted);margin-top:3px;"></div></div>
             <div class="field"><label>Tawi Unaloomba Uhamisho</label><select id="uh-tawi-chanzo" onchange="updateUhamishoBeiSummary()"></select></div>
             <div class="field"><label>Idadi</label><input type="number" id="uh-idadi" placeholder="1" min="0" step="any" oninput="updateUhamishoBeiSummary()"/><div class="field-error" id="err-uh-idadi">Weka idadi</div></div>
             <div class="field uh-ya-stock" id="uh-kipimo-wrap"><label>Kipimo Changu cha Kuuzia</label><select id="uh-kipimo-yangu" onchange="updateUbadilishaUhamisho()"><option value="">Sawa na cha chanzo</option><option value="pc">Piece / Pisi</option><option value="bag">Bag / Mifuko</option><option value="roll">Roll / Rola</option><option value="meter">Meter / Mita</option><option value="litre">Litre / Lita</option><option value="kg">Kg / Kilo</option><option value="tonne">Tonne / Tani</option><option value="pack">Pack / Packets</option><option value="sheet">Sheet / Bati</option><option value="box">Box / Kasha</option><option value="set">Set / Seti</option><option value="pair">Pair / Jozi</option><option value="bando">Bando / Bundle</option><option value="ndoo">Ndoo / Bucket</option><option value="kopo">Kopo / Can</option></select></div>
@@ -4489,9 +4489,12 @@ function jaziUhamishoChaguoBidhaa(){
   // Unique product NAMES available at any branch other than the officer's
   // own — they pick what they need first, then see who actually has it.
   const myTawi=ninaTawiLaKazi()?userTawi:null;
-  const list=allBidhaa.filter(p=>(!myTawi||p.tawi!==myTawi)&&!TAWI_BILA_UHAMISHO.includes(p.tawi)&&(!naMairiTu()||(p.tawi===TAWI_LA_KUCHUKUA_MAIRI&&niTairiLaOrodhaYaRose(p.jina))));
+  let list=allBidhaa.filter(p=>(!myTawi||p.tawi!==myTawi)&&!TAWI_BILA_UHAMISHO.includes(p.tawi)&&(!naMairiTu()||(p.tawi===TAWI_LA_KUCHUKUA_MAIRI&&niTairiLaOrodhaYaRose(p.jina))));
+  const tafuta=($('uh-bidhaa-tafuta')?$('uh-bidhaa-tafuta').value:'').trim(),jumlaZote=new Set(list.map(p=>p.jina.toLowerCase())).size;
+  if(tafuta)list=list.filter(p=>bidhaaInalingana(p,tafuta));      // typing narrows the list (name, Swahili name, category, unit, price, branch)
+  const hint=$('uh-bidhaa-idadi');
   sel.innerHTML='';
-  if(!list.length){sel.innerHTML='<option value="">Hakuna bidhaa</option>';jaziUhamishoTawiKwaBidhaa();return;}
+  if(!list.length){sel.innerHTML=`<option value="">${tafuta?'Hakuna bidhaa inayolingana na "'+escH(tafuta)+'"':'Hakuna bidhaa'}</option>`;if(hint)hint.textContent=tafuta?`0 kati ya ${jumlaZote} zinazolingana`:'';jaziUhamishoTawiKwaBidhaa();return;}
   const seen=new Map();
   list.forEach(p=>{const key=p.jina.toLowerCase();if(!seen.has(key))seen.set(key,p);});
   const unique=[...seen.values()];
@@ -4511,6 +4514,7 @@ function jaziUhamishoChaguoBidhaa(){
     sel.appendChild(og);
   });
   if(prev&&unique.some(p=>p.jina.toLowerCase()===prev))sel.value=prev;
+  if(hint)hint.textContent=tafuta?`${unique.length} kati ya ${jumlaZote} zinazolingana`:'';
   jaziUhamishoTawiKwaBidhaa();
 }
 function jaziUhamishoTawiKwaBidhaa(){
@@ -4590,10 +4594,13 @@ const ufunguoWaOmbi=(u)=>u.ombi_no?`${u.ombi_no}|${u.tawi_chanzo}|${u.tawi_muomb
 // The next request number now comes from the DATABASE (one counter for all branches), so no two requests share a number.
 // ── Transfer SMS wording ──
 // Greeting by the time in Tanzania (EAT, UTC+3), whatever the phone's own clock zone:
-// 06:00–12:00 asubuhi · 12:01–15:00 mchana · 15:01 onward (and the small hours before 06:00) jioni.
+// 05:00–12:00 asubuhi · 12:01–15:00 mchana · 15:01 onward jioni · the small hours before 05:00 usiku.
 function salamuYaSaa(){
-  const eat=new Date(Date.now()+3*3600*1000),dk=eat.getUTCHours()*60+eat.getUTCMinutes();
-  if(dk>=360&&dk<=720)return 'asubuhi';
+  let dk;
+  try{const p=new Intl.DateTimeFormat('en-GB',{timeZone:'Africa/Dar_es_Salaam',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date()),g=(t)=>parseInt((p.find(x=>x.type===t)||{}).value,10);dk=g('hour')*60+g('minute');}
+  catch(_e){const eat=new Date(Date.now()+3*3600*1000);dk=eat.getUTCHours()*60+eat.getUTCMinutes();}
+  if(dk<300)return 'usiku';
+  if(dk<=720)return 'asubuhi';
   if(dk>720&&dk<=900)return 'mchana';
   return 'jioni';
 }
@@ -4606,7 +4613,7 @@ function smsOmbiLaTransfer(tawiChanzo,jinaMuombaji,tawiMuombaji){
 }
 function smsOmbiLimekubaliwa(u){
   const mpokeaji=(u.jina_muombaji||officerOf(u.tawi_muombaji)||'').trim();
-  return `Habari ${mpokeaji}, ombi lako la transfer kutoka ${jinaLaTawiKwaSms(u.tawi_chanzo)} limekubaliwa na stock yako imeongezeka tafadhali ingia kwenye mfumo kukiri kupokea bidhaa hii.`;
+  return `Habari ya ${salamuYaSaa()} ${mpokeaji}, ombi lako la transfer kutoka ${jinaLaTawiKwaSms(u.tawi_chanzo)} limekubaliwa na stock yako imeongezeka tafadhali ingia kwenye mfumo kukiri kupokea bidhaa hii.`;
 }
 async function nextOmbiNo(){
   try{
@@ -8325,6 +8332,7 @@ async function skaniUhamisho(){
   const mist=(d.mistari||[]).filter(l=>l&&String(l.jina||'').trim()&&Number(l.idadi)>0);
   const box=$('uhSkaniBox');if(!box)return;
   if(!mist.length){box.innerHTML='';arifu('notifyUhamisho','❌ Hakuna mistari iliyoweza kusomwa kwenye picha — jaribu picha iliyo wazi zaidi.','error');return;}
+  if($('uh-bidhaa-tafuta')&&$('uh-bidhaa-tafuta').value){$('uh-bidhaa-tafuta').value='';jaziUhamishoChaguoBidhaa();}
   const sel=$('uh-bidhaa'),ruhusa=new Set([...sel.options].map(o=>o.value));
   const orodha=allBidhaa.filter(p=>ruhusa.has(p.jina.toLowerCase()));
   skaniUhamishoMist=mist.map(l=>({l,p:linganinishaBidhaa(l.jina,orodha)}));
@@ -8335,6 +8343,7 @@ async function skaniUhamisho(){
 }
 function jazaUhamishoKutokaPicha(i){
   const x=skaniUhamishoMist[i];if(!x||!x.p)return;
+  if($('uh-bidhaa-tafuta')&&$('uh-bidhaa-tafuta').value){$('uh-bidhaa-tafuta').value='';jaziUhamishoChaguoBidhaa();}
   $('uh-bidhaa').value=x.p.jina.toLowerCase();jaziUhamishoTawiKwaBidhaa();
   $('uh-idadi').value=idadiSahihi(x.l.idadi)||'';
   updateUhamishoBeiSummary();
