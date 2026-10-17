@@ -4975,13 +4975,18 @@ function beiYaKupokeaHtml(u){
   const chaguo=`<option value="new"${sel==='new'?' selected':''}>➕ Bidhaa mpya kwangu — "${escH(u.jina)}"</option>`+cand.map(c=>`<option value="${c.id}"${String(c.id)===sel?' selected':''}>${c.alama>=0.8?'✔ ':''}${escH(c.jina)} — ${fmtIdadi(c.idadi)} ${kp} · bei ${c.bei.map(x=>pesa(x)).join(' / ')}</option>`).join('');
   return`<div style="margin-top:6px;padding:7px 9px;border-radius:8px;border:1px dashed var(--a-line);background:rgba(255,255,255,0.04);">
     <label for="uh-map-${u.id}" style="display:block;font-size:11px;color:var(--a-muted);margin-bottom:3px;">Bidhaa hii ni ipi kwenye stock yako? (chagua ili isiongezwe kama bidhaa mpya)</label>
-    <select id="uh-map-${u.id}" style="width:100%;max-width:340px;padding:7px 9px;border-radius:7px;border:1.5px solid var(--a-line);background:rgba(255,255,255,0.05);color:var(--a-text);font-size:12.5px;margin-bottom:6px;">${chaguo}</select>
+    <select id="uh-map-${u.id}" onchange="onyeshaJinaJipya('${u.id}')" style="width:100%;max-width:340px;padding:7px 9px;border-radius:7px;border:1.5px solid var(--a-line);background:rgba(255,255,255,0.05);color:var(--a-text);font-size:12.5px;margin-bottom:6px;">${chaguo}</select>
+    <div id="uh-jina-wrap-${u.id}" style="display:${sel==='new'?'block':'none'};margin-bottom:6px;">
+      <label for="uh-jina-${u.id}" style="display:block;font-size:11px;color:var(--a-muted);margin-bottom:3px;">Jina la bidhaa hii kwenye stock yako (unaweza kuliandika upendavyo)</label>
+      <input type="text" id="uh-jina-${u.id}" value="${escH(u.jina)}" maxlength="120" autocomplete="off" placeholder="Andika jina la bidhaa" style="width:100%;max-width:340px;padding:7px 9px;border-radius:7px;border:1.5px solid var(--a-line);background:rgba(255,255,255,0.05);color:var(--a-text);font-size:13px;font-weight:600;"/>
+    </div>
     <label for="uh-bei-${u.id}" style="display:block;font-size:11px;color:var(--a-muted);margin-bottom:3px;">Bei (rate) ya kuuza ya tawi lako (TSh kwa ${kp} 1)</label>
     <input type="number" inputmode="decimal" min="0" step="any" id="uh-bei-${u.id}" value="${b.msingi>0?b.msingi:''}" placeholder="Andika bei yako" data-idadi="${b.mk.idadi}" oninput="thamaniYaMpokeajiLive('${u.id}')" style="width:130px;padding:7px 9px;border-radius:7px;border:1.5px solid var(--a-line);background:rgba(255,255,255,0.05);color:var(--a-text);font-size:13px;font-weight:700;"/>
     <div style="font-size:11px;color:var(--a-muted);margin-top:3px;">Rate iliyohamishwa kutoka ${escH(BRANCHES[u.tawi_chanzo]||u.tawi_chanzo)}: ${pesa(b.chanzo)}${b.mk.badili?' / '+escH(u.kipimo||'pc'):''} · Stock ya zamani haibadilishwi bei — kiasi kinaongezwa kwenye mstari wenye jina na rate hiyo hiyo, au mstari mpya unafunguliwa.</div>
     <div id="uh-thamani-${u.id}" style="font-size:11.5px;margin-top:3px;">${b.msingi>0?`Thamani kwa bei yako: <b>${b.mk.idadi} ${kp} × ${pesa2(b.msingi)} = ${pesa2(round2(b.mk.idadi*b.msingi))}</b>`:'Andika bei yako ya kuuza — mfumo hautaikokotoa.'}</div>
   </div>`;
 }
+function onyeshaJinaJipya(id){const s=$('uh-map-'+id),w=$('uh-jina-wrap-'+id);if(w)w.style.display=(s&&s.value==='new')?'block':'none';}
 function thamaniYaMpokeajiLive(id){
   const el=$('uh-bei-'+id),out=$('uh-thamani-'+id);if(!el||!out)return;
   const v=parseFloat(el.value)||0,q=Number(el.dataset.idadi)||0,u=allUhamisho.find(x=>x.id===id),kp=u?escH(uhamishoKwaMpokeaji(u).kipimo):'';
@@ -4989,11 +4994,11 @@ function thamaniYaMpokeajiLive(id){
 }
 // What received goods are worth at the RECEIVER's own price (his unit × the price he typed). null = he has not set one.
 function thamaniKwaMpokeaji(u){const b=Number(u.bei_kuuza_mpokeaji)||0;return b>0?round2(uhamishoKwaMpokeaji(u).idadi*b):null;}
-async function ongezaStockKwaMpokeaji(u,beiYangu,ramani){
+async function ongezaStockKwaMpokeaji(u,beiYangu,ramani,jinaJipya){
   const mk=uhamishoKwaMpokeaji(u),beiMpya=Math.round((Number(beiYangu)||0)*100)/100;
   const chaguo=ramani==null?ramaniMsingiYaMpokeaji(u):String(ramani);
   const rep=chaguo!=='new'?allBidhaa.find(p=>String(p.id)===chaguo&&p.tawi===u.tawi_muombaji):null;      // the product the receiver says this is
-  const jinaLengo=rep?rep.jina:u.jina;
+  const jinaLengo=rep?rep.jina:(String(jinaJipya||'').replace(/\s+/g,' ').trim()||u.jina);      // a NEW product takes the name the receiver typed, not the sender's
   const chanzo=allBidhaa.find(p=>p.id===u.bidhaa_id)||{};
   if(!(beiMpya>0))throw new Error(`Weka bei yako ya kuuza ya "${u.jina}" kwanza.`);
   // same name + same unit + SAME RATE → add the quantity there; otherwise open a new line at this rate (his other lines keep their rates)
@@ -5028,8 +5033,8 @@ async function thibitishaUhamishoStock(group,jinaMuuzaji,jinaDereva,nambaGari){
     loadAllBaada();
   }catch(e){toast('❌ Hitilafu: '+e.message);loadAllBaada();}
 }
-async function pokeaUhamishoStock(group,jinaMpokeaji,bei,ramani){
-  bei=bei||{};ramani=ramani||{};
+async function pokeaUhamishoStock(group,jinaMpokeaji,bei,ramani,majina){
+  bei=bei||{};ramani=ramani||{};majina=majina||{};
   try{
     let zilizopokelewa=0;
     for(const u of group){
@@ -5039,7 +5044,7 @@ async function pokeaUhamishoStock(group,jinaMpokeaji,bei,ramani){
         claimed=await DB.patch('uhamisho',`id=eq.${u.id}&hali=eq.Imethibitishwa`,tuma);
       }
       if(!Array.isArray(claimed)||!claimed.length)continue;
-      try{await ongezaStockKwaMpokeaji(u,bei[u.id],ramani[u.id]);}
+      try{await ongezaStockKwaMpokeaji(u,bei[u.id],ramani[u.id],majina[u.id]);}
       catch(e){await DB.patch('uhamisho',`id=eq.${u.id}`,{hali:'Imethibitishwa'});throw e;}
       zilizopokelewa++;
     }
@@ -5142,22 +5147,25 @@ async function pokeaUhamishoBatch(groupKey){
   const jinaMpokeaji=myOfficerName()||(jinaEl?jinaEl.value.trim():'');
   if(!jinaMpokeaji){toast('❌ Andika jina lako kabla ya kuthibitisha kupokea.');return;}
   if(group.every(u=>u.aina==='Stock')){
-    const bei={},ramani={},mabadiliko=[];
+    const bei={},ramani={},majina={},mabadiliko=[];
     for(const u of group){
       const el=$('uh-bei-'+u.id),v=Math.round((parseFloat(el?el.value:'')||0)*100)/100;
       if(!(v>0)){toast(`❌ Weka bei ya kuuza ya "${u.jina}" kwa tawi lako kabla ya kupokea.`);if(el){el.focus();el.scrollIntoView({block:'center'});}return;}
       bei[u.id]=v;
       const sel=$('uh-map-'+u.id),ch=sel?sel.value:ramaniMsingiYaMpokeaji(u);ramani[u.id]=ch;
+      if(ch==='new'){const jn=$('uh-jina-'+u.id),jv=jn?jn.value.replace(/\s+/g,' ').trim():'';
+        if(jn&&!jv){toast(`❌ Andika jina la "${u.jina}" kwenye stock yako kabla ya kupokea.`);jn.focus();jn.scrollIntoView({block:'center'});return;}
+        majina[u.id]=jv||u.jina;}
       const rep=ch!=='new'?allBidhaa.find(p=>String(p.id)===ch):null;
       if(rep){
         const mk=uhamishoKwaMpokeaji(u),mistari=allBidhaa.filter(p=>p.tawi===u.tawi_muombaji&&p.jina===rep.jina&&kipimoSawa(p.kipimo,mk.kipimo));
         if(!mistari.some(p=>Number(p.bei_kuuzia)===v))mabadiliko.push(`${rep.jina}: una bei ${[...new Set(mistari.map(p=>pesa(Number(p.bei_kuuzia)||0)))].join(' / ')} → mstari mpya wa bei ${pesa(v)}`);
       }else if(ramaniMsingiYaMpokeaji(u)!=='new'){
-        const c=bidhaaZaMpokeaji(u)[0];mabadiliko.push(`"${u.jina}" inafanana na "${c.jina}" uliyonayo — umechagua kuipokea kama bidhaa MPYA`);
+        const c=bidhaaZaMpokeaji(u)[0];mabadiliko.push(`"${u.jina}" inafanana na "${c.jina}" uliyonayo — umechagua kuipokea kama bidhaa MPYA (jina: "${majina[u.id]||u.jina}")`);
       }
     }
     if(mabadiliko.length&&!(await thibitishaTofauti('Hakiki Kabla ya Kupokea','Hakiki mambo haya. Stock ya zamani haibadilishwi bei; kiasi kinaongezwa kwenye mstari wenye bei hiyo hiyo, au mstari mpya unafunguliwa.',mabadiliko,'Ndiyo, Pokea','Rudi'))) return;
-    return pokeaUhamishoStock(group,jinaMpokeaji,bei,ramani);
+    return pokeaUhamishoStock(group,jinaMpokeaji,bei,ramani,majina);
   }
   try{
     const tarehe=leoISO();
