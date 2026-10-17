@@ -4115,7 +4115,7 @@ function safuTupu(cols,msg){return`<tr><td colspan="${cols}" class="empty-state"
 // A branch that is still entering its opening records (e.g. Morena, Benaco) works on ONE fixed date, so nothing is saved or
 // read under today's date by mistake. Only that branch's own officer is bound; the General Manager is not.
 // To release a branch, delete its line here.
-const TAREHE_MAALUM_TAWI={benaco:'2026-10-01'};
+const TAREHE_MAALUM_TAWI={};      // no branch has its date locked any more — every user picks the date of the record himself
 function tareheMaalumu(){return(isAdmin&&userRole!=='gm'&&userRole!=='director'&&userTawi&&TAREHE_MAALUM_TAWI[userTawi])||'';}
 function tareheYaLeo(){return tareheMaalumu()||leoISO();}
 const VIINGIZO_VYA_TAREHE=['t-tarehe','m-tarehe','uh-tarehe','g-tarehe','mapato-tarehe'];
