@@ -1350,7 +1350,6 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
         <div class="card"><div class="c-label">NMB</div><div class="c-value" id="mpNmb">—</div></div>
         <div class="card"><div class="c-label">CRDB</div><div class="c-value" id="mpCrdb">—</div></div>
         <div class="card" style="border-left:3px solid var(--a-rg)"><div class="c-label">Jumla Mapato (zote)</div><div class="c-value" id="mzCashIn" style="color:var(--a-rg)">—</div></div>
-        <div class="card"><div class="c-label">Salio la Cash</div><div class="c-value" id="mpSalioSasa">—</div></div>
       </div>
       <div class="section" id="mzMafisaSection">
         <div class="section-header"><h3>📅 Mauzo ya Siku — Kila Afisa wa Mauzo</h3>
@@ -1425,6 +1424,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
             <span style="color:var(--a-muted);font-size:12px;">hadi</span>
             <input type="date" id="mapato-hadi" onchange="renderGharama()" style="width:auto"/>
             <button class="btn sm secondary" onclick="onyeshaMapatoYote()">Onyesha Yote</button>
+            <button class="btn sm" onclick="pakuaRipotiMapato()">⬇ Pakua Ripoti ya Mapato</button>
           </div>
         </div>
         <div class="section-body"><div id="mapato-tafuta-muhtasari" style="display:none;"></div><div class="table-wrap"><table>
@@ -1790,10 +1790,10 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
           <div id="notifyMakusanyo" class="notify"></div>
           <div class="form-grid"><div class="field"><label>Tarehe ya Makusanyo</label><input type="date" id="mk-tarehe"/></div></div>
           <datalist id="mk-majina"></datalist>
-          <p style="font-size:12px;color:var(--a-muted);margin:4px 0 10px;">Andika jina la kila afisa na kiasi alichokabidhi — Cash na Lipa Namba. Orodhesha maafisa wote, kisha uhifadhi mara moja.</p>
+          <p style="font-size:12px;color:var(--a-muted);margin:4px 0 10px;">Andika jina la kila afisa na kiasi alichokabidhi — Cash, Lipa Namba, NMB na CRDB (NMB na CRDB ni mauzo ya moja kwa moja yaliyolipwa benki). Orodhesha maafisa wote, kisha uhifadhi mara moja.</p>
           <div class="grid-scroll-hint">↔ Telezesha jedwali kulia ili kuona sehemu iliyobaki</div>
           <div class="table-wrap"><table class="grid-entry">
-            <thead><tr><th>#</th><th>Jina la Afisa wa Mauzo</th><th class="num">Cash</th><th class="num">Lipa Namba</th><th class="num">Jumla<small class="oto-lebo">AUTO</small></th><th></th></tr></thead>
+            <thead><tr><th>#</th><th>Jina la Afisa wa Mauzo</th><th class="num">Cash</th><th class="num">Lipa Namba</th><th class="num">NMB</th><th class="num">CRDB</th><th class="num">Jumla<small class="oto-lebo">AUTO</small></th><th></th></tr></thead>
             <tbody id="makusanyoGridBody"></tbody>
           </table></div>
           <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;">
@@ -6473,6 +6473,24 @@ function salioKabla(tarehe){
   return round2(s);
 }
 function onyeshaMatumiziYote(){$('mz-kuanzia').value='';$('mz-hadi').value='';renderGharama();}
+// Mapato report as an Excel file: exactly the rows now shown in "Orodha ya Mapato" (same search / dates) with a JUMLA row.
+async function pakuaRipotiMapato(){
+  try{
+    await pakiaMaktaba('xlsx');
+    const q=($('mapato-tafuta')?$('mapato-tafuta').value:'').trim(),tk=sawazishaUtafutaji(q);
+    const k=$('mapato-kuanzia')?$('mapato-kuanzia').value:'',h=$('mapato-hadi')?$('mapato-hadi').value:'';
+    const rows=computeMatumiziLedger(q?'':k,q?'':h).rows.filter(e=>jumlaYaMapato(e)>0&&(!tk||tk.split(' ').every(w=>sawazishaUtafutaji((e.mkabidhi||'')+' '+(e.maelezo||'')).includes(w))));
+    if(!rows.length){toast('ℹ Hakuna mapato ya kupakua kwa vigezo hivi.');return;}
+    const n=(v)=>Number(v)||0,j={cash:0,lipa:0,nmb:0,crdb:0};
+    const aoa=[['NGARA HUDUMA CO. LTD — RIPOTI YA MAPATO'],[q?`Jina: ${q} (tarehe zote)`:`Kipindi: ${k||'Mwanzo'} hadi ${h||leoISO()}`],[],['#','Tarehe','Aliyekabidhi','Maelezo','Cash','Lipa Namba','NMB','CRDB','Jumla']];
+    rows.forEach((e,i)=>{j.cash+=n(e.cash_in);j.lipa+=n(e.lipa_in);j.nmb+=n(e.nmb_in);j.crdb+=n(e.crdb_in);aoa.push([i+1,e.tarehe,e.mkabidhi||'',e.maelezo||'',n(e.cash_in),n(e.lipa_in),n(e.nmb_in),n(e.crdb_in),round2(jumlaYaMapato(e))]);});
+    aoa.push(['','','','JUMLA',round2(j.cash),round2(j.lipa),round2(j.nmb),round2(j.crdb),round2(j.cash+j.lipa+j.nmb+j.crdb)]);
+    const ws=XLSX.utils.aoa_to_sheet(aoa);ws['!cols']=[{wch:5},{wch:12},{wch:22},{wch:34},{wch:16},{wch:16},{wch:16},{wch:16},{wch:18}];
+    const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Mapato');
+    XLSX.writeFile(wb,`ngarahuduma-mapato-${(q?'jina':(k||'mwanzo')+'-'+(h||leoISO()))}.xlsx`);
+    toast('✅ Ripoti ya mapato imepakuliwa');
+  }catch(e){toast('❌ Imeshindwa kupakua ripoti: '+e.message);}
+}
 function onyeshaMapatoYote(){$('mapato-kuanzia').value='';$('mapato-hadi').value='';if($('mapato-tafuta'))$('mapato-tafuta').value='';renderGharama();}
 function renderGharama(){
   const futa=(e)=>e._pending?'<span style="color:var(--a-muted);font-size:11px;">Inasubiri</span>':(gmReadOnly?'—':`<button class="btn sm danger" onclick="futaGharama('${e.id}')">Futa</button>`);
@@ -6501,12 +6519,14 @@ function renderGharama(){
         ms.innerHTML=`<div style="padding:10px 12px;margin-bottom:10px;border:1px solid var(--a-line);border-radius:10px;background:rgba(255,255,255,0.03);font-size:12.5px;line-height:1.7;">Matokeo ya "<strong>${escH(q)}</strong>": rekodi <strong>${rows.length}</strong> (tarehe zote) &nbsp;·&nbsp; Cash <strong>${pesa2(round2(j.cash))}</strong> &nbsp;·&nbsp; Lipa Namba <strong>${pesa2(round2(j.lipa))}</strong> &nbsp;·&nbsp; NMB <strong>${pesa2(round2(j.nmb))}</strong> &nbsp;·&nbsp; CRDB <strong>${pesa2(round2(j.crdb))}</strong> &nbsp;|&nbsp; <strong style="color:var(--a-rg);">Jumla ${pesa2(yote)}</strong></div>`;
       }else{ms.style.display='none';ms.innerHTML='';}
     }
-    tbIn.innerHTML=rows.length?rows.map((e,i)=>`<tr><td>${i+1}</td><td>${e._pending?'⏳ ':''}${e.tarehe}</td><td><strong>${escH(e.mkabidhi||'—')}</strong></td><td>${escH(e.maelezo||'—')}</td>${seli(e.cash_in)}${seli(e.lipa_in)}${seli(e.nmb_in)}${seli(e.crdb_in)}<td class="num"><strong>${pesa2(jumlaYaMapato(e))}</strong></td><td>${futa(e)}</td></tr>`).join(''):safuTupu(10,q?'Hakuna mapato yanayolingana na jina hilo.':'Bado hakuna mapato.');
+    tbIn.innerHTML=rows.length?rows.map((e,i)=>`<tr><td>${i+1}</td><td>${e._pending?'⏳ ':''}${e.tarehe}</td><td><strong>${escH(e.mkabidhi||'—')}</strong></td><td>${escH(e.maelezo||'—')}</td>${seli(e.cash_in)}${seli(e.lipa_in)}${seli(e.nmb_in)}${seli(e.crdb_in)}<td class="num"><strong>${pesa2(jumlaYaMapato(e))}</strong></td><td>${futa(e)}</td></tr>`).join('')+(()=>{const j={cash:0,lipa:0,nmb:0,crdb:0};rows.forEach(e=>{j.cash+=Number(e.cash_in)||0;j.lipa+=Number(e.lipa_in)||0;j.nmb+=Number(e.nmb_in)||0;j.crdb+=Number(e.crdb_in)||0;});
+      const jt=n=>`<td class="num"><strong>${pesa2(round2(n))}</strong></td>`;
+      return `<tr class="safu-jumla" style="background:rgba(255,255,255,0.07);border-top:2px solid var(--a-line);"><td colspan="4"><strong>JUMLA (${rows.length} rekodi)</strong></td>${jt(j.cash)}${jt(j.lipa)}${jt(j.nmb)}${jt(j.crdb)}${jt(j.cash+j.lipa+j.nmb+j.crdb)}<td></td></tr>`;})():safuTupu(10,q?'Hakuna mapato yanayolingana na jina hilo.':'Bado hakuna mapato.');
   }
   // All-time cards (independent of the date filters above). The cash balance counts CASH only.
   const allTime=computeMatumiziLedger('',''),t={cash:0,lipa:0,nmb:0,crdb:0};
   allGharama.forEach(e=>{t.cash+=e.cash_in||0;t.lipa+=e.lipa_in||0;t.nmb+=e.nmb_in||0;t.crdb+=e.crdb_in||0;});
-  [['mpCash',t.cash],['mpLipa',t.lipa],['mpNmb',t.nmb],['mpCrdb',t.crdb],['mzCashIn',t.cash+t.lipa+t.nmb+t.crdb],['mzCashOut',allTime.totalOut],['mzSalioSasa',allTime.finalBalance],['mpSalioSasa',allTime.finalBalance]].forEach(([id,v])=>{const el=$(id);if(el)el.textContent=pesa2(v);});
+  [['mpCash',t.cash],['mpLipa',t.lipa],['mpNmb',t.nmb],['mpCrdb',t.crdb],['mzCashIn',t.cash+t.lipa+t.nmb+t.crdb],['mzCashOut',allTime.totalOut]].forEach(([id,v])=>{const el=$(id);if(el)el.textContent=pesa2(v);});
   // THE DAY: only the total matumizi of the chosen day, and what remains of that day's mapato
   if($('gh-siku')){
     if(!$('gh-siku').value)$('gh-siku').value=leoISO();
@@ -8507,7 +8527,7 @@ updateOfflineBanner();
 // and a month-end report. Entered only by the Cashier; the General Manager reads it.
 // ═══════════════════════════════════════════════════════════════════════════
 const SAFU_MWANZO_MAKUSANYO=12;
-const NJIA_ZA_MAKUSANYO=[['cash','Cash'],['lipa','Lipa Namba']];       // (NMB / CRDB are no longer entered here; older entries that have them still count in the totals)
+const NJIA_ZA_MAKUSANYO=[['cash','Cash'],['lipa','Lipa Namba'],['nmb','NMB'],['crdb','CRDB']];       // what each officer handed over: Cash, Lipa Namba, and direct sales paid into NMB / CRDB
 const jumlaYaMakusanyo=(r)=>(r.cash||0)+(r.nmb||0)+(r.crdb||0)+(r.lipa||0);
 function majinaYaMaafisa(){return[...new Set(Object.values(BRANCH_OFFICER))].sort();}
 function tawiYaAfisa(jina){const q=String(jina||'').trim().toLowerCase();return Object.keys(BRANCH_OFFICER).find(t=>String(BRANCH_OFFICER[t]).toLowerCase()===q)||null;}
@@ -8718,7 +8738,7 @@ function kusanyaMakusanyo(rows){
     let d=kwaSiku.get(r.tarehe);
     if(!d){d={tarehe:r.tarehe,cash:0,lipa:0,nmb:0,crdb:0,benki:0,jumla:0,maafisa:new Set()};kwaSiku.set(r.tarehe,d);}
     const j=jumlaYaMakusanyo(r);
-    NJIA_ZA_MAKUSANYO.forEach(([n])=>{const v=r[n]||0;a[n]+=v;d[n]+=v;jumla[n]+=v;});
+    ['cash','lipa'].forEach(n=>{const v=r[n]||0;a[n]+=v;d[n]+=v;jumla[n]+=v;});      // NMB / CRDB are added just below
     const benki=(r.nmb||0)+(r.crdb||0);a.benki+=benki;d.benki+=benki;jumla.benki+=benki;
     [['nmb',r.nmb||0],['crdb',r.crdb||0]].forEach(([n,v])=>{a[n]+=v;d[n]+=v;jumla[n]+=v;});
     a.jumla+=j;d.jumla+=j;jumla.jumla+=j;
@@ -8748,7 +8768,7 @@ function futaSafuMakusanyo(btn){
   if(!b.children.length)b.appendChild(safuMakusanyoMpya());
   hesabuGridMakusanyo();
 }
-function safuMakusanyoImetumika(tr){return['.g-afisa','.g-cash','.g-lipa'].some(s=>tr.querySelector(s).value.trim()!=='');}
+function safuMakusanyoImetumika(tr){return['.g-afisa','.g-cash','.g-lipa','.g-nmb','.g-crdb'].some(s=>tr.querySelector(s).value.trim()!=='');}
 function hesabuGridMakusanyo(){
   const b=$('makusanyoGridBody');if(!b)return;
   const jumla={cash:0,nmb:0,crdb:0,lipa:0,yote:0};
@@ -8816,7 +8836,7 @@ async function _hifadhiMakusanyoImpl(){
       if(marudio.length&&!(await thibitishaSiyoDuplicate(`${marudio.join(', ')} ${marudio.length===1?'ana':'wana'} tayari makusanyo yaliyoingizwa tarehe ${tarehe}. Haya mapya yataongezwa juu ya yaliyopo. Je, unataka kuendelea?`)))return;
     }catch(_e){/* could not check — carry on */}
   }
-  const data=safu.map(s=>({tarehe,afisa:s.afisa,tawi:s.tawi,cash:s.cash,lipa:s.lipa,rekodi_jina:userJina||null}));
+  const data=safu.map(s=>({tarehe,afisa:s.afisa,tawi:s.tawi,cash:s.cash,lipa:s.lipa,nmb:s.nmb||0,crdb:s.crdb||0,rekodi_jina:userJina||null}));
   const calls=[{op:'post',table:'ukusanyaji_siku',data}];
   const mwisho=()=>{futaAkibaMakusanyo();jengaGridMakusanyo();onyeshaMakosaGrid('makusanyoGridErrors','notifyMakusanyo',[]);};
   if(!navigator.onLine){
