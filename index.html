@@ -931,25 +931,25 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
     <button class="a-tab-btn" data-page="mauzo"><span class="t-icon">🧾</span><span class="t-label">Sales</span></button>
     <button class="a-tab-btn" data-page="uhamisho"><span class="t-icon">🔄</span><span class="t-label">Transfer</span><span class="t-pill" id="uhTopPill" style="display:none">0</span></button>
     <button class="a-tab-btn" data-page="pokea"><span class="t-icon">📥</span><span class="t-label">Received</span><span class="t-pill" id="pokeaTopPill" style="display:none">0</span></button>
-    <button class="a-tab-btn" data-page="serikali"><span class="t-icon">🏛</span><span class="t-label">Order</span></button>
-    <button class="a-tab-btn" data-page="serikali-mafuta"><span class="t-icon">⛽</span><span class="t-label">Order ⛽</span></button>
-    <button class="a-tab-btn" data-page="serikali-wateja"><span class="t-icon">💳</span><span class="t-label">Wateja wa Order</span></button>
-    <button class="a-tab-btn" data-page="ripoti-order"><span class="t-icon">📊</span><span class="t-label">Ripoti Order</span></button>
+    <button class="a-tab-btn" data-page="serikali"><span class="t-icon">🏛</span><span class="t-label">Order za Serikali</span></button>
+    <button class="a-tab-btn" data-page="serikali-mafuta"><span class="t-icon">🏛</span><span class="t-label">Order za Serikali (Mafuta)</span></button>
+    <button class="a-tab-btn" data-page="serikali-wateja"><span class="t-icon">💳</span><span class="t-label">Wateja wa Order (Serikali/Kampuni)</span></button>
+    <button class="a-tab-btn" data-page="ripoti-order"><span class="t-icon">📊</span><span class="t-label">Ripoti ya Order (Mwezi)</span></button>
     <button class="a-tab-btn" data-page="marekebisho"><span class="t-icon">✏️</span><span class="t-label">Marekebisho</span><span class="t-pill" id="marekTopPill" style="display:none">0</span></button>
     <button class="a-tab-btn" data-page="mapato"><span class="t-icon">💰</span><span class="t-label">Mapato</span></button>
     <button class="a-tab-btn" data-page="gharama"><span class="t-icon">💸</span><span class="t-label">Matumizi</span></button>
     <button class="a-tab-btn" data-page="wateja"><span class="t-icon">💳</span><span class="t-label">Madeni</span></button>
     <button class="a-tab-btn" data-page="wanunuzi"><span class="t-icon">📣</span><span class="t-label">Wateja</span></button>
-    <button class="a-tab-btn" data-page="kila-siku"><span class="t-icon">📅</span><span class="t-label">Summary Siku</span></button>
+    <button class="a-tab-btn" data-page="kila-siku"><span class="t-icon">📅</span><span class="t-label">Summary ya Siku</span></button>
     <button class="a-tab-btn" data-page="makusanyo"><span class="t-icon">💵</span><span class="t-label">Makusanyo</span></button>
     <button class="a-tab-btn" data-page="ripoti-makusanyo"><span class="t-icon">📊</span><span class="t-label">Ripoti ya Makusanyo</span></button>
     <button class="a-tab-btn" data-page="ripoti"><span class="t-icon">📈</span><span class="t-label">Ripoti</span></button>
     <button class="a-tab-btn" data-page="fomu"><span class="t-icon">🖨</span><span class="t-label">Fomu</span></button>
     <button class="a-tab-btn" data-page="mafuta"><span class="t-icon">⛽</span><span class="t-label">Mafuta</span></button>
-    <button class="a-tab-btn" data-page="oda-mafuta"><span class="t-icon">📝</span><span class="t-label">Order Mafuta</span></button>
-    <button class="a-tab-btn" data-page="fomu-mafuta"><span class="t-icon">🧾</span><span class="t-label">Fomu Mafuta</span></button>
-    <button class="a-tab-btn" data-page="mdaiwa-mpya"><span class="t-icon">➕</span><span class="t-label">Mdaiwa</span></button>
-    <button class="a-tab-btn" data-page="ripoti-madeni"><span class="t-icon">📑</span><span class="t-label">Ripoti Madeni</span></button>
+    <button class="a-tab-btn" data-page="oda-mafuta"><span class="t-icon">📝</span><span class="t-label">Order za Mafuta</span></button>
+    <button class="a-tab-btn" data-page="fomu-mafuta"><span class="t-icon">🧾</span><span class="t-label">Fomu za Mafuta</span></button>
+    <button class="a-tab-btn" data-page="mdaiwa-mpya"><span class="t-icon">➕</span><span class="t-label">Mdaiwa Mpya</span></button>
+    <button class="a-tab-btn" data-page="ripoti-madeni"><span class="t-icon">📑</span><span class="t-label">Ripoti ya Madeni</span></button>
     <button class="a-tab-btn" data-page="takataka"><span class="t-icon">🗑</span><span class="t-label">Zilizofutwa</span></button>
   </div>
 </div>
@@ -3871,7 +3871,7 @@ function applyRoleUI(){
   // The same page does two jobs (sending orders / preparing invoices), so its name follows the person using it.
   const skNav=(userRole==='serikali')?'Invoice za Order':(userRole==='serikali_mauzo'?'Order':'Order za Serikali'),skTab=(userRole==='serikali')?'Invoice':(userRole==='serikali_mauzo'?'Order':'Mauzo');
   document.querySelectorAll('.nav-btn[data-page="serikali"]').forEach(b=>{const t=[...b.childNodes].reverse().find(x=>x.nodeType===3&&x.textContent.trim());if(t)t.textContent=skNav;});
-  document.querySelectorAll('.a-tab-btn[data-page="serikali"] .t-label').forEach(l=>l.textContent=skTab);
+  document.querySelectorAll('.a-tab-btn[data-page="serikali"] .t-label').forEach(l=>l.textContent=skNav);   // same name as the sidebar
   { const st=$('stmtSection');if(st)st.style.display=(userRole==='serikali_mafuta'||userRole==='gm')?'':'none'; }   // Fuad prepares the monthly statements; the GM can view them
   // Branch officers no longer type their own name anywhere — it comes from their account
   ['t-jina-muhusika','uh-jina-muombaji','mc-jina-mweka-stoo','dc-jina-mweka-stoo','bp-jina-mweka-stoo','ds-jina-mweka-stoo'].forEach(id=>{
