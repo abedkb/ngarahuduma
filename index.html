@@ -940,16 +940,16 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
     <button class="a-tab-btn" data-page="gharama"><span class="t-icon">💸</span><span class="t-label">Matumizi</span></button>
     <button class="a-tab-btn" data-page="wateja"><span class="t-icon">💳</span><span class="t-label">Madeni</span></button>
     <button class="a-tab-btn" data-page="wanunuzi"><span class="t-icon">📣</span><span class="t-label">Wateja</span></button>
-    <button class="a-tab-btn" data-page="kila-siku"><span class="t-icon">📅</span><span class="t-label">Siku</span></button>
-    <button class="a-tab-btn" data-page="ripoti-makusanyo"><span class="t-icon">📊</span><span class="t-label">Ripoti ya Makusanyo</span></button>
+    <button class="a-tab-btn" data-page="kila-siku"><span class="t-icon">📅</span><span class="t-label">Summary Siku</span></button>
     <button class="a-tab-btn" data-page="makusanyo"><span class="t-icon">💵</span><span class="t-label">Makusanyo</span></button>
+    <button class="a-tab-btn" data-page="ripoti-makusanyo"><span class="t-icon">📊</span><span class="t-label">Ripoti ya Makusanyo</span></button>
     <button class="a-tab-btn" data-page="ripoti"><span class="t-icon">📈</span><span class="t-label">Ripoti</span></button>
     <button class="a-tab-btn" data-page="fomu"><span class="t-icon">🖨</span><span class="t-label">Fomu</span></button>
     <button class="a-tab-btn" data-page="mafuta"><span class="t-icon">⛽</span><span class="t-label">Mafuta</span></button>
-    <button class="a-tab-btn" data-page="oda-mafuta"><span class="t-icon">📝</span><span class="t-label">Order</span></button>
-    <button class="a-tab-btn" data-page="fomu-mafuta"><span class="t-icon">🧾</span><span class="t-label">Fomu</span></button>
+    <button class="a-tab-btn" data-page="oda-mafuta"><span class="t-icon">📝</span><span class="t-label">Order Mafuta</span></button>
+    <button class="a-tab-btn" data-page="fomu-mafuta"><span class="t-icon">🧾</span><span class="t-label">Fomu Mafuta</span></button>
     <button class="a-tab-btn" data-page="mdaiwa-mpya"><span class="t-icon">➕</span><span class="t-label">Mdaiwa</span></button>
-    <button class="a-tab-btn" data-page="ripoti-madeni"><span class="t-icon">📑</span><span class="t-label">Ripoti</span></button>
+    <button class="a-tab-btn" data-page="ripoti-madeni"><span class="t-icon">📑</span><span class="t-label">Ripoti Madeni</span></button>
     <button class="a-tab-btn" data-page="takataka"><span class="t-icon">🗑</span><span class="t-label">Zilizofutwa</span></button>
   </div>
 </div>
@@ -981,6 +981,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       <button class="nav-btn active" data-page="dashibodi"><span class="icon">📊</span>Dashboard</button>
       <div class="nav-section">Duka</div>
       <button class="nav-btn" data-page="ununuzi"><span class="icon">🛒</span>Purchase</button>
+      <button class="nav-btn" data-page="hifadhi"><span class="icon">🗃</span>Stock</button>
       <div class="nav-section">Shughuli</div>
       <button class="nav-btn" data-page="mauzo"><span class="icon">🧾</span>Sales</button>
       <button class="nav-btn" data-page="uhamisho"><span class="icon">🔄</span>Transfer<span class="count-pill" id="uhPendingPill" style="display:none;">0</span></button>
@@ -993,7 +994,6 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       <button class="nav-btn" data-page="mapato"><span class="icon">💰</span>Mapato</button>
       <button class="nav-btn" data-page="gharama"><span class="icon">💸</span>Matumizi</button>
       <div class="nav-section">Taarifa</div>
-      <button class="nav-btn" data-page="hifadhi"><span class="icon">🗃</span>Stock</button>
       <button class="nav-btn" data-page="wateja"><span class="icon">💳</span>Madeni</button>
       <button class="nav-btn" data-page="wanunuzi"><span class="icon">📣</span>Wateja</button>
       <button class="nav-btn" data-page="kila-siku"><span class="icon">📅</span>Summary ya Siku</button>
@@ -2243,6 +2243,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
             <p style="font-size:13px;margin-bottom:4px">Mteja: <strong id="ski-mteja">—</strong></p>
             <p style="font-size:13px;">Mradi: <strong id="ski-mradi">—</strong></p>
           </div>
+          <div id="ski-unganisha" style="display:none;background:rgba(255,122,69,0.08);border:1px solid rgba(255,122,69,0.35);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13px;"></div>
           <div class="table-wrap"><table>
             <thead><tr><th>Particulars</th><th>Tawi</th><th class="num">QTY</th><th class="num">Bei ya Stoo</th><th class="num">Bei ya Serikali (TZS)</th><th class="num">Jumla</th></tr></thead>
             <tbody id="tbody-ski-lines"></tbody>
@@ -7625,7 +7626,7 @@ function renderSkQueue(){
 }
 let skiKundi=null,skiRendered='__bado__',skiInaHifadhi=false;
 function funguaInvoiceSerikali(kundi){            // "Andaa Invoice" on a queue row: show THAT order in the panel
-  skiKundi=kundi;skiRendered='__bado__';
+  skiKundi=kundi;skiEkstra=[];skiRendered='__bado__';
   renderSkPanel(skMakundi(skTayari));
   const s=$('skInvoicePanelSection');if(s)s.scrollIntoView({behavior:'smooth',block:'start'});
 }
@@ -7644,20 +7645,48 @@ function renderSkPanel(ready){
     hint.innerHTML=waiting?`Kuna Order <strong>${waiting}</strong> zinazosubiri majibu ya matawi. Matawi yote yakijibu, zitaonekana hapa — kisha utaweka <strong>bei rasmi ya serikali</strong> kwa kila bidhaa na kutengeneza invoice.`
       :`Hakuna Order iliyokubaliwa na matawi bado. <strong>Mchakato:</strong> 1) Afisa wa Order za Serikali anatuma Order → 2) tawi linakubali kwa bei ya stoo → 3) Order inaonekana hapa, kisha unaweka <strong>bei rasmi ya serikali</strong> kwa kila bidhaa na kutengeneza invoice.`;
   }else hint.style.display='none';
-  if(skiKundi===skiRendered)return;                             // already showing it — never wipe prices being typed
-  skiRendered=skiKundi;
-  const lines=skiKundi?allMaombiStock.filter(m=>skiKundi.split(',').includes(String(m.kundi_id))&&m.aina_chanzo==='Bidhaa'&&m.hali==='Imethibitishwa'):[];
-  const hasOrder=lines.length>0,h=lines[0]||{};
-  $('ski-mteja').textContent=hasOrder?h.mteja:'—';
-  $('ski-mradi').textContent=hasOrder?(h.mradi||'—'):'—';
-  $('tbody-ski-lines').innerHTML=hasOrder
-    ?lines.map(l=>`<tr><td>${escH(l.jina)}</td><td>${BRANCHES[l.tawi]||l.tawi}</td><td class="num">${l.idadi} ${l.kipimo||'pc'}</td><td class="num">${pesa(l.bei_stoo)}</td><td class="num"><input type="number" min="0" step="any" class="ski-bei" data-id="${l.id}" data-idadi="${l.idadi}" value="${l.bei_serikali||''}" placeholder="Bei ya Serikali" oninput="hesabuInvoiceSerikali()" style="width:140px;text-align:right;"/></td><td class="num" id="ski-j-${l.id}">—</td></tr>`).join('')
-    :`<tr style="opacity:.6"><td>Particulars <span style="font-size:11px;">(zinatoka kwenye agizo)</span></td><td>Tawi</td><td class="num">QTY</td><td class="num">Bei ya Stoo</td><td class="num"><input type="number" disabled placeholder="Bei ya Serikali (TZS)" style="width:170px;text-align:right;"/></td><td class="num">Jumla</td></tr>`;
+  skiEkstra=skiEkstra.filter(x=>ids.includes(x)&&x!==skiKundi);  // a combined order that was invoiced or answered meanwhile drops out
+  const funguo=skiZote();
+  if(funguo===skiRendered)return;                               // already showing it — never wipe prices being typed
+  skiRendered=funguo;
+  const hasOrder=skiJazaMistari();
   ['ski-aina-malipo','ski-awali','ski-tarehe-mwisho'].forEach(id=>{$(id).disabled=!hasOrder;});
   $('ski-save-btn').disabled=!hasOrder;$('ski-save-btn').style.opacity=hasOrder?'':'0.5';
   $('ski-aina-malipo').value='Mkopo';$('ski-awali').value='';$('ski-tarehe-mwisho').value='';
   $('ski-notify').style.display='none';
   togglaInvoiceSerikali();hesabuInvoiceSerikali();
+}
+// ONE invoice can cover several sends of the same customer (different branches, even different projects or days).
+// The officer ties extra sends to the invoice on screen; prices already typed are kept when the list changes.
+let skiEkstra=[];
+const skiZote=()=>[skiKundi,...skiEkstra].filter(Boolean).join(',');
+function skiJazaMistari(){
+  const beiZilizoandikwa={};
+  document.querySelectorAll('#tbody-ski-lines .ski-bei').forEach(i=>{if(i.value!=='')beiZilizoandikwa[i.dataset.id]=i.value;});
+  const ids=skiZote().split(',');
+  const lines=skiKundi?allMaombiStock.filter(m=>ids.includes(String(m.kundi_id))&&m.aina_chanzo==='Bidhaa'&&m.hali==='Imethibitishwa'):[];
+  const hasOrder=lines.length>0,h=lines[0]||{};
+  const miradi=[...new Set(lines.map(l=>(l.mradi||'').trim()).filter(Boolean))];
+  $('ski-mteja').textContent=hasOrder?h.mteja:'—';
+  $('ski-mradi').textContent=hasOrder?(miradi.join(' + ')||'—'):'—';
+  $('tbody-ski-lines').innerHTML=hasOrder
+    ?lines.map(l=>`<tr><td>${escH(l.jina)}</td><td>${BRANCHES[l.tawi]||l.tawi}</td><td class="num">${l.idadi} ${l.kipimo||'pc'}</td><td class="num">${pesa(l.bei_stoo)}</td><td class="num"><input type="number" min="0" step="any" class="ski-bei" data-id="${l.id}" data-idadi="${l.idadi}" value="${beiZilizoandikwa[l.id]??(l.bei_serikali||'')}" placeholder="Bei ya Serikali" oninput="hesabuInvoiceSerikali()" style="width:140px;text-align:right;"/></td><td class="num" id="ski-j-${l.id}">—</td></tr>`).join('')
+    :`<tr style="opacity:.6"><td>Particulars <span style="font-size:11px;">(zinatoka kwenye agizo)</span></td><td>Tawi</td><td class="num">QTY</td><td class="num">Bei ya Stoo</td><td class="num"><input type="number" disabled placeholder="Bei ya Serikali (TZS)" style="width:170px;text-align:right;"/></td><td class="num">Jumla</td></tr>`;
+  // other answered sends of the SAME customer that can join this invoice
+  const box=$('ski-unganisha');
+  if(box){
+    const wengine=hasOrder?skMakundi(skTayari).filter(g=>g.id!==skiKundi&&jinaKey(g.lines[0].mteja)===jinaKey(h.mteja)):[];
+    box.style.display=wengine.length?'block':'none';
+    box.innerHTML=wengine.length?`<div style="font-weight:600;margin-bottom:6px;">Order nyingine za ${escH(h.mteja)} zilizo tayari — ziunganishe kwenye invoice hii ikiwa ni invoice moja:</div>`+wengine.map(g=>{
+      const ok=g.lines.filter(l=>l.hali==='Imethibitishwa'),tw=[...new Set(ok.map(l=>BRANCHES[l.tawi]||l.tawi))].join(', ');
+      return `<label style="display:flex;gap:8px;align-items:flex-start;margin:4px 0;cursor:pointer;"><input type="checkbox" ${skiEkstra.includes(g.id)?'checked':''} onchange="skiTogglaEkstra('${g.id}')" style="margin-top:3px;"/><span>${escH(ok[0].mradi||'—')} · ${escH(String(ok[0].tarehe||'').slice(0,10))} · ${escH(tw)} <span style="color:var(--a-muted);">(bidhaa ${ok.length})</span></span></label>`;
+    }).join(''):'';
+  }
+  return hasOrder;
+}
+function skiTogglaEkstra(id){
+  skiEkstra=skiEkstra.includes(id)?skiEkstra.filter(x=>x!==id):[...skiEkstra,id];
+  skiRendered=skiZote();skiJazaMistari();hesabuInvoiceSerikali();
 }
 function hesabuInvoiceSerikali(){
   let jumla=0;
@@ -7687,10 +7716,10 @@ async function tengenezaInvoiceSerikali(){
   try{
     // One database step: checks every price, creates the invoice and (for credit) the debt, and marks the order invoiced.
     const h=await authHeaders();
-    const r=await fetch(`${SB_URL}/rest/v1/rpc/serikali_tengeneza_invoice_kundi`,{method:'POST',headers:h,body:JSON.stringify({p:{kundi_ids:skiKundi.split(','),bei,aina_malipo:aina,kilicholipwa_awali:awali,tarehe_mwisho:mwisho||null}})});
+    const r=await fetch(`${SB_URL}/rest/v1/rpc/serikali_tengeneza_invoice_kundi`,{method:'POST',headers:h,body:JSON.stringify({p:{kundi_ids:skiZote().split(','),bei,aina_malipo:aina,kilicholipwa_awali:awali,tarehe_mwisho:mwisho||null}})});
     d=await r.json();
     if(!r.ok||!d||!d.invoice_no)throw new Error((d&&(d.message||d.hint))||'Imeshindwa kutengeneza invoice');
-    skiKundi=null;skiRendered='__bado__';
+    skiKundi=null;skiEkstra=[];skiRendered='__bado__';
     toast(`✅ Invoice ${d.invoice_no} imetengenezwa — ${pesa(d.jumla)}`);
     loadAllBaada();
   }catch(e){kosa('❌ '+e.message);d=null;}
