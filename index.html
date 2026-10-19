@@ -3083,6 +3083,7 @@ const BRANCHES={
   godownabel:'Nakatunga Godown — Abel',
   godownjonathan:'Nakatunga Godown — Jonathan',
   godownsubira:'Nakatunga Godown — Subira',
+  godownemma:'Nakatunga Godown — Emma',
   nakatunga:'Nakatunga',
   runzeweduka:'Runzewe — Duka',
   runzewestore:'Runzewe — Store',
@@ -3092,7 +3093,7 @@ const BRANCHES={
   ngaramjinipetrol:'Ngara Mjini Petrol Station',
   ushirombopetrol:'Ushirombo Petrol Station'
 };
-const HARDWARE_BRANCHES={ngaramjini:BRANCHES.ngaramjini,benaco:BRANCHES.benaco,godownabel:BRANCHES.godownabel,godownjonathan:BRANCHES.godownjonathan,godownsubira:BRANCHES.godownsubira,nakatunga:BRANCHES.nakatunga,runzeweduka:BRANCHES.runzeweduka,runzewestore:BRANCHES.runzewestore,ushirombo:BRANCHES.ushirombo,citycentre:BRANCHES.citycentre,matumizibranch:BRANCHES.matumizibranch};
+const HARDWARE_BRANCHES={ngaramjini:BRANCHES.ngaramjini,benaco:BRANCHES.benaco,godownabel:BRANCHES.godownabel,godownjonathan:BRANCHES.godownjonathan,godownsubira:BRANCHES.godownsubira,godownemma:BRANCHES.godownemma,nakatunga:BRANCHES.nakatunga,runzeweduka:BRANCHES.runzeweduka,runzewestore:BRANCHES.runzewestore,ushirombo:BRANCHES.ushirombo,citycentre:BRANCHES.citycentre,matumizibranch:BRANCHES.matumizibranch};
 const PETROL_BRANCHES={ngaramjinipetrol:'Ngara Mjini Petrol Station',ushirombopetrol:'Ushirombo Petrol Station'};
 function populateBranchSelect(id,branchMap,withAllOption){
   const sel=document.getElementById(id);if(!sel)return;
@@ -3124,12 +3125,12 @@ const BRANCH_PHONE={
   ushirombopetrol:'0744175894'   // Jamal — station manager
 };
 // Sales officer of each stock point. Every officer manages their OWN stock — at
-// Nakatunga Godown that means three separate stock points (Abel, Jonathan, Subira),
+// Nakatunga Godown that means three separate stock points (Abel, Jonathan, Subira, Emma),
 // and at Runzewe the Duka and the Store are separate too. Nothing is shared.
 const BRANCH_OFFICER={
   ngaramjini:'Neema',citycentre:'Diana',benaco:'Morena',matumizibranch:'Rose',
   runzewestore:'Aniceth',runzeweduka:'Suleimani',ushirombo:'Peruse',nakatunga:'Josephina',
-  godownabel:'Abel',godownjonathan:'Jonathan',godownsubira:'Subira',
+  godownabel:'Abel',godownjonathan:'Jonathan',godownsubira:'Subira',godownemma:'Emma',
   ushirombopetrol:'Jamal',ngaramjinipetrol:'Jemima'
 };
 function officerOf(tawi){return BRANCH_OFFICER[tawi]||'';}
