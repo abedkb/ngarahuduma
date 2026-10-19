@@ -926,7 +926,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
   </div>
   <div class="a-topnav-tabs" id="aTopnavTabs">
     <button class="a-tab-btn active" data-page="dashibodi"><span class="t-icon">📊</span><span class="t-label">Dashboard</span></button>
-    <button class="a-tab-btn" data-page="hifadhi"><span class="t-icon">🛒</span><span class="t-label">Purchase</span></button>
+    <button class="a-tab-btn" data-page="ununuzi"><span class="t-icon">🛒</span><span class="t-label">Purchase</span></button>
     <button class="a-tab-btn" data-page="hifadhi"><span class="t-icon">🗃</span><span class="t-label">Stock</span></button>
     <button class="a-tab-btn" data-page="mauzo"><span class="t-icon">🧾</span><span class="t-label">Sales</span></button>
     <button class="a-tab-btn" data-page="uhamisho"><span class="t-icon">🔄</span><span class="t-label">Transfer</span><span class="t-pill" id="uhTopPill" style="display:none">0</span></button>
@@ -980,7 +980,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       <div class="nav-section">Muhtasari</div>
       <button class="nav-btn active" data-page="dashibodi"><span class="icon">📊</span>Dashboard</button>
       <div class="nav-section">Duka</div>
-      <button class="nav-btn" data-page="hifadhi"><span class="icon">🛒</span>Purchase</button>
+      <button class="nav-btn" data-page="ununuzi"><span class="icon">🛒</span>Purchase</button>
       <div class="nav-section">Shughuli</div>
       <button class="nav-btn" data-page="mauzo"><span class="icon">🧾</span>Sales</button>
       <button class="nav-btn" data-page="uhamisho"><span class="icon">🔄</span>Transfer<span class="count-pill" id="uhPendingPill" style="display:none;">0</span></button>
@@ -1498,7 +1498,52 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 
     <!-- HIFADHI — merged with Manunuzi: purchases (stock-in) directly affect stock, so they live together -->
     <section id="hifadhi" class="page">
-      <div class="topbar"><div class="topbar-left"><h2>Stock</h2><p>Bidhaa zote zilizopo stoo — ongeza manunuzi (huingia stoo moja kwa moja) na simamia hifadhi.</p></div></div>
+      <div class="topbar"><div class="topbar-left"><h2>Stock</h2><p>Bidhaa zote zilizopo stoo — zilipotoka (Manunuzi au Transfer), idadi, bei na thamani yake.</p></div></div>
+      <div class="section" id="stockJedwaliSection">
+        <div class="section-header"><h3>📋 Orodha ya Stock Iliyopo</h3></div>
+        <div class="section-body"><div id="stockJedwaliBox"><div class="empty-state">Inapakia...</div></div></div>
+      </div>
+      <div class="section">
+        <div class="section-header"><h3>📦 Taarifa ya Stoo</h3>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+            <input type="search" id="search-stock" placeholder="🔍 Tafuta bidhaa, mfano: cement, misumari" oninput="renderStock()" style="width:260px"/>
+            <button class="btn sm secondary" onclick="fungaFunguaStockZote(true)">Fungua Zote</button>
+            <button class="btn sm secondary" onclick="fungaFunguaStockZote(false)">Funga Zote</button>
+          </div>
+        </div>
+        <div class="section-body">
+          <p id="stockMuhtasari" style="font-size:12px;color:var(--a-muted);margin:0 0 10px;"></p>
+          <div id="stockMakundi"><div class="empty-state">Inapakia...</div></div>
+        </div>
+      </div>
+      <div class="section" id="bidhaaMpyaEntrySection">
+        <div class="section-header"><h3>📸 Ongeza Bidhaa Mpya</h3></div>
+        <div class="section-body">
+          
+          <div class="form-grid">
+            <div class="field"><label>Jina la Bidhaa (English)</label><input type="text" id="p-jina" autocomplete="off" placeholder="mfano: Pvc elbow 1.5&quot;"/></div>
+            <div class="field"><label>Jina kwa Kiswahili</label><input type="text" id="p-jina-sw" autocomplete="off" placeholder="mfano: Kiungio cha Pvc 1.5&quot;"/></div>
+            <div class="field"><label>Bei ya Kuuzia (TZS)</label><input type="number" id="p-bei" placeholder="2000"/></div>
+            <div class="field"><label>Bei ya Kununulia (TZS, hiari)</label><input type="number" id="p-bei-gharama" placeholder="0"/></div>
+            <div class="field"><label>Idadi Iliyopo</label><input type="number" id="p-idadi" placeholder="1" min="1" value="1"/></div>
+            <div class="field"><label>Kipimo</label>
+              <select id="p-kipimo"><option value="pc">Piece / Pisi</option><option value="bag">Bag / Mifuko</option><option value="roll">Roll / Rola</option><option value="meter">Meter / Mita</option><option value="litre">Litre / Lita</option><option value="kg">Kg / Kilo</option><option value="tonne">Tonne / Tani</option><option value="pack">Pack / Packets</option><option value="sheet">Sheet / Bati</option><option value="box">Box / Kasha</option><option value="katoni">Katoni / Carton</option><option value="set">Set / Seti</option><option value="pair">Pair / Jozi</option><option value="bando">Bando / Bundle</option><option value="ndoo">Ndoo / Bucket</option><option value="kopo">Kopo / Can</option></select>
+            </div>
+            <input type="hidden" id="p-kategoria" value="mengineyo"/>
+            <div class="field"><label>Kiwango cha Chini (tahadhari)</label><input type="number" id="p-kiwango-chini" placeholder="10" value="10"></div>
+            <div class="field"><label>Tawi</label><select id="p-tawi"></select></div>
+            <div class="field"><label>Lebo (hiari)</label><input type="text" id="p-badge" placeholder="mfano: Bidhaa Mpya"/></div>
+            <div class="field full"><label>Maelezo ya Bidhaa (Kiswahili)</label><textarea id="p-maelezo-sw" rows="2" placeholder="mfano: Bomba la plastiki linalotumika kwa mifumo ya maji ya nyumbani na majengo."></textarea></div>
+            <div class="field full"><label>Product Description (English)</label><textarea id="p-maelezo-en" rows="2" placeholder="e.g. Plastic pipe used for domestic and building water systems."></textarea></div>
+          </div>
+          <div class="controls">
+            <button class="btn gold" id="p-save-btn" onclick="saveProductWithPhoto()">💾 Hifadhi na Onyesha Dukani</button>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section id="ununuzi" class="page">
+      <div class="topbar"><div class="topbar-left"><h2>Purchase</h2><p>Ongeza manunuzi (huingia stoo moja kwa moja) na uone rekodi za manunuzi.</p></div></div>
       <div class="section" id="manunuziEntrySection"><div class="section-header"><h3>➕ Ongeza Ununuzi (Stock-in)</h3></div>
         <div class="section-body">
           <div id="notifyManunuzi" class="notify"></div>
@@ -1528,44 +1573,6 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
             <button class="btn gold" onclick="ongezaUununuzi()">💾 Hifadhi Ununuzi Wote</button>
             <button class="btn secondary" onclick="safishaManunuzi()">🗑 Futa</button>
           </div>
-        </div>
-      </div>
-      <div class="section" id="bidhaaMpyaEntrySection">
-        <div class="section-header"><h3>📸 Ongeza Bidhaa Mpya</h3></div>
-        <div class="section-body">
-          
-          <div class="form-grid">
-            <div class="field"><label>Jina la Bidhaa (English)</label><input type="text" id="p-jina" autocomplete="off" placeholder="mfano: Pvc elbow 1.5&quot;"/></div>
-            <div class="field"><label>Jina kwa Kiswahili</label><input type="text" id="p-jina-sw" autocomplete="off" placeholder="mfano: Kiungio cha Pvc 1.5&quot;"/></div>
-            <div class="field"><label>Bei ya Kuuzia (TZS)</label><input type="number" id="p-bei" placeholder="2000"/></div>
-            <div class="field"><label>Bei ya Kununulia (TZS, hiari)</label><input type="number" id="p-bei-gharama" placeholder="0"/></div>
-            <div class="field"><label>Idadi Iliyopo</label><input type="number" id="p-idadi" placeholder="1" min="1" value="1"/></div>
-            <div class="field"><label>Kipimo</label>
-              <select id="p-kipimo"><option value="pc">Piece / Pisi</option><option value="bag">Bag / Mifuko</option><option value="roll">Roll / Rola</option><option value="meter">Meter / Mita</option><option value="litre">Litre / Lita</option><option value="kg">Kg / Kilo</option><option value="tonne">Tonne / Tani</option><option value="pack">Pack / Packets</option><option value="sheet">Sheet / Bati</option><option value="box">Box / Kasha</option><option value="katoni">Katoni / Carton</option><option value="set">Set / Seti</option><option value="pair">Pair / Jozi</option><option value="bando">Bando / Bundle</option><option value="ndoo">Ndoo / Bucket</option><option value="kopo">Kopo / Can</option></select>
-            </div>
-            <input type="hidden" id="p-kategoria" value="mengineyo"/>
-            <div class="field"><label>Kiwango cha Chini (tahadhari)</label><input type="number" id="p-kiwango-chini" placeholder="10" value="10"></div>
-            <div class="field"><label>Tawi</label><select id="p-tawi"></select></div>
-            <div class="field"><label>Lebo (hiari)</label><input type="text" id="p-badge" placeholder="mfano: Bidhaa Mpya"/></div>
-            <div class="field full"><label>Maelezo ya Bidhaa (Kiswahili)</label><textarea id="p-maelezo-sw" rows="2" placeholder="mfano: Bomba la plastiki linalotumika kwa mifumo ya maji ya nyumbani na majengo."></textarea></div>
-            <div class="field full"><label>Product Description (English)</label><textarea id="p-maelezo-en" rows="2" placeholder="e.g. Plastic pipe used for domestic and building water systems."></textarea></div>
-          </div>
-          <div class="controls">
-            <button class="btn gold" id="p-save-btn" onclick="saveProductWithPhoto()">💾 Hifadhi na Onyesha Dukani</button>
-          </div>
-        </div>
-      </div>
-      <div class="section">
-        <div class="section-header"><h3>📦 Taarifa ya Stoo</h3>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-            <input type="search" id="search-stock" placeholder="🔍 Tafuta bidhaa, mfano: cement, misumari" oninput="renderStock()" style="width:260px"/>
-            <button class="btn sm secondary" onclick="fungaFunguaStockZote(true)">Fungua Zote</button>
-            <button class="btn sm secondary" onclick="fungaFunguaStockZote(false)">Funga Zote</button>
-          </div>
-        </div>
-        <div class="section-body">
-          <p id="stockMuhtasari" style="font-size:12px;color:var(--a-muted);margin:0 0 10px;"></p>
-          <div id="stockMakundi"><div class="empty-state">Inapakia...</div></div>
         </div>
       </div>
       <div class="section"><div class="section-header"><h3>📋 Rekodi za Manunuzi</h3></div>
@@ -3795,9 +3802,9 @@ function enterAdmin(role='gm',tawi=null,jina=''){
 }
 // Pages each role may access. GM sees everything across all branches.
 const ROLE_PAGES={
-  gm:['dashibodi','mauzo','mapato','gharama','hifadhi','wateja','wanunuzi','kila-siku','makusanyo','ripoti','fomu','takataka','serikali','serikali-mafuta','serikali-wateja','ripoti-order','ripoti-makusanyo','marekebisho','mafuta','fomu-mafuta','mdaiwa-mpya','ripoti-madeni'],
-  deski:['dashibodi','maagizo','mauzo','uhamisho','pokea','hifadhi','wateja','fomu','marekebisho'],
-  matumizi:['mauzo','hifadhi','uhamisho','pokea','wateja','fomu','marekebisho','mapato','gharama'],   // works as a branch sales officer (for the branch on her profile) AND keeps the cash book
+  gm:['dashibodi','mauzo','mapato','gharama','hifadhi','ununuzi','wateja','wanunuzi','kila-siku','makusanyo','ripoti','fomu','takataka','serikali','serikali-mafuta','serikali-wateja','ripoti-order','ripoti-makusanyo','marekebisho','mafuta','fomu-mafuta','mdaiwa-mpya','ripoti-madeni'],
+  deski:['dashibodi','maagizo','mauzo','uhamisho','pokea','hifadhi','ununuzi','wateja','fomu','marekebisho'],
+  matumizi:['mauzo','hifadhi','ununuzi','uhamisho','pokea','wateja','fomu','marekebisho','mapato','gharama'],   // works as a branch sales officer (for the branch on her profile) AND keeps the cash book
   madeni:['wateja','mdaiwa-mpya','ripoti-madeni'],      // Abdul: the debts + his collection report
   cashier:['dashibodi','makusanyo','ripoti-makusanyo'],   // Makusanyo: the one place the Cashier can ENTER data (daily collections)
   serikali:['serikali','serikali-wateja'],        // Madeni ya Serikali (Rehema): prepares invoices + owns the debts (corrects her invoices directly — no Marekebisho tab, no Ripoti ya Order)
@@ -3916,7 +3923,7 @@ function changeViewingTawi(v){
 // A fuel station has no invoices, no shop stock, no walk-in credit customers —
 // these tabs are pure hardware-branch concepts, so hide them while looking at
 // a petrol station instead of leaving them showing empty, misleading tables.
-const HARDWARE_ONLY_PAGES=['maagizo','mauzo','uhamisho','pokea','hifadhi','wateja','wanunuzi','kila-siku','ripoti','fomu','takataka'];
+const HARDWARE_ONLY_PAGES=['maagizo','mauzo','uhamisho','pokea','hifadhi','ununuzi','wateja','wanunuzi','kila-siku','ripoti','fomu','takataka'];
 function applyPetrolNavVisibility(){
   const isFuel=!!PETROL_BRANCHES[viewingTawi];
   HARDWARE_ONLY_PAGES.forEach(page=>{
@@ -4150,7 +4157,7 @@ function sajiliTawiLaFaragha(t){
   BRANCHES[t]=TAWI_ZA_FARAGHA[t];HARDWARE_BRANCHES[t]=TAWI_ZA_FARAGHA[t];BRANCH_OFFICER[t]=TAWI_ZA_FARAGHA[t];
   ['t-tawi','p-tawi','wn-tawi'].forEach(id=>populateBranchSelect(id,HARDWARE_BRANCHES,false));
 }
-const PAGES_ZA_TAWI=['mauzo','hifadhi','uhamisho','pokea','wateja','fomu','marekebisho'];
+const PAGES_ZA_TAWI=['mauzo','hifadhi','ununuzi','uhamisho','pokea','wateja','fomu','marekebisho'];
 function pagesZaRole(){
   const p=ROLE_PAGES[userRole]||ROLE_PAGES.gm;
   if(userRole==='matumizi'&&!userTawi)return p.filter(x=>!PAGES_ZA_TAWI.includes(x));
@@ -6623,6 +6630,23 @@ function renderStock(){
   const tafuta=(($('search-stock')||{}).value||'').trim();
   const makundi=makundiYaStock(),yote='yote'===viewingTawi&&!ninaTawiLaKazi();
   const blank="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Crect fill='%23F3E6DE' width='40' height='40'/%3E%3C/svg%3E";
+  // Flat list of every product in stock: where it came from, quantity, rate and value — with the grand total at the end
+  const jb=$('stockJedwaliBox');
+  if(jb){
+    const safu=[];
+    makundi.forEach(g=>{
+      const hm=(g.manunuzi||[]).length>0,ht=(g.transfer||[]).length>0;
+      const chanzo=hm&&ht?'Manunuzi + Transfer':hm?'Manunuzi':ht?'Transfer':'Stoo ya Awali';
+      g.bidhaa.forEach(p=>{const q=Number(p.idadi)||0;if(q>0)safu.push({jina:g.jina,tawi:p.tawi,kipimo:p.kipimo||'pc',chanzo,q,bei:Number(p.bei_kuuzia)||0});});
+    });
+    safu.sort((a,b)=>a.jina.localeCompare(b.jina,'en',{sensitivity:'base'}));
+    const jumlaYote=safu.reduce((t,x)=>t+x.q*x.bei,0),nc=yote?7:6;
+    const rangi={'Manunuzi':'pill-green','Transfer':'pill-amber','Manunuzi + Transfer':'pill-green','Stoo ya Awali':'pill-red'};
+    jb.innerHTML=safu.length?`<div class="table-wrap"><table><thead><tr><th>#</th><th>Bidhaa</th>${yote?'<th>Tawi</th>':''}<th>UNIT</th><th>Imepokelewa Kupitia</th><th class="num">QTY</th><th class="num">RATE</th><th class="num">JUMLA</th></tr></thead><tbody>`
+      +safu.map((x,i)=>`<tr><td>${i+1}</td><td><strong>${escH(x.jina)}</strong></td>${yote?`<td>${escH(BRANCHES[x.tawi]||x.tawi)}</td>`:''}<td>${escH(x.kipimo)}</td><td><span class="pill ${rangi[x.chanzo]||'pill-green'}">${escH(x.chanzo)}</span></td><td class="num">${fmtIdadi(x.q)}</td><td class="num">${pesa(x.bei)}</td><td class="num"><strong>${pesa(x.q*x.bei)}</strong></td></tr>`).join('')
+      +`<tr style="font-weight:700;background:rgba(255,138,87,0.10);"><td colspan="${nc}">JUMLA YA STOCK YOTE (bidhaa ${safu.length})</td><td class="num">${pesa(jumlaYote)}</td></tr></tbody></table></div>`
+      :`<div class="empty-state"><div class="icon">📭</div>${tafuta?'Hakuna bidhaa inayolingana na utafutaji huu.':'Hakuna stock iliyopo.'}</div>`;
+  }
   const m=$('stockMuhtasari');if(m)m.textContent=makundi.length?`Bidhaa ${makundi.length}${tafuta?` zinazolingana na "${tafuta}"`:''} — gusa bidhaa kuona stock yake na historia ya manunuzi.`:'';
   if(!makundi.length){box.innerHTML=`<div class="empty-state"><div class="icon">📭</div>${tafuta?'Hakuna bidhaa inayolingana na utafutaji huu.':'Hakuna bidhaa.'}</div>`;return;}
   const funguaKwaUtafutaji=tafuta&&makundi.length<=6;      // a search with few results opens them straight away
