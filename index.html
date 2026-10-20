@@ -11350,7 +11350,12 @@ function htmlYaDailySales(d){
   const punguzoRows=d.punguzo.map((s,i)=>`<tr><td class="sn">${i+1}</td><td>${escH(s.mteja||'—')}</td><td colspan="3">${escH(s.jina)} × ${s.idadi}</td><td class="num">${fmt0(Number(s.punguzo)||0)}</td></tr>`);
   for(let i=d.punguzo.length;i<MIN_PUNGUZO;i++)punguzoRows.push(`<tr><td class="sn">${i+1}</td><td></td><td colspan="3"></td><td></td></tr>`);
   const T=(n)=>`TSh ${fmt0(n)}`;
-  return `<table class="ds-tbl"><colgroup><col style="width:7%"><col style="width:37%"><col style="width:8%"><col style="width:9%"><col style="width:16%"><col style="width:23%"></colgroup><tbody>
+  // Order and credit sales are listed line by line too (so a day made only of orders is not an empty table); their totals stay below.
+  const mistariYa=(a)=>a.map((s,i)=>`<tr><td class="sn">${i+1}</td><td>${escH(s.jina)}${s.mteja&&!niMtejaWaKawaida(s.mteja)?` <span style="font-size:10px;color:#555;">(${escH(s.mteja)})</span>`:''}</td><td class="ds-mid">${escH(s.kipimo||'pc')}</td><td class="ds-mid">${s.idadi}</td><td class="num">${fmt0(Number(s.bei_kuuzia)||0)}</td><td class="num">${fmt0((Number(s.jumla)||0)+(Number(s.punguzo)||0))}</td></tr>`).join('');
+  const kichwaCha=(t)=>`<tr><td colspan="6" class="ds-jumla" style="text-align:center;height:8mm;">${t}</td></tr>`;
+  const orodhaOda=d.odaMistari&&d.odaMistari.length?kichwaCha('ORDER SALES — ITEMS')+mistariYa(d.odaMistari):'';
+  const orodhaMadeni=d.madeniMistari&&d.madeniMistari.length?kichwaCha('MADENI — ITEMS')+mistariYa(d.madeniMistari):'';
+  return `<table class="ds-tbl"<colgroup><col style="width:7%"><col style="width:37%"><col style="width:8%"><col style="width:9%"><col style="width:16%"><col style="width:23%"></colgroup><tbody>
     <tr><td colspan="6" class="ds-firma">..NGARA HUDUMA COMPANY LIMITED..</td></tr>
     <tr><td style="height:15mm;"></td><td colspan="4" style="height:15mm;vertical-align:top;"><div class="ds-lebo">NAME OF STORE KEEPER.</div><div class="ds-jina-la-keeper">${escH(d.keeper)}</div></td><td rowspan="2" class="ds-nembo"><div class="inv-logo"></div><div style="font-size:10px;color:#555;margin-top:2px;">${escH(d.tawiJina)}</div></td></tr>
     <tr><td colspan="4" style="font-weight:700;font-size:14px;">DATE: ${tarehePangoFomu(d.tarehe)}</td><td></td></tr>
@@ -11358,6 +11363,7 @@ function htmlYaDailySales(d){
     <tr><th>S/N</th><th>PARTICULAR</th><th>UNIT</th><th>QTY</th><th>RATE</th><th>AMOUNT</th></tr>
     ${mauzoRows.join('')}
     <tr><td></td><td class="ds-jumla">TOTAL CASH AMOUNT</td><td></td><td></td><td colspan="2" class="num ds-jumla">${T(d.jumlaPesa)}</td></tr>
+    ${orodhaOda}${orodhaMadeni}
     <tr><td rowspan="3"></td><td colspan="3" class="ds-jumla" style="text-align:center;height:8mm;">TOTAL ORDER SALES</td><td colspan="2" class="num ds-jumla">${T(d.jumlaOda)}</td></tr>
     <tr><td colspan="3" class="ds-jumla" style="text-align:center;height:8mm;">TOTAL MADENI</td><td colspan="2" class="num ds-jumla">${T(d.jumlaMadeni)}</td></tr>
     <tr><td colspan="4" class="ds-jumla" style="text-align:center;">DISCOUNTED PRODUCTS</td><td></td></tr>
@@ -11377,7 +11383,7 @@ function generateDailySalesForm(){
   const siku=confirmedMauzo().filter(s=>s.tawi===tawi&&s.tarehe===tarehe&&!s._pending).sort((a,b)=>String(a.created_at||'').localeCompare(String(b.created_at||'')));
   const pesa_=siku.filter(s=>!niMauzoYaOrder(s)&&!niMauzoYaMadeni(s)),oda=siku.filter(niMauzoYaOrder),madeni=siku.filter(niMauzoYaMadeni),punguzo=siku.filter(s=>(Number(s.punguzo)||0)>0);
   const jm=(a)=>a.reduce((x,s)=>x+(Number(s.jumla)||0)+(Number(s.punguzo)||0),0);      // every total is BEFORE discount; the discount is taken off once, at the end
-  const d={tarehe,tawiJina:BRANCHES[tawi]||tawi,keeper,pesa:pesa_,punguzo,jumlaPesa:jm(pesa_),jumlaOda:jm(oda),jumlaMadeni:jm(madeni),jumlaPunguzo:punguzo.reduce((x,s)=>x+(Number(s.punguzo)||0),0)};
+  const d={tarehe,tawiJina:BRANCHES[tawi]||tawi,keeper,pesa:pesa_,punguzo,odaMistari:oda,madeniMistari:madeni,jumlaPesa:jm(pesa_),jumlaOda:jm(oda),jumlaMadeni:jm(madeni),jumlaPunguzo:punguzo.reduce((x,s)=>x+(Number(s.punguzo)||0),0)};
   d.jumlaYote=d.jumlaPesa+d.jumlaOda+d.jumlaMadeni-d.jumlaPunguzo;      // TOTAL DAILY SALES = total before discount − total discount
   $('dsBody').innerHTML=htmlYaDailySales(d);
   $('dsOverlay').dataset.jina='daily-sales-report-form-'+tarehe+'-'+tawi;
