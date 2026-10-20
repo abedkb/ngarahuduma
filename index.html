@@ -3442,11 +3442,32 @@ const DB={
   async get(t,q=''){const h=await authHeaders();const r=await fetch(`${SB_URL}/rest/v1/${t}?${q}`,{headers:h});return r.json();},
   // Used by the background refresh: when the server's answer is identical to the last one, nothing is parsed or redrawn.
   // (null = "nothing changed, keep what you have")
+  // Reads a whole table. The server hands out at most 1,000 rows per request, so a table with more rows (all branches together, as the
+  // General Manager and the Director see them) is read in pages of 1,000 until every row has arrived — otherwise the OLDER days silently go missing.
   async getKama(t,q='',lazima){
-    const h=await authHeaders();const r=await fetch(`${SB_URL}/rest/v1/${t}?${q}`,{headers:h});
-    const text=await r.text(),key=t+'?'+q;
+    const h=await authHeaders(),key=t+'?'+q,UKUBWA=1000;
+    const moja=/(^|&)limit=/.test(q)||/(^|&)id=eq\./.test(q);      // the caller asked for a small, fixed answer
+    let j,text;
+    if(moja){
+      const r=await fetch(`${SB_URL}/rest/v1/${t}?${q}`,{headers:h});
+      text=await r.text();
+      try{j=JSON.parse(text);}catch(_e){return null;}
+    }else{
+      const kuagiza=(/(^|&)order=/.test(q)&&t!=='matumizi_salio_awali')?q.replace(/(^|&)order=([^&]*)/,(m,a,b)=>`${a}order=${b},id.asc`):q;      // a fixed tie-break, so a row never moves between pages
+      j=[];let jumlaYote=null;
+      for(let off=0;off<200000;off+=UKUBWA){
+        const r=await fetch(`${SB_URL}/rest/v1/${t}?${kuagiza}${kuagiza?'&':''}limit=${UKUBWA}&offset=${off}`,{headers:off===0?Object.assign({},h,{Prefer:'count=exact'}):h});
+        const mwili=await r.text();let sehemu;
+        try{sehemu=JSON.parse(mwili);}catch(_e){return null;}
+        if(!Array.isArray(sehemu)){if(off===0){j=sehemu;break;}return null;}      // an error answer on the first page is passed on as before
+        if(off===0){const m=/\/(\d+)\s*$/.exec(r.headers.get('content-range')||'');if(m)jumlaYote=Number(m[1]);}
+        j=j.concat(sehemu);
+        if(!sehemu.length)break;
+        if(jumlaYote!==null?j.length>=jumlaYote:sehemu.length<UKUBWA)break;
+      }
+      text=JSON.stringify(j);
+    }
     if(!lazima&&_jibuLaMwisho[key]===text)return null;
-    let j;try{j=JSON.parse(text);}catch(_e){return null;}
     if(Array.isArray(j))_jibuLaMwisho[key]=text;
     return j;
   },
@@ -6043,47 +6064,59 @@ function waIntlPhone(phone){
   if(!p.startsWith('255'))p='255'+p;
   return p;
 }
+// "Shiriki (WhatsApp)". On a PHONE the share sheet is the dependable way: it hands the picture straight to WhatsApp.
+// The browser only allows the share sheet right after a tap, but making the picture takes a few seconds — so when the phone
+// refuses, the picture is kept ready and the next tap on Shiriki sends it at once.
+let _fomuTayari=null;      // {blob,filename,at}
+const niSimu=()=>/Android|iPhone|iPad|iPod/i.test(navigator.userAgent||'')||(navigator.maxTouchPoints>1&&/Macintosh/.test(navigator.userAgent||''));
 async function shirikiFomu(){
-  const canvas=await fomuKamataPicha();if(!canvas)return;
-  const filename=jinaLaFomuLiloWazi();
   const sheet=document.querySelector('.inv-overlay.open .inv-sheet');
   const waPhone=sheet?sheet.dataset.waPhone:'';
   const openWaChat=()=>{
-    if(waPhone)window.open(`https://wa.me/${waIntlPhone(waPhone)}`,'_blank');
-    else window.open('https://wa.me/','_blank');
+    const w=window.open(waPhone?`https://wa.me/${waIntlPhone(waPhone)}`:'https://wa.me/','_blank');
+    return !!w;
   };
-  canvas.toBlob(async(blob)=>{
-    if(!blob)return;
-    const file=new File([blob],filename+'.png',{type:'image/png'});
+  const pakua=(blob,filename)=>{
+    const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename+'.png';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),4000);
+  };
+  const filename0=jinaLaFomuLiloWazi();
+  let blob,filename=filename0,tayariSasa=false;
+  if(_fomuTayari&&_fomuTayari.filename===filename0&&Date.now()-_fomuTayari.at<180000){blob=_fomuTayari.blob;tayariSasa=true;}      // second tap: the picture is already made
+  else{
+    const canvas=await fomuKamataPicha();if(!canvas)return;
+    blob=await new Promise(r=>canvas.toBlob(r,'image/png'));
+    if(!blob){toast('❌ Picha ya fomu haikutengenezwa (simu haina nafasi ya kutosha?). Jaribu tena au tumia "Pakua".');return;}
+  }
+  const file=new File([blob],filename+'.png',{type:'image/png'});
+  const simu=niSimu();
 
-    // Best path: copy the image straight to the device clipboard, then open
-    // WhatsApp already on the right chat — the person just pastes it in,
-    // no downloaded file to hunt for and attach manually.
-    if(navigator.clipboard&&window.ClipboardItem){
-      try{
-        await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
-        openWaChat();
-        toast(waPhone
-          ?'✅ Fomu imenakiliwa na WhatsApp imefunguliwa — bandika (paste/shikilia kidole) kwenye ujumbe kisha "Tuma".'
-          :'✅ Fomu imenakiliwa — fungua mazungumzo unayotaka na ubandike (paste) kisha "Tuma".');
-        return;
-      }catch(e){/* kivinjari hiki hakiruhusu kunakili picha — endelea kwenye njia nyingine */}
+  // 1) Phone: the native share sheet — the form goes straight into WhatsApp.
+  const shareInawezekana=!!(navigator.canShare&&navigator.share&&navigator.canShare({files:[file]}));
+  if(simu&&shareInawezekana){
+    try{await navigator.share({files:[file],title:filename});_fomuTayari=null;return;}
+    catch(e){
+      if(e.name==='AbortError'){_fomuTayari={blob,filename:filename0,at:Date.now()};return;}      // the person closed the sheet
+      if(!tayariSasa){      // the phone wants a fresh tap: keep the picture and ask for one more tap
+        _fomuTayari={blob,filename:filename0,at:Date.now()};
+        toast('✅ Fomu iko tayari — bonyeza "Shiriki (WhatsApp)" mara moja zaidi ili kuituma.');return;
+      }
     }
-
-    // Next best: native share sheet (lets the person pick WhatsApp themselves).
-    if(navigator.canShare&&navigator.canShare({files:[file]})){
-      try{await navigator.share({files:[file],title:filename});return;}
-      catch(e){if(e.name==='AbortError')return;/* fall through to download */}
-    }
-
-    // Last resort: download the file and open WhatsApp, person attaches manually.
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');a.href=url;a.download=filename+'.png';
-    document.body.appendChild(a);a.click();document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    openWaChat();
-    toast('📥 Kivinjari hiki hakiwezi kunakili/kutuma moja kwa moja — fomu imepakuliwa, sasa iambatanishe kwenye WhatsApp.');
-  },'image/png');
+  }
+  // 2) Computer (or a phone without a share sheet): copy the picture, open WhatsApp, paste.
+  if(!simu&&navigator.clipboard&&window.ClipboardItem){
+    try{
+      await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
+      openWaChat();
+      toast(waPhone?'✅ Fomu imenakiliwa na WhatsApp imefunguliwa — bandika (Ctrl+V) kwenye ujumbe kisha "Tuma".':'✅ Fomu imenakiliwa — fungua mazungumzo unayotaka na ubandike (Ctrl+V) kisha "Tuma".');
+      return;
+    }catch(e){/* this browser does not allow copying a picture — carry on */}
+  }
+  // 3) Last resort: save the picture and open WhatsApp, the person attaches it (paperclip → Gallery/Files).
+  pakua(blob,filename);
+  const wazi=openWaChat();
+  toast(wazi?'📥 Fomu imepakuliwa — kwenye WhatsApp bonyeza kiambatisho (📎) kisha ichague kutoka Picha/Faili.'
+            :'📥 Fomu imepakuliwa kwenye simu — fungua WhatsApp mwenyewe, bonyeza 📎 kisha uchague fomu hiyo.');
 }
 $('tfClose') && $('tfClose').addEventListener('click',()=>closeSheet('tfOverlay'));
 $('rfClose') && $('rfClose').addEventListener('click',()=>closeSheet('rfOverlay'));
