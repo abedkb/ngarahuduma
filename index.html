@@ -233,6 +233,14 @@ footer b{color:var(--rg);font-weight:600;}
 .s-login-title{font-family:'Big Shoulders Display',sans-serif;font-size:22px;color:var(--rg);margin-bottom:6px;font-weight:800;}
 .s-login-sub{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink3);margin-bottom:28px;}
 .s-login-err{font-size:11px;color:#FF8A8A;margin-bottom:12px;min-height:16px;}
+.s-login-who{font-family:'Big Shoulders Display',sans-serif;font-size:20px;font-weight:800;color:var(--ink);margin:-14px 0 16px;}
+.s-login-alt{font-size:11.5px;color:var(--ink3);margin:16px 0 0;line-height:1.9;}
+.s-login-alt a{color:var(--rg);cursor:pointer;text-decoration:none;margin:0 6px;white-space:nowrap;}
+.s-login-alt a:hover{text-decoration:underline;}
+.s-login-card{position:relative;}
+.s-login-siri{position:absolute;right:10px;bottom:10px;width:26px;height:26px;padding:0;margin:0;border:0;border-radius:50%;background:transparent;cursor:pointer;opacity:.18;}
+.s-login-siri::after{content:'';position:absolute;left:10px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--ink3);}
+.s-login-siri:hover{opacity:.55;}
 .s-login-card input,.s-login-card select{width:100%;background:rgba(255,255,255,0.06);border:1px solid var(--line);color:var(--ink);padding:11px 14px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;outline:none;border-radius:10px;margin-bottom:12px;text-align:center;}
 .s-login-card input:focus{border-color:var(--rg);}
 /* Full-page login (no storefront behind it) */
@@ -895,11 +903,14 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 <div class="s-login-overlay" id="loginOverlay">
   <form class="s-login-card" onsubmit="event.preventDefault();doLogin();" autocomplete="on">
     <p class="s-login-title">Ngara Huduma</p>
-    <p class="s-login-sub">Ingia kwenye mfumo</p>
+    <p class="s-login-sub" id="loginSub">Ingia kwenye mfumo</p>
+    <p class="s-login-who" id="loginWho" style="display:none;"></p>
     <p class="s-login-err" id="loginErr"></p>
     <input type="email" id="loginEmail" name="username" autocomplete="username" placeholder="Barua pepe" required/>
     <input type="password" id="pwInput" name="password" autocomplete="current-password" placeholder="Weka password" required/>
     <button type="submit" class="btn-rg" id="loginBtn" style="width:100%">Ingia</button>
+    <p class="s-login-alt" id="loginAlt"></p>
+    <button type="button" class="s-login-siri" id="loginSiri" onclick="onyeshaMilango()" aria-label="." title=""></button>
   </form>
 </div>
 
@@ -3659,7 +3670,28 @@ function initObserver(){
 // AUTH — two role types: gm (General Manager, sees all 3 branches),
 // deski (Front Desk Officer, locked to their own branch)
 // ════════════════════════════════════════════════════════════════
-function openLogin(){hideSplash();$('loginOverlay').classList.add('open');$('loginEmail').value='';$('pwInput').value='';$('loginErr').textContent='';const btn=$('loginBtn');btn.disabled=false;btn.style.opacity='1';setTimeout(()=>$('loginEmail').focus(),100);}
+// Two special doors: the General Manager and the Director each get a login where their user name is already filled in
+// (they type only their password). Open it with  ngarahuduma.com/#meneja  or  ngarahuduma.com/#director ,
+// or with the links under the normal login. The password rules are the account's own — nothing is weakened.
+const MLANGO_MAALUM={meneja:{email:'assa@ngarahuduma.com',jina:'Meneja Mkuu',role:'gm'},director:{email:'director@ngarahuduma.com',jina:'Director',role:'director'}};
+let mlangoWaSasa=null;
+function mlangoKutokaUrl(){const h=(location.hash||'').replace('#','').toLowerCase(),q=new URLSearchParams(location.search).get('ingia');const v=(q||h||'').toLowerCase();return MLANGO_MAALUM[v]?v:null;}
+function wekaMlango(m){
+  mlangoWaSasa=m||null;
+  const e=$('loginEmail'),w=$('loginWho'),alt=$('loginAlt'),sub=$('loginSub');
+  if(m){const d=MLANGO_MAALUM[m];e.value=d.email;e.style.display='none';w.textContent=d.jina;w.style.display='block';sub.textContent='Weka password yako';
+    alt.innerHTML='<a onclick="wekaMlango(null)">Ingia kwa akaunti nyingine</a>';
+  }else{e.value='';e.style.display='';w.style.display='none';sub.textContent='Ingia kwenye mfumo';
+    alt.innerHTML='';}
+  $('pwInput').value='';$('loginErr').textContent='';
+  setTimeout(()=>(m?$('pwInput'):e).focus(),100);
+}
+// The little dot in the corner of the login card is the only way to the two special logins (nothing else on screen mentions them).
+function onyeshaMilango(){
+  const alt=$('loginAlt');if(mlangoWaSasa)return;
+  alt.innerHTML=alt.innerHTML?'':'<a onclick="wekaMlango(\'meneja\')">Meneja Mkuu</a>·<a onclick="wekaMlango(\'director\')">Director</a>';
+}
+function openLogin(){hideSplash();$('loginOverlay').classList.add('open');$('pwInput').value='';$('loginErr').textContent='';const btn=$('loginBtn');btn.disabled=false;btn.style.opacity='1';wekaMlango(mlangoKutokaUrl());}
 function closeLogin(){$('loginOverlay').classList.remove('open');}
 // The login/profile service timing out (HTTP 502/503/504) is NOT a wrong password or a broken account.
 const sevaHaikujibu=(e)=>!!e&&((e.status>=500)||/(^|\D)5\d\d(\D|$)/.test(String(e.message||''))||e.name==='AuthRetryableFetchError');
@@ -3667,9 +3699,9 @@ const ujumbeSeva=(e)=>{const k=((String((e&&e.message)||'').match(/(^|\D)(5\d\d)
   return `Seva ya akaunti haikujibu kwa wakati${k?` (HTTP ${k})`:''}. Hii ni hitilafu ya muda — subiri sekunde chache kisha ujaribu tena. Ikiendelea, mjulishe msimamizi wa mfumo.`;};
 const subiriMs=(ms)=>new Promise(r=>setTimeout(r,ms));
 async function doLogin(){
-  const email=$('loginEmail').value.trim();
+  const email=(mlangoWaSasa?MLANGO_MAALUM[mlangoWaSasa].email:$('loginEmail').value.trim());
   const pw=$('pwInput').value;
-  if(!email||!pw){$('loginErr').textContent='Weka barua pepe na password.';return;}
+  if(!email||!pw){$('loginErr').textContent=mlangoWaSasa?'Weka password.':'Weka barua pepe na password.';return;}
   if(!navigator.onLine){
     $('loginErr').textContent='Huwezi kuingia ukiwa hauna mtandao. Tafadhali unganisha mtandao kisha jaribu tena.';
     return;
@@ -3718,6 +3750,7 @@ async function doLogin(){
   const hitilafu=!ROLE_PAGES[profile.role]?`Jukumu la akaunti hii ("${profile.role}") halitambuliki na mfumo. Wasiliana na msimamizi.`
     :(['deski','petroli','petroli_mauzo'].includes(profile.role)&&!profile.tawi)?'Akaunti hii haijapewa tawi. Wasiliana na msimamizi.':'';
   if(hitilafu){_prefetch=null;busy(false);$('loginErr').textContent=hitilafu;await sbClient.auth.signOut();return;}
+  if(mlangoWaSasa&&profile.role!==MLANGO_MAALUM[mlangoWaSasa].role){_prefetch=null;busy(false);$('loginErr').textContent='Akaunti hii si ya '+MLANGO_MAALUM[mlangoWaSasa].jina+'. Wasiliana na msimamizi.';await sbClient.auth.signOut();return;}
   try{localStorage.setItem('nh_cached_profile',JSON.stringify({role:profile.role,tawi:profile.tawi||null,jina:profile.jina||''}));}catch(e){}
   console.info(`[login] sign-in ${Math.round(tAuth-t0)}ms · profile ${Math.round(performance.now()-tAuth)}ms`);
   closeLogin();
@@ -4051,17 +4084,17 @@ function loadAll(){
   return _startLoad();
 }
 // The 8-second background refresh: simply skip a tick if the last one hasn't finished.
-const POLL_MS=30000;     // how often an open, visible, in-use screen quietly refreshes itself
-const IDLE_MS=120000;    // a screen nobody has touched for 2 minutes stops refreshing until someone does
+const POLL_MS=75000;     // how often an open, visible, in-use screen quietly refreshes itself
+const IDLE_MS=90000;     // a screen nobody has touched for 2 minutes stops refreshing until someone does
 let _pollTick=0,_lastActivity=Date.now();
 function loadAllPoll(){
   if(document.hidden||_loadRunning||_loadPending)return;
   if(Date.now()-_lastActivity>IDLE_MS)return;            // nobody is looking: don't ask the server for nobody
   _pollTick++;
-  _startLoad(_pollTick%3!==0,false);                      // 2 routine refreshes, then 1 full one (so a General Manager correction reaches everyone within ~1.5 min) — and nothing is redrawn if nothing changed
+  _startLoad(_pollTick%4!==0,false);                      // 2 routine refreshes, then 1 full one (so a General Manager correction reaches everyone within ~1.5 min) — and nothing is redrawn if nothing changed
 }
 // Someone touches an idle or just-returned-to screen: catch up straight away (at most once every 20 seconds).
-function _kamaTena(){if(isAdmin&&!document.hidden&&Date.now()-_lastFullLoad>20000)loadAll();}
+function _kamaTena(){if(isAdmin&&!document.hidden&&Date.now()-_lastFullLoad>45000)loadAll();}
 let _kidole=0;
 ['pointerdown','keydown','touchstart','mousemove'].forEach(ev=>document.addEventListener(ev,()=>{
   const sasa=Date.now();if(sasa-_kidole<1000)return;_kidole=sasa;
@@ -7595,11 +7628,23 @@ async function hifadhiInvoiceSerikali(){
 // ── Madeni ya Serikali: orders the branches have answered, waiting for the official-price invoice ──
 // ONE customer (same name, same project, same day) = ONE invoice, whichever branches the goods came from and however many
 // times the order was sent. Sends that are not invoiced yet are joined into a single group; an already invoiced send stays on its own.
+// A project name compared without the usual spelling differences: P/SCHOOL = PRIMARY = PRIMARY SCHOOL, SEC = SECONDARY, H/CENTER = HEALTH CENTRE …
+const skMradiKey=(m)=>{
+  let t=jinaKey(m).replace(/[.,;:]/g,' ').replace(/\s*-\s*/g,' - ');
+  t=t.replace(/\bP\s*\/\s*SCHOOL\b/g,'PRIMARY SCHOOL').replace(/\bP\s*\/\s*S\b/g,'PRIMARY SCHOOL').replace(/\bPRIMARY\b(?!\s+SCHOOL)/g,'PRIMARY SCHOOL')
+   .replace(/\bSECONDARY\b(?!\s+SCHOOL)/g,'SECONDARY SCHOOL').replace(/\bSEC\b/g,'SECONDARY SCHOOL')
+   .replace(/\bH\s*\/\s*CENT(?:ER|RE)\b/g,'HEALTH CENTRE').replace(/\bHEALTH\s+CENT(?:ER|RE)\b/g,'HEALTH CENTRE')
+   .replace(/\bQUOTATION\b|\bQUATATION\b/g,'QUOTATION');
+  return t.replace(/\s+/g,' ').trim();
+};
 const skMakundi=(kigezo)=>{const by={};allMaombiStock.filter(m=>m.aina_chanzo==='Bidhaa').forEach(m=>{(by[m.kundi_id]=by[m.kundi_id]||[]).push(m);});
   const vikundi={};
   Object.entries(by).forEach(([id,lines])=>{
     const imetolewa=lines.some(l=>l.hali==='Imethibitishwa'&&l.invoice_no),h=lines[0];
-    const funguo=imetolewa?'#'+id:[jinaKey(h.mteja),jinaKey(h.mradi||''),String(h.tarehe||h.created_at||'').slice(0,10)].join('|');
+    const mk=skMradiKey(h.mradi);
+    // ONE project on ONE day = ONE invoice, whichever branches the goods came from and however the project was spelled.
+    // The same project on another day is another invoice (same rule as the petrol-station Orders).
+    const funguo=imetolewa?'#'+id:[jinaKey(h.mteja),mk,String(h.tarehe||h.created_at||'').slice(0,10)].join('|');
     const g=vikundi[funguo]||(vikundi[funguo]={ids:[],lines:[]});
     g.ids.push(id);g.lines.push(...lines);
   });
@@ -7675,11 +7720,12 @@ function skiJazaMistari(){
   // other answered sends of the SAME customer that can join this invoice
   const box=$('ski-unganisha');
   if(box){
-    const wengine=hasOrder?skMakundi(skTayari).filter(g=>g.id!==skiKundi&&jinaKey(g.lines[0].mteja)===jinaKey(h.mteja)):[];
+    const siku0=String(h.tarehe||h.created_at||'').slice(0,10);
+    const wengine=hasOrder?skMakundi(skTayari).filter(g=>g.id!==skiKundi&&jinaKey(g.lines[0].mteja)===jinaKey(h.mteja)&&String(g.lines[0].tarehe||g.lines[0].created_at||'').slice(0,10)===siku0):[];
     box.style.display=wengine.length?'block':'none';
-    box.innerHTML=wengine.length?`<div style="font-weight:600;margin-bottom:6px;">Order nyingine za ${escH(h.mteja)} zilizo tayari — ziunganishe kwenye invoice hii ikiwa ni invoice moja:</div>`+wengine.map(g=>{
+    box.innerHTML=wengine.length?`<div style="font-weight:600;margin-bottom:8px;">Order nyingine za ${escH(h.mteja)} za tarehe hiyo hiyo (${escH(siku0)}) — ziunganishe kwenye invoice hii kama ni mradi huohuo ulioandikwa tofauti:</div>`+wengine.map(g=>{
       const ok=g.lines.filter(l=>l.hali==='Imethibitishwa'),tw=[...new Set(ok.map(l=>BRANCHES[l.tawi]||l.tawi))].join(', ');
-      return `<label style="display:flex;gap:8px;align-items:flex-start;margin:4px 0;cursor:pointer;"><input type="checkbox" ${skiEkstra.includes(g.id)?'checked':''} onchange="skiTogglaEkstra('${g.id}')" style="margin-top:3px;"/><span>${escH(ok[0].mradi||'—')} · ${escH(String(ok[0].tarehe||'').slice(0,10))} · ${escH(tw)} <span style="color:var(--a-muted);">(bidhaa ${ok.length})</span></span></label>`;
+      return `<label style="display:flex;flex-direction:row;gap:10px;align-items:flex-start;justify-content:flex-start;text-align:left;margin:6px 0;cursor:pointer;width:100%;"><input type="checkbox" ${skiEkstra.includes(g.id)?'checked':''} onchange="skiTogglaEkstra('${g.id}')" style="flex:0 0 auto;width:18px;height:18px;min-width:18px;margin:2px 0 0;padding:0;"/><span style="flex:1;text-align:left;">${escH(ok[0].mradi||'—')} · ${escH(String(ok[0].tarehe||'').slice(0,10))} · ${escH(tw)} <span style="color:var(--a-muted);">(bidhaa ${ok.length})</span></span></label>`;
     }).join(''):'';
   }
   return hasOrder;
@@ -10817,7 +10863,7 @@ const niMauzoYaMadeni=(s)=>s.aina==='Mkopo'&&s.chanzo!=='Serikali';             
 function tarehePangoFomu(iso){const [y,m,d]=String(iso).split('-');return `${d} / ${m} / ${y}`;}
 function htmlYaDailySales(d){
   const MIN_MAUZO=20,MIN_PUNGUZO=5;
-  const mauzoRows=d.pesa.map((s,i)=>`<tr><td class="sn">${i+1}</td><td>${escH(s.jina)}${s.njia_ya_malipo==='Bank'&&s.benki?` <span style="font-size:10px;color:#555;">(${escH(s.benki)})</span>`:''}</td><td class="ds-mid">${escH(s.kipimo||'pc')}</td><td class="ds-mid">${s.idadi}</td><td class="num">${fmt0(Number(s.bei_kuuzia)||0)}</td><td class="num">${fmt0(Number(s.jumla)||0)}</td></tr>`);
+  const mauzoRows=d.pesa.map((s,i)=>`<tr><td class="sn">${i+1}</td><td>${escH(s.jina)}${s.njia_ya_malipo==='Bank'&&s.benki?` <span style="font-size:10px;color:#555;">(${escH(s.benki)})</span>`:''}</td><td class="ds-mid">${escH(s.kipimo||'pc')}</td><td class="ds-mid">${s.idadi}</td><td class="num">${fmt0(Number(s.bei_kuuzia)||0)}</td><td class="num">${fmt0((Number(s.jumla)||0)+(Number(s.punguzo)||0))}</td></tr>`);   // the amount BEFORE any discount
   for(let i=d.pesa.length;i<MIN_MAUZO;i++)mauzoRows.push(`<tr><td class="sn">${i+1}</td><td></td><td></td><td></td><td></td><td></td></tr>`);
   const punguzoRows=d.punguzo.map((s,i)=>`<tr><td class="sn">${i+1}</td><td>${escH(s.mteja||'—')}</td><td colspan="3">${escH(s.jina)} × ${s.idadi}</td><td class="num">${fmt0(Number(s.punguzo)||0)}</td></tr>`);
   for(let i=d.punguzo.length;i<MIN_PUNGUZO;i++)punguzoRows.push(`<tr><td class="sn">${i+1}</td><td></td><td colspan="3"></td><td></td></tr>`);
@@ -10835,7 +10881,7 @@ function htmlYaDailySales(d){
     <tr><td colspan="4" class="ds-jumla" style="text-align:center;">DISCOUNTED PRODUCTS</td><td></td></tr>
     <tr><th style="height:9mm;">S/N</th><th>NAME OF CUSTOMER</th><th colspan="3">PRODUCT PURCHASED</th><th>AMOUNT DISCOUNTED</th></tr>
     ${punguzoRows.join('')}
-    <tr><td></td><td class="ds-jumla">TOTAL AMOUNT</td><td colspan="3"></td><td class="num ds-jumla">${T(d.jumlaPunguzo)}</td></tr>
+    <tr><td></td><td class="ds-jumla">TOTAL DISCOUNT</td><td colspan="3"></td><td class="num ds-jumla">${T(d.jumlaPunguzo)}</td></tr>
     <tr><td></td><td colspan="3" class="ds-jumla-kubwa">TOTAL DAILY SALES</td><td colspan="2" class="num ds-jumla-kubwa">${T(d.jumlaYote)}</td></tr>
   </tbody></table>
 `;
@@ -10848,9 +10894,9 @@ function generateDailySalesForm(){
   if(!keeper){arifu('notifyDaily','❌ Weka jina la store keeper.','error');return;}
   const siku=confirmedMauzo().filter(s=>s.tawi===tawi&&s.tarehe===tarehe&&!s._pending).sort((a,b)=>String(a.created_at||'').localeCompare(String(b.created_at||'')));
   const pesa_=siku.filter(s=>!niMauzoYaOrder(s)&&!niMauzoYaMadeni(s)),oda=siku.filter(niMauzoYaOrder),madeni=siku.filter(niMauzoYaMadeni),punguzo=siku.filter(s=>(Number(s.punguzo)||0)>0);
-  const jm=(a)=>a.reduce((x,s)=>x+(Number(s.jumla)||0),0);
+  const jm=(a)=>a.reduce((x,s)=>x+(Number(s.jumla)||0)+(Number(s.punguzo)||0),0);      // every total is BEFORE discount; the discount is taken off once, at the end
   const d={tarehe,tawiJina:BRANCHES[tawi]||tawi,keeper,pesa:pesa_,punguzo,jumlaPesa:jm(pesa_),jumlaOda:jm(oda),jumlaMadeni:jm(madeni),jumlaPunguzo:punguzo.reduce((x,s)=>x+(Number(s.punguzo)||0),0)};
-  d.jumlaYote=d.jumlaPesa+d.jumlaOda+d.jumlaMadeni;
+  d.jumlaYote=d.jumlaPesa+d.jumlaOda+d.jumlaMadeni-d.jumlaPunguzo;      // TOTAL DAILY SALES = total before discount − total discount
   $('dsBody').innerHTML=htmlYaDailySales(d);
   $('dsOverlay').dataset.jina='daily-sales-report-form-'+tarehe+'-'+tawi;
   setWaPhone('dsOverlay',ADMIN_PHONE);
