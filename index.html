@@ -950,7 +950,8 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
     <button class="a-tab-btn" data-page="pokea"><span class="t-icon">📥</span><span class="t-label">Received</span><span class="t-pill" id="pokeaTopPill" style="display:none">0</span></button>
     <button class="a-tab-btn" data-page="serikali"><span class="t-icon">🏛</span><span class="t-label">Order za Serikali</span></button>
     <button class="a-tab-btn" data-page="serikali-mafuta"><span class="t-icon">🏛</span><span class="t-label">Order za Serikali (Mafuta)</span></button>
-    <button class="a-tab-btn" data-page="serikali-wateja"><span class="t-icon">💳</span><span class="t-label">Wateja wa Order (Serikali/Kampuni)</span></button>
+    <button class="a-tab-btn" data-page="serikali-wateja"><span class="t-icon">💳</span><span class="t-label">Wateja wa Order (Hardware)</span></button>
+    <button class="a-tab-btn" data-page="serikali-wateja-mafuta"><span class="t-icon">⛽</span><span class="t-label">Wateja wa Order (Mafuta)</span></button>
     <button class="a-tab-btn" data-page="ripoti-order"><span class="t-icon">📊</span><span class="t-label">Ripoti ya Order (Mwezi)</span></button>
     <button class="a-tab-btn" data-page="marekebisho"><span class="t-icon">✏️</span><span class="t-label">Marekebisho</span><span class="t-pill" id="marekTopPill" style="display:none">0</span></button>
     <button class="a-tab-btn" data-page="mapato"><span class="t-icon">💰</span><span class="t-label">Mapato</span></button>
@@ -1008,7 +1009,8 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       <button class="nav-btn" data-page="pokea"><span class="icon">📥</span>Received<span class="count-pill" id="pokeaPill" style="display:none;">0</span></button>
       <button class="nav-btn" data-page="serikali"><span class="icon">🏛</span>Order za Serikali</button>
       <button class="nav-btn" data-page="serikali-mafuta"><span class="icon">🏛</span>Order za Serikali (Mafuta)</button>
-      <button class="nav-btn" data-page="serikali-wateja"><span class="icon">💳</span>Wateja wa Order (Serikali/Kampuni)</button>
+      <button class="nav-btn" data-page="serikali-wateja"><span class="icon">💳</span>Wateja wa Order (Hardware)</button>
+      <button class="nav-btn" data-page="serikali-wateja-mafuta"><span class="icon">⛽</span>Wateja wa Order (Mafuta)</button>
       <button class="nav-btn" data-page="ripoti-order"><span class="icon">📊</span>Ripoti ya Order (Mwezi)</button>
       <button class="nav-btn" data-page="marekebisho"><span class="icon">✏️</span>Marekebisho<span class="count-pill" id="marekPill" style="display:none;">0</span></button>
       <button class="nav-btn" data-page="mapato"><span class="icon">💰</span>Mapato</button>
@@ -1051,9 +1053,12 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       <div class="topbar"><div class="topbar-left"><h2>Dashboard</h2><p>Muhtasari wa biashara ya Ngara Huduma</p><p id="dashKaribu" style="display:none;font-weight:600;color:var(--a-rg);margin-top:4px;"></p></div></div>
       <div id="dashHardwareView">
       <div class="controls" style="margin-bottom:12px;">
-        <label style="font-size:11px;color:var(--a-muted);text-transform:uppercase;align-self:center;">Taarifa ya Tarehe:</label>
+        <label style="font-size:11px;color:var(--a-muted);text-transform:uppercase;align-self:center;">Taarifa ya Tarehe (Kuanzia):</label>
         <input type="date" id="dash-tarehe" onchange="renderDashibodi()"/>
-        <button class="btn sm secondary" onclick="$('dash-tarehe').value=tareheYaLeo();renderDashibodi();">Leo</button>
+        <label style="font-size:11px;color:var(--a-muted);text-transform:uppercase;align-self:center;">Hadi:</label>
+        <input type="date" id="dash-hadi" onchange="renderDashibodi()"/>
+        <button class="btn sm secondary" onclick="$('dash-tarehe').value=tareheYaLeo();$('dash-hadi').value='';renderDashibodi();">Leo</button>
+        <span id="dashKipindi" style="font-size:12px;color:var(--a-muted);align-self:center;"></span>
       </div>
       <div class="section" id="dashMkSection" style="display:none;">
         <div class="section-header"><h3>📅 Muhtasari wa Siku — Kila Afisa wa Mauzo</h3><span id="dashMkTarehe" style="font-size:12px;color:var(--a-muted);"></span></div>
@@ -1742,6 +1747,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       </div>
       <div class="section"><div class="section-header"><h3>💳 Wateja Wenye Madeni</h3>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <select id="md-tawi" onchange="madeniOnyeshaZote=false;renderWateja()" style="width:auto;display:none;"></select>
           <input type="search" id="md-tafuta" placeholder="🔍 Tafuta jina, simu au kitu..." oninput="renderWateja()" style="width:220px"/>
           <select id="md-hali" onchange="renderWateja()" style="width:auto"><option value="">Wote</option><option value="SALIO">Wanaodaiwa (wenye salio)</option><option value="NOT PAID">NOT PAID</option><option value="PARTIAL">PARTIAL</option><option value="PAID">PAID</option></select>
         </div></div>
@@ -2524,7 +2530,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
     </section>
 
     <section id="serikali-wateja" class="page">
-      <div class="topbar"><div class="topbar-left"><h2>Wateja wa Order — Serikali / Kampuni</h2></div></div>
+      <div class="topbar"><div class="topbar-left"><h2>Wateja wa Order — Hardware (Serikali / Kampuni)</h2></div></div>
       <div class="section">
         <div class="section-header"><h3>💳 Orodha ya Wateja wa Order <span id="sk-w-idadi" style="font-size:12px;font-weight:500;color:var(--a-muted);"></span></h3><input type="search" id="sk-w-tafuta" placeholder="🔍 Tafuta mteja, simu, invoice au bidhaa..." oninput="renderWatejaSerikali()" style="width:260px"/></div>
         <div class="section-body">
@@ -2547,6 +2553,34 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
         <div class="section-body" style="padding:0;"><div class="table-wrap"><table>
           <thead><tr><th>Tarehe</th><th>Kiasi</th><th>Baki Baada</th><th>Maelezo</th><th>Imepokelewa na</th></tr></thead>
           <tbody id="tbody-malipo-history-sk"></tbody>
+        </table></div></div>
+      </div>
+    </section>
+
+    <section id="serikali-wateja-mafuta" class="page">
+      <div class="topbar"><div class="topbar-left"><h2>Wateja wa Order — Mafuta (Serikali / Kampuni)</h2></div></div>
+      <div class="section">
+        <div class="section-header"><h3>💳 Orodha ya Wateja wa Order <span id="sk-w-idadi-mf" style="font-size:12px;font-weight:500;color:var(--a-muted);"></span></h3><input type="search" id="sk-w-tafuta-mf" placeholder="🔍 Tafuta mteja, simu, invoice au bidhaa..." oninput="renderWatejaSerikali()" style="width:260px"/></div>
+        <div class="section-body">
+          <div class="summary-row" style="display:flex;gap:28px;flex-wrap:wrap;margin-bottom:14px;">
+            <div><span style="font-size:11px;color:var(--a-muted);text-transform:uppercase;">Jumla ya Order</span><br><strong id="sk-w-jumla-mf" style="font-size:18px;">TZS 0</strong></div>
+            <div><span style="font-size:11px;color:var(--a-muted);text-transform:uppercase;">Kimelipwa</span><br><strong id="sk-w-kimelipwa-mf" style="font-size:18px;color:var(--a-green,#4ade80);">TZS 0</strong></div>
+            <div><span style="font-size:11px;color:var(--a-muted);text-transform:uppercase;">Bakaa</span><br><strong id="sk-w-bakaa-mf" style="font-size:18px;color:var(--a-red,#f87171);">TZS 0</strong></div>
+          </div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Mteja (Kitabu)</th><th>Simu</th><th>Order Lote</th><th>Kimelipwa</th><th>Bakaa</th><th>Mwisho wa Malipo</th><th>Hali</th><th>Kitendo</th></tr></thead>
+            <tbody id="tbody-wateja-serikali-mf"></tbody>
+          </table></div>
+        </div>
+      </div>
+          <div class="section" id="malipo-history-section-sk-mf" style="display:none;">
+        <div class="section-header">
+          <h3>📋 Historia ya Malipo — <span id="malipo-history-jina-sk-mf">—</span></h3>
+          <button class="btn sm secondary" onclick="document.getElementById('malipo-history-section-sk-mf').style.display='none'">Funga ✕</button>
+        </div>
+        <div class="section-body" style="padding:0;"><div class="table-wrap"><table>
+          <thead><tr><th>Tarehe</th><th>Kiasi</th><th>Baki Baada</th><th>Maelezo</th><th>Imepokelewa na</th></tr></thead>
+          <tbody id="tbody-malipo-history-sk-mf"></tbody>
         </table></div></div>
       </div>
     </section>
@@ -3984,14 +4018,14 @@ function enterAdmin(role='gm',tawi=null,jina=''){
 }
 // Pages each role may access. GM sees everything across all branches.
 const ROLE_PAGES={
-  gm:['dashibodi','mauzo','mapato','gharama','hifadhi','ununuzi','wateja','wanunuzi','kila-siku','makusanyo','ripoti','fomu','takataka','serikali','serikali-mafuta','serikali-wateja','ripoti-order','ripoti-makusanyo','marekebisho','mafuta','fomu-mafuta','mdaiwa-mpya','ripoti-madeni'],
+  gm:['dashibodi','mauzo','mapato','gharama','hifadhi','ununuzi','wateja','wanunuzi','kila-siku','makusanyo','ripoti','fomu','takataka','serikali','serikali-mafuta','serikali-wateja','serikali-wateja-mafuta','ripoti-order','ripoti-makusanyo','marekebisho','mafuta','fomu-mafuta','mdaiwa-mpya','ripoti-madeni'],
   deski:['dashibodi','maagizo','mauzo','uhamisho','pokea','hifadhi','ununuzi','wateja','fomu','marekebisho'],
   matumizi:['mauzo','hifadhi','ununuzi','uhamisho','pokea','wateja','fomu','marekebisho','mapato','gharama'],   // works as a branch sales officer (for the branch on her profile) AND keeps the cash book
   madeni:['wateja','mdaiwa-mpya','ripoti-madeni'],      // Abdul: the debts + his collection report
   cashier:['dashibodi','makusanyo','ripoti-makusanyo'],   // Makusanyo: the one place the Cashier can ENTER data (daily collections)
   serikali:['serikali','serikali-wateja'],        // Madeni ya Serikali (Rehema): prepares invoices + owns the debts (corrects her invoices directly — no Marekebisho tab, no Ripoti ya Order)
   serikali_mauzo:['serikali','ripoti-order'],                                  // Mauzo ya Serikali (Felister, Anania): sends orders to the branches
-  serikali_mafuta:['serikali-mafuta','serikali-wateja','marekebisho'],
+  serikali_mafuta:['serikali-mafuta','serikali-wateja-mafuta','marekebisho'],
   petroli:['mafuta','oda-mafuta','fomu-mafuta'],       // the station managers record the credit orders
   petroli_mauzo:['mafuta']
 };ROLE_PAGES.director=ROLE_PAGES.gm;          // the Director has the General Manager's tabs — and sees the private branch too (see enterAdmin)
@@ -6477,8 +6511,10 @@ function renderDashibodi(){
   // still owed) stays a running balance regardless of date, since "today's new
   // debt" would be a far less useful number than what's actually still owed.
   if(!$('dash-tarehe').value)$('dash-tarehe').value=tareheYaLeo();
-  const dashDate=$('dash-tarehe').value;
-  const t=hesabu(dashDate,dashDate);
+  let dashDate=$('dash-tarehe').value,dashHadi=($('dash-hadi')||{}).value||dashDate;
+  if(dashHadi<dashDate){const z=dashDate;dashDate=dashHadi;dashHadi=z;}      // dates typed the wrong way round still work
+  const t=hesabu(dashDate,dashHadi);
+  { const kp=$('dashKipindi');if(kp)kp.textContent=dashHadi>dashDate?`Jumla za kipindi: ${dashDate} hadi ${dashHadi}`:''; }
   renderKadiYaStock();
   // Purchases count ONLY on the day they are dated (a purchase is never also counted on the day it was typed in).
   const manunuziKadi=t.jumla_manunuzi;
@@ -7277,12 +7313,29 @@ async function pakiaMuktadhaYaMadeni(){
   finally{_madeniCtx.sig=sig;_madeniCtx.inaleta=false;}      // always settle, so a failed request can never loop
   renderWateja();
 }
+// MADENI: nothing is listed until a branch is picked (or "Matawi yote"); a branch-bound officer sees his own branch at once.
+function madeniTawiLililochaguliwa(){
+  if(ninaTawiLaKazi())return viewingTawi;
+  const v=($('md-tawi')||{}).value||'';
+  if(v)return v;
+  return viewingTawi!=='yote'?viewingTawi:'';
+}
+function jazaChaguoZaMadeni(){
+  const sel=$('md-tawi');if(!sel)return;
+  if(ninaTawiLaKazi()){sel.style.display='none';return;}
+  sel.style.display='';
+  const sasa=sel.value,tawi=[...new Set(watejaKawaida().map(w=>w.tawi).filter(Boolean))].sort((a,b)=>(BRANCHES[a]||a).localeCompare(BRANCHES[b]||b));
+  const html='<option value="">— Chagua tawi —</option><option value="yote">Matawi yote</option>'+tawi.map(t=>`<option value="${escH(t)}">${escH(BRANCHES[t]||t)}</option>`).join('');
+  if(sel.dataset.sig!==html){sel.innerHTML=html;sel.dataset.sig=html;sel.value=sasa;}
+}
 function renderWateja(){
-  renderKadiZaMadeni();try{renderMdaiwaMpya();}catch(_e){}
+  renderKadiZaMadeni();jazaChaguoZaMadeni();try{renderMdaiwaMpya();}catch(_e){}
   if(allWateja.length&&_madeniCtx.sig!==sahihiYaMadeni()&&!_madeniCtx.inaleta&&['madeni','gm','deski','matumizi'].includes(userRole))pakiaMuktadhaYaMadeni();
   const mwisho=new Map();_madeniCtx.malipo.forEach(m=>{const t=mwisho.get(m.mteja_id);if(!t||m.tarehe>t)mwisho.set(m.mteja_id,m.tarehe);});
   const hali=$('md-hali')?$('md-hali').value:'',q=($('md-tafuta')?$('md-tafuta').value:'').trim().toLowerCase();
-  let safu=safuZaMaster(filterByTawi(watejaKawaida()),userRole==='madeni'?_madeniCtx.vitu:vituVyaMkopoKutokaMauzo(),mwisho);
+  const tawiMd=madeniTawiLililochaguliwa();
+  const orodhaMadeni=!tawiMd?[]:watejaKawaida().filter(w=>tawiMd==='yote'||w.tawi===tawiMd);
+  let safu=safuZaMaster(orodhaMadeni,userRole==='madeni'?_madeniCtx.vitu:vituVyaMkopoKutokaMauzo(),mwisho);
   if(hali==='SALIO')safu=safu.filter(m=>m.salio>0);else if(hali)safu=safu.filter(m=>m.hali===hali);
   if(q)safu=safu.filter(m=>(m.jina+' '+m.simu+' '+m.vitu+' '+String(m.stooZaVitu||'').replace(/<[^>]*>/g,' ')).toLowerCase().includes(q));
   safu.sort((a,b)=>String(b.tarehe).localeCompare(String(a.tarehe))||a.jina.localeCompare(b.jina));
@@ -7292,7 +7345,7 @@ function renderWateja(){
     const bs=(m.orodhaYaBidhaa&&m.orodhaYaBidhaa.length)?m.orodhaYaBidhaa:[null],rs=bs.length>1?` rowspan="${bs.length}"`:'';
     const sehemuB=(b)=>b?`<td style="font-size:12px;">${escH(b.jina)}</td><td class="num" style="white-space:nowrap;">${b.idadi} ${escH(b.kipimo)}</td><td class="num">${b.bei!=null?pesa(b.bei):'—'}</td><td class="num"><strong>${b.jumla!=null?pesa(b.jumla):'—'}</strong></td><td style="font-size:12px;"><b>${escH(BRANCHES[b.tawi]||b.tawi||'—')}</b></td>`:'<td>—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td>—</td>';
     return`<tr><td${rs}>${i+1}</td><td${rs}><strong>${escH(m.jina)}</strong><br><div style="margin-top:4px;height:4px;background:var(--a-line);border-radius:2px;width:80px"><div style="height:100%;width:${prog}%;background:${prog===100?'var(--a-green)':'var(--a-rg)'};border-radius:2px"></div></div><span style="font-size:10px;color:var(--a-muted)">${prog}% imelipwa</span></td><td${rs}>${escH(m.simu||'—')}</td><td${rs} style="white-space:nowrap;">${m.tarehe||'—'}</td>${sehemuB(bs[0])}<td${rs} class="num">${pesa(m.deni)}</td><td${rs} class="num" style="color:var(--a-green);font-weight:600">${pesa(m.lipwa)}</td><td${rs} class="num" style="color:${m.salio>0?'var(--a-red)':'var(--a-green)'};font-weight:700">${pesa(m.salio)}</td><td${rs} style="white-space:nowrap;">${m.malipoMwisho||'—'}</td><td${rs} style="font-size:12px;min-width:110px;">${escH(m.store)}</td><td${rs} style="white-space:nowrap;">${m.followup||'—'}</td><td${rs} style="white-space:nowrap;">${rpPill(m.hali)}</td><td${rs} style="white-space:nowrap;"><div style="display:flex;gap:4px;">${(m.salio>0&&userRole!=='cashier')?`<button class="btn sm gold" onclick="funguaMalipo('${m.id}')">💳 Lipa</button>`:''}${(m.salio>0&&(userRole==='madeni'||userRole==='gm'||userRole==='serikali'||ninaTawiLaKazi()))?`<button class="btn sm" style="background:var(--a-blue);color:#fff;" onclick="kumbushiaDeni('${m.id}')">🔔 Kumbushia</button>`:''}<button class="btn sm secondary" onclick="oneshaHistoriaMalipo('${m.id}','${jinaJs}')">📋</button></div></td></tr>`+bs.slice(1).map(b=>`<tr>${sehemuB(b)}</tr>`).join('');
-  }).join('')+(safu.length>onyesha.length?`<tr><td colspan="17" style="text-align:center;"><button class="btn sm secondary" onclick="madeniOnyeshaZote=true;renderWateja()">Onyesha zote (${safu.length})</button></td></tr>`:''):safuTupu(17,q||hali?'Hakuna anayelingana na utafutaji huu.':'Hakuna wateja wa madeni.');
+  }).join('')+(()=>{const nz=(v)=>Number(v)||0,jD=safu.reduce((a,m)=>a+nz(m.deni),0),jL=safu.reduce((a,m)=>a+nz(m.lipwa),0),jS=safu.reduce((a,m)=>a+nz(m.salio),0),jA=safu.reduce((a,m)=>a+(m.orodhaYaBidhaa||[]).reduce((x,b)=>x+nz(b&&b.jumla),0),0);return `<tr class="safu-jumla" style="font-weight:700;background:rgba(255,138,87,0.10);border-top:2px solid var(--a-line);"><td colspan="7">JUMLA (wateja ${safu.length})</td><td class="num">${pesa(jA)}</td><td></td><td class="num">${pesa(jD)}</td><td class="num">${pesa(jL)}</td><td class="num">${pesa(jS)}</td><td colspan="5"></td></tr>`;})()+(safu.length>onyesha.length?`<tr><td colspan="17" style="text-align:center;"><button class="btn sm secondary" onclick="madeniOnyeshaZote=true;renderWateja()">Onyesha zote (${safu.length})</button></td></tr>`:''):safuTupu(17,!tawiMd?'Chagua tawi hapo juu ili kuona madeni yake.':(q||hali?'Hakuna anayelingana na utafutaji huu.':'Hakuna madeni kwenye tawi hili.'));
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -7404,9 +7457,11 @@ function bidhaaZaDeni(c){         // the goods behind one Order debt, each with 
   if(c.chanzo==='Mafuta')return allSerikaliMafuta.filter(x=>x.invoice_no===c.invoice_no).map(x=>({jina:x.aina,kiasi:Number(x.lita).toFixed(2)+' L',tawi:x.tawi,tarehe:x.tarehe}));
   return allSerikali.filter(x=>x.invoice_no===c.invoice_no).map(x=>({jina:x.jina,kiasi:`${x.idadi} ${x.kipimo||'pc'}`,tawi:x.tawi,tarehe:x.tarehe}));
 }
-function makundiYaWatejaOrder(){
+const ainaYaWokSasa=()=>document.querySelector('#serikali-wateja-mafuta.active')?'mafuta':'bidhaa';      // which Wateja wa Order page the person is on
+function makundiYaWatejaOrder(aina){
+  aina=aina||ainaYaWokSasa();
   const m=new Map();
-  watejaTaasisi().forEach(c=>{const k=jinaKey(c.jina);let g=m.get(k);if(!g){g={key:k,jina:String(c.jina).trim(),rekodi:[]};m.set(k,g);}g.rekodi.push(c);});
+  watejaTaasisi().filter(c=>aina==='mafuta'?c.chanzo==='Mafuta':c.chanzo!=='Mafuta').forEach(c=>{const k=jinaKey(c.jina);let g=m.get(k);if(!g){g={key:k,jina:String(c.jina).trim(),rekodi:[]};m.set(k,g);}g.rekodi.push(c);});
   const leo=leoISO();
   return [...m.values()].map(g=>{
     g.rekodi.forEach(c=>{c._bidhaa=bidhaaZaDeni(c);c._tarehe=(c._bidhaa[0]&&c._bidhaa[0].tarehe)||String(c.created_at||'').slice(0,10);});
@@ -7498,14 +7553,16 @@ async function kumbushiaDeniLaMteja(k){
   const r=await sendSms(g.simu,msg);
   toast(r&&r.ok?`✅ Ukumbusho umetumwa kwa ${g.jina}`:'❌ Ujumbe haukutumwa — jaribu tena');
 }
-function renderWatejaSerikali(){
-  const tb=$('tbody-wateja-serikali');if(!tb)return;
-  const wote=makundiYaWatejaOrder(),rekodiZote=wote.reduce((a,g)=>a+g.rekodi.length,0);
+function renderWatejaSerikali(){renderWatejaOrderAina('bidhaa');renderWatejaOrderAina('mafuta');}
+function renderWatejaOrderAina(aina){
+  const sfx=aina==='mafuta'?'-mf':'';
+  const tb=$('tbody-wateja-serikali'+sfx);if(!tb)return;
+  const wote=makundiYaWatejaOrder(aina),rekodiZote=wote.reduce((a,g)=>a+g.rekodi.length,0);
   const jumla=wote.reduce((a,g)=>a+g.deni,0),kimelipwa=wote.reduce((a,g)=>a+g.lipwa,0),bakaa=wote.reduce((a,g)=>a+g.bakaa,0);
-  ['sk-w-jumla','sk-w-kimelipwa','sk-w-bakaa'].forEach((id,i)=>{const el=$(id);if(el)el.textContent=pesa([jumla,kimelipwa,bakaa][i]);});
-  const q=($('sk-w-tafuta')?$('sk-w-tafuta').value:'').trim().toLowerCase();
+  ['sk-w-jumla','sk-w-kimelipwa','sk-w-bakaa'].forEach((id,i)=>{const el=$(id+sfx);if(el)el.textContent=pesa([jumla,kimelipwa,bakaa][i]);});
+  const q=($('sk-w-tafuta'+sfx)?$('sk-w-tafuta'+sfx).value:'').trim().toLowerCase();
   const orodha=q?wote.filter(g=>g.maandishi.includes(q)):wote;
-  if($('sk-w-idadi'))$('sk-w-idadi').textContent=`(wateja ${wote.length} · rekodi ${rekodiZote})`;
+  if($('sk-w-idadi'+sfx))$('sk-w-idadi'+sfx).textContent=`(wateja ${wote.length} · rekodi ${rekodiZote})`;
   tb.innerHTML=orodha.length?orodha.map(g=>{
     const prog=g.deni>0?Math.round((g.lipwa/g.deni)*100):0,wazi=kitabuZilizofunguliwa.has(g.key),k=kitabuFunguo(g.key);
     const pills=g.aina.map(a=>`<span class="pill" style="background:${rangiYaTaasisi(a)};color:#fff;font-size:10px;">${labelYaTaasisi(a)}</span>`).join(' ')+(g.mafuta?' <span class="pill" style="background:#F5A524;color:#1a1200;font-size:10px;">⛽ Mafuta</span>':'');
@@ -7525,7 +7582,7 @@ async function kumbushiaDeni(id){
 const JUKUMU_LABEL={gm:'Meneja Mkuu',madeni:'Afisa Madeni',deski:'Msimamizi',serikali:'Afisa wa Order za Serikali',serikali_mauzo:'Afisa wa Order',serikali_mafuta:'Afisa wa Serikali (Mafuta)'};
 async function oneshaHistoriaMalipo(mteja_id,jina){
   // the government debts page has its own panel (the Madeni page's one is on a different, hidden page)
-  const sfx=document.querySelector('#serikali-wateja.active')?'-sk':'';
+  const sfx=document.querySelector('#serikali-wateja.active')?'-sk':(document.querySelector('#serikali-wateja-mafuta.active')?'-sk-mf':'');
   $('malipo-history-jina'+sfx).textContent=jina;
   const sec=$('malipo-history-section'+sfx),tb=$('tbody-malipo-history'+sfx);
   sec.style.display='block';
