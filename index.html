@@ -2493,8 +2493,8 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       <div class="section">
         <div class="section-header"><h3>📋 Order Zilizorekodiwa — Kituo Hiki</h3></div>
         <div class="section-body"><div class="table-wrap"><table>
-          <thead><tr><th>Invoice</th><th>Tarehe</th><th>Mteja</th><th>Magari</th><th class="num">Lita</th><th class="num">Jumla</th><th>Malipo</th><th>Kitendo</th></tr></thead>
-          <tbody id="tbody-oda-mafuta"><tr class="loading-row"><td colspan="8">Inapakia...</td></tr></tbody>
+          <thead><tr><th>Mteja</th><th class="num">Order</th><th class="num">Lita</th><th class="num">Jumla ya Mkopo</th><th class="num">Bado Hajalipa</th><th>Kitendo</th></tr></thead>
+          <tbody id="tbody-oda-mafuta"><tr class="loading-row"><td colspan="6">Inapakia...</td></tr></tbody>
         </table></div></div>
       </div>
     </section>
@@ -10748,6 +10748,8 @@ function jazaMtejaOda(){
   if(c.simu&&simuEl&&(!simuEl.value.trim()||simuEl.value===_odaAutoSimu)){simuEl.value=c.simu;_odaAutoSimu=c.simu;}
   if(hint)hint.textContent='✓ Mteja anayejulikana — aina'+(c.simu?' na simu':'')+' zimejazwa.';
 }
+const odaMtejaWazi=new Set();
+function badilishaOdaMteja(k){if(odaMtejaWazi.has(k))odaMtejaWazi.delete(k);else odaMtejaWazi.add(k);renderOdaMafuta();}
 function renderOdaMafuta(){
   const tb=$('tbody-oda-mafuta');if(!tb)return;
   if($('odaGridBody')&&!$('odaGridBody').children.length)jengaGridOda();
@@ -10756,12 +10758,27 @@ function renderOdaMafuta(){
   if(userRole!=='petroli')return;
   const kwaInvoice=new Map();
   allSerikaliMafuta.filter(s=>s.tawi===userTawi).forEach(s=>{
-    let g=kwaInvoice.get(s.invoice_no);if(!g){g={inv:s.invoice_no,mteja:s.mteja,tarehe:s.tarehe,t:'',magari:new Set(),lita:0,jumla:0,lipwa:true};kwaInvoice.set(s.invoice_no,g);}
+    let g=kwaInvoice.get(s.invoice_no);if(!g){g={inv:s.invoice_no,mteja:s.mteja,tarehe:s.tarehe,t:'',magari:new Set(),aina:new Set(),lita:0,jumla:0,lipwa:true,mkopo:false};kwaInvoice.set(s.invoice_no,g);}
     const t=String(s.created_at||'9999');if(t>g.t)g.t=t;
-    if(s.tarehe>g.tarehe)g.tarehe=s.tarehe;if(s.gari)g.magari.add(s.gari);g.lita+=Number(s.lita)||0;g.jumla+=Number(s.jumla)||0;if(s.hali_malipo!=='Imelipwa')g.lipwa=false;
+    if(s.tarehe>g.tarehe)g.tarehe=s.tarehe;if(s.gari)g.magari.add(s.gari);if(s.aina)g.aina.add(s.aina);g.lita+=Number(s.lita)||0;g.jumla+=Number(s.jumla)||0;if(s.hali_malipo!=='Imelipwa')g.lipwa=false;if(s.aina_malipo==='Mkopo')g.mkopo=true;
   });
-  const list=[...kwaInvoice.values()].sort((a,b)=>b.t.localeCompare(a.t)||String(b.inv).localeCompare(String(a.inv),undefined,{numeric:true})).slice(0,60);
-  tb.innerHTML=list.length?list.map(g=>`<tr><td><strong>${escH(g.inv)}</strong></td><td>${g.tarehe}</td><td>${escH(g.mteja)}</td><td style="max-width:200px;font-size:12px;">${[...g.magari].map(escH).join(', ')||'—'}</td><td class="num">${g.lita.toFixed(2)} L</td><td class="num"><strong>${pesa(g.jumla)}</strong></td><td><span class="pill ${g.lipwa?'pill-green':'pill-red'}">${g.lipwa?'Imelipwa':'Haijalipwa'}</span></td><td><button class="btn sm secondary" onclick="onyeshaInvoiceSerikaliMafutaNo('${escH(g.inv)}')">🖨 Invoice</button></td></tr>`).join(''):safuTupu(8,'Bado hakuna oda za mkopo zilizorekodiwa kituoni hiki.');
+  // Group the invoices by customer: one row per customer, open it to see every order and the total on credit.
+  const wateja=new Map();
+  [...kwaInvoice.values()].forEach(g=>{
+    const k=jinaKey(g.mteja)||'?';let c=wateja.get(k);
+    if(!c){c={key:k,jina:String(g.mteja||'').trim(),oda:[],lita:0,jumla:0,deni:0,t:''};wateja.set(k,c);}
+    c.oda.push(g);c.lita+=g.lita;c.jumla+=g.jumla;if(!g.lipwa)c.deni+=g.jumla;if(g.t>c.t)c.t=g.t;
+  });
+  const orodha=[...wateja.values()].sort((a,b)=>b.t.localeCompare(a.t));
+  tb.innerHTML=orodha.length?orodha.map(c=>{
+    const wazi=odaMtejaWazi.has(c.key);
+    c.oda.sort((a,b)=>String(b.tarehe).localeCompare(String(a.tarehe))||b.t.localeCompare(a.t));
+    const kaza=`<tr style="cursor:pointer;" onclick="badilishaOdaMteja('${escH(c.key).replace(/'/g,"&#39;")}')"><td><strong>${wazi?'▼':'▶'} ${escH(c.jina)}</strong></td><td class="num">${c.oda.length}</td><td class="num">${c.lita.toFixed(2)} L</td><td class="num"><strong>${pesa(c.jumla)}</strong></td><td class="num">${c.deni>0?`<span class="pill pill-red">${pesa(c.deni)}</span>`:'<span class="pill pill-green">Hana deni</span>'}</td><td><button class="btn sm secondary" onclick="event.stopPropagation();badilishaOdaMteja('${escH(c.key).replace(/'/g,"&#39;")}')">${wazi?'Funga':'Fungua'}</button></td></tr>`;
+    if(!wazi)return kaza;
+    const mistari=c.oda.map(g=>`<tr><td><strong>${escH(g.inv)}</strong></td><td>${g.tarehe}</td><td style="max-width:200px;font-size:12px;">${[...g.magari].map(escH).join(', ')||'—'}</td><td>${[...g.aina].map(escH).join(', ')||'—'}</td><td class="num">${g.lita.toFixed(2)} L</td><td class="num"><strong>${pesa(g.jumla)}</strong></td><td><span class="pill ${g.lipwa?'pill-green':'pill-red'}">${g.lipwa?'Imelipwa':'Haijalipwa'}</span></td><td><button class="btn sm secondary" onclick="onyeshaInvoiceSerikaliMafutaNo('${escH(g.inv)}')">🖨 Invoice</button></td></tr>`).join('');
+    const jumlaSafu=`<tr style="background:var(--a-bg,#f4f6f9);font-weight:700;"><td colspan="4">Jumla ya ${escH(c.jina)}</td><td class="num">${c.lita.toFixed(2)} L</td><td class="num">${pesa(c.jumla)}</td><td colspan="2">Deni: ${pesa(c.deni)}</td></tr>`;
+    return kaza+`<tr><td colspan="6" style="padding:0 0 0 18px;background:rgba(0,0,0,.02);"><div class="table-wrap"><table><thead><tr><th>Invoice</th><th>Tarehe</th><th>Magari</th><th>Mafuta</th><th class="num">Lita</th><th class="num">Jumla</th><th>Malipo</th><th>Kitendo</th></tr></thead><tbody>${mistari}${jumlaSafu}</tbody></table></div></td></tr>`;
+  }).join(''):safuTupu(6,'Bado hakuna oda za mkopo zilizorekodiwa kituoni hiki.');
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
