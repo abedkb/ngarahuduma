@@ -2355,7 +2355,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
           <h4 style="margin:20px 0 10px;">Ongeza Bidhaa kwenye Order</h4>
           <div class="form-grid">
             <div class="field"><label>Tawi la Kuchukulia Bidhaa</label><select id="sk-tawi" onchange="jaziBidhaaSerikali()"></select></div>
-            <div class="field"><label>Bidhaa</label><input type="search" id="sk-bidhaa-tafuta" placeholder="🔍 Andika herufi za bidhaa..." autocomplete="off" oninput="jaziBidhaaSerikali()" style="margin-bottom:6px;"/><select id="sk-bidhaa" onchange="skMuhtasariBidhaa()"></select></div>
+            <div class="field"><label>Bidhaa</label><input type="search" id="sk-bidhaa-tafuta" placeholder="🔍 Andika herufi za bidhaa..." autocomplete="off" oninput="jaziBidhaaSerikali()" onfocus="this.select()" onkeydown="if(event.key==='Enter'){event.preventDefault();skBidhaaChagua();}" style="margin-bottom:6px;"/><select id="sk-bidhaa" onchange="skMuhtasariBidhaa()" onclick="skBidhaaChagua()" onkeydown="if(event.key==='Enter'){event.preventDefault();skBidhaaChagua();}"></select></div>
             <div class="field"><label>Idadi</label><input type="number" id="sk-idadi" min="0" step="any" inputmode="decimal" placeholder="1"/></div>
             <div class="field full" id="sk-info" style="font-size:12px;color:var(--a-muted);"></div>
           </div>
@@ -8158,16 +8158,25 @@ function jaziBidhaaSerikali(){
   const prev=sel.value;
   const q=(($('sk-bidhaa-tafuta')||{}).value||'').trim().toLowerCase().split(/\s+/).filter(Boolean);
   const zote=allBidhaa.filter(p=>p.tawi===tawi).sort((a,b)=>a.jina.localeCompare(b.jina));
-  const list=q.length?zote.filter(p=>{const h=(p.jina+' '+(p.jina_sw||'')).toLowerCase();return q.every(t=>h.includes(t));}):zote;
-  sel.size=q.length&&list.length>1?Math.min(6,list.length):1;      // while typing, show the matches as a short list
-  sel.innerHTML=list.length?list.map(p=>`<option value="${p.id}">${escH(p.jina)}${p.jina_sw?' / '+escH(p.jina_sw):''} — zipo ${p.idadi}${p.idadi<=0?' (IMEISHA)':''}</option>`).join(''):`<option value="">${q.length?'Hakuna bidhaa inayolingana kwenye tawi hili':'Hakuna bidhaa kwenye tawi hili'}</option>`;
+  let list=q.length?zote.filter(p=>{const h=(p.jina+' '+(p.jina_sw||'')).toLowerCase();return q.every(t=>h.includes(t));}):zote;
+  const ch=allBidhaa.find(x=>String(x.id)===sel.dataset.chosen);
+  if(ch&&ch.tawi===tawi&&(($('sk-bidhaa-tafuta')||{}).value||'').trim().toLowerCase()===String(ch.jina).toLowerCase())list=[ch];      // a product was picked from the results: show just that one
+  sel.size=list.length>1?Math.max(2,Math.min(8,list.length)):1;      // while typing, show the matches as a short list
+  sel.innerHTML=list.length?list.map(p=>`<option value="${p.id}"${p.idadi<=0?' style="color:#c0392b;"':''}>${escH(p.jina)}${p.jina_sw?' / '+escH(p.jina_sw):''}  —  ${p.idadi<=0?'IMEISHA':qtyKipimo(p.idadi,p.kipimo)}  ·  ${pesa(p.bei_kuuzia||0)}</option>`).join(''):`<option value="">${q.length?'Hakuna bidhaa inayolingana kwenye tawi hili':'Hakuna bidhaa kwenye tawi hili'}</option>`;
   if(prev&&list.some(p=>String(p.id)===prev))sel.value=prev;else if(list.length)sel.value=String(list[0].id);
   skMuhtasariBidhaa();
+}
+// Click (or Enter on) a product in the search results: it is chosen, its full name fills the search box and the list closes — no need to type the rest.
+function skBidhaaChagua(){
+  const sel=$('sk-bidhaa'),box=$('sk-bidhaa-tafuta');if(!sel||!box||!sel.value)return;
+  const p=allBidhaa.find(x=>String(x.id)===sel.value);if(!p)return;
+  sel.dataset.chosen=String(p.id);box.value=p.jina;jaziBidhaaSerikali();
+  const n=$('sk-idadi');if(n)n.focus();
 }
 function skMuhtasariBidhaa(){
   const el=$('sk-info');if(!el)return;
   const p=allBidhaa.find(x=>String(x.id)===($('sk-bidhaa')?$('sk-bidhaa').value:''));
-  el.textContent=p?`Zilizopo kwenye tawi: ${p.idadi} ${p.kipimo||'pc'} · Bei ya stoo ya tawi: TZS ${Number(p.bei_kuuzia||0).toLocaleString()} — tawi litakubali order kwa bei hii.`:'';
+  el.innerHTML=p?`<strong>${escH(p.jina)}</strong> — zilizopo kwenye tawi: <strong>${qtyKipimo(p.idadi,p.kipimo)}</strong> · Bei ya stoo: <strong>${pesa(p.bei_kuuzia||0)}</strong> kwa ${escH(p.kipimo||'pc')} — tawi litakubali order kwa bei hii.`:'';
 }
 function ongezaMstariSerikali(){
   const p=allBidhaa.find(x=>String(x.id)===$('sk-bidhaa').value);
@@ -8180,6 +8189,7 @@ function ongezaMstariSerikali(){
   // No price is typed here: the line shows the branch's own stock price, which is what the branch will accept it at.
   serikaliDraft.push({bidhaa_id:p.id,jina:p.jina,jina_sw:p.jina_sw||'',kipimo:p.kipimo||'pc',tawi:p.tawi,idadi,bei:Number(p.bei_kuuzia||0)});
   $('sk-idadi').value='';
+  if($('sk-bidhaa-tafuta')){$('sk-bidhaa-tafuta').value='';delete $('sk-bidhaa').dataset.chosen;jaziBidhaaSerikali();$('sk-bidhaa-tafuta').focus();}      // ready to search the next product
   $('notifySerikali').className='notify';renderDraftSerikali();
 }
 function futaMstariSerikali(i){serikaliDraft.splice(i,1);renderDraftSerikali();}
@@ -8663,9 +8673,11 @@ async function futaOrderYangu(kundi){
   if(!confirm('Futa order hii yote? Haitaweza kurudishwa. Matawi hayataiona tena.'))return;
   try{
     const h=await authHeaders();
-    const r=await fetch(`${SB_URL}/rest/v1/rpc/futa_order_yangu`,{method:'POST',headers:h,body:JSON.stringify({p_kundi:kundi})});
-    const d=await r.json().catch(()=>null);
-    if(!r.ok||!d||!d.ok)throw new Error((d&&(d.message||d.hint))||'Imeshindwa kufuta order');
+    for(const k of String(kundi).split(',').filter(Boolean)){      // one order can be made of several sends
+      const r=await fetch(`${SB_URL}/rest/v1/rpc/futa_order_yangu`,{method:'POST',headers:h,body:JSON.stringify({p_kundi:k})});
+      const d=await r.json().catch(()=>null);
+      if(!r.ok||!d||!d.ok)throw new Error((d&&(d.message||d.hint))||'Imeshindwa kufuta order');
+    }
     toast('🗑 Order imefutwa');
     loadAllBaada();
   }catch(e){toast('❌ '+e.message);}
@@ -8679,7 +8691,15 @@ function renderMaombiSerikaliYangu(containerId,aina_chanzo){
   if(wrap)wrap.style.display='';
   const mine=allMaombiStock.filter(m=>m.aina_chanzo===aina_chanzo&&m.omba_na);
   const byKundi={};
-  mine.forEach(m=>{(byKundi[m.kundi_id]=byKundi[m.kundi_id]||[]).push(m);});
+  if(aina_chanzo==='Bidhaa'){
+    // ONE customer + project on ONE day = ONE order, however many times it was sent and whichever branches it went to (an invoiced order is grouped by its invoice).
+    const gA={};mine.forEach(m=>{(gA[m.kundi_id]=gA[m.kundi_id]||[]).push(m);});
+    Object.entries(gA).forEach(([k,ls])=>{
+      const inv=ls.find(l=>l.hali==='Imethibitishwa'&&l.invoice_no);
+      const f=inv?'inv|'+inv.invoice_no:[jinaKey(ls[0].mteja),skMradiKey(ls[0].mradi),skSiku(ls[0])].join('|');
+      (byKundi[f]=byKundi[f]||[]).push(...ls);
+    });
+  }else mine.forEach(m=>{(byKundi[m.kundi_id]=byKundi[m.kundi_id]||[]).push(m);});
   const cy=aina_chanzo==='Bidhaa'?skChujio('y'):{a:'',b:''};
   const groups=Object.entries(byKundi).filter(([k,l])=>skNdani(skSiku(l[0]),cy)).sort((a,b)=>aina_chanzo==='Bidhaa'?skKaribu(a[1][0],b[1][0]):(b[1][0].created_at||'').localeCompare(a[1][0].created_at||''));
   tb.innerHTML=groups.length?groups.map(([kundi,lines])=>{
@@ -8703,7 +8723,8 @@ function renderMaombiSerikaliYangu(containerId,aina_chanzo){
     const ikoni=(l)=>l.hali==='Imethibitishwa'?' ✓':(l.hali==='Imekataliwa'?' ✗':' ⏳');      // each store's answer for its own goods
     const rs=(aina_chanzo==='Bidhaa'&&lines.length>1)?` rowspan="${lines.length}"`:'';
     const naweFuta=(userRole==='serikali_mauzo'&&aina_chanzo==='Bidhaa'&&!confirmed&&!invoiced);      // an order no branch has accepted yet can still be taken back
-    const futaBtn=naweFuta?`<div style="margin-top:6px;"><button class="btn sm danger" onclick="futaOrderYangu('${kundi}')">🗑 Futa Order</button></div>`:'';
+    const kundiZote=[...new Set(lines.map(l=>l.kundi_id))].join(',');
+    const futaBtn=naweFuta?`<div style="margin-top:6px;"><button class="btn sm danger" onclick="futaOrderYangu('${kundiZote}')">🗑 Futa Order</button></div>`:'';
     const invBtn=(aina_chanzo==='Bidhaa'&&invoiced)?`<div style="margin-top:6px;"><button class="btn sm secondary" onclick="onyeshaInvoiceSerikaliNo('${escH(invoiced.invoice_no)}')">🖨 Fungua Invoice</button></div>`:'';
     const haliCell=`<td${rs}><span class="pill ${haliCls}">${haliTxt}</span>${invBtn}${futaBtn}${rejected?`<div style="font-size:11px;color:var(--a-muted);margin-top:4px;">${escH((lines.find(l=>l.jibu)||{}).jibu||'')}</div>`:''}</td>`;
     if(aina_chanzo==='Bidhaa'){
