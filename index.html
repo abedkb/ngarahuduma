@@ -2397,7 +2397,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
           </div>
           <div id="ski-unganisha" style="display:none;background:rgba(255,122,69,0.08);border:1px solid rgba(255,122,69,0.35);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13px;"></div>
           <div class="table-wrap"><table>
-            <thead><tr><th>Particulars</th><th>Tawi</th><th class="num">QTY</th><th class="num">Bei ya Stoo</th><th class="num">Bei ya Serikali (TZS)</th><th class="num">Jumla</th></tr></thead>
+            <thead><tr><th>Particulars</th><th>Tawi</th><th class="num">QTY (stoo)</th><th class="num">Bei ya Stoo</th><th>Mteja Apewe Kwa Kipimo</th><th class="num">Bei ya Serikali (TZS)</th><th class="num">Jumla</th></tr></thead>
             <tbody id="tbody-ski-lines"></tbody>
           </table></div>
           <div style="text-align:right;margin:10px 0 14px;"><strong id="ski-jumla" style="font-size:16px;">Jumla ya Invoice: TZS 0</strong></div>
@@ -8248,6 +8248,16 @@ const skChujio=(k)=>({a:($('sk-'+k+'-kuanzia')||{}).value||'',b:($('sk-'+k+'-had
 const skNdani=(siku,c)=>(!c.a||siku>=c.a)&&(!c.b||siku<=c.b);
 function skChujioBadilika(){renderSerikali();renderMaombiSerikaliYangu('tbody-sk-maombi-yangu','Bidhaa');}
 function skFutaChujio(k){['kuanzia','hadi'].forEach(x=>{const e=$('sk-'+k+'-'+x);if(e)e.value='';});skChujioBadilika();}
+const SK_VIPIMO=['kg','tonne','bag','pc','box','roll','meter','litre','pack','set','pair','ndoo','kopo','katoni','bando'];
+const SK_KIGAWE={'kg>tonne':1000,'tonne>kg':0.001};      // store units in ONE customer unit, for the common pairs (Rehema can overwrite it)
+function skiBadilishaKipimo(id){
+  const sel=document.querySelector(`.ski-kip[data-id="${id}"]`),kg=document.querySelector(`.ski-kig[data-id="${id}"]`),w=document.getElementById('ski-kw-'+id);
+  if(!sel||!kg)return;
+  if(sel.value){const d=SK_KIGAWE[sel.dataset.stoo+'>'+sel.value];if(d!=null)kg.value=d;else if(kg.dataset.kwa!==sel.value)kg.value='';kg.dataset.kwa=sel.value;}
+  else kg.value='';
+  if(w)w.style.display=sel.value?'flex':'none';
+  hesabuInvoiceSerikali();
+}
 function renderSkQueue(){
   const tb=$('tbody-sk-queue'),wrap=$('skQueueSection');if(!tb||!wrap)return;
   const show=userRole==='serikali'||userRole==='gm';
@@ -8306,6 +8316,9 @@ const skiZote=()=>[skiKundi,...skiEkstra].filter(Boolean).join(',');
 function skiJazaMistari(){
   const beiZilizoandikwa={};
   document.querySelectorAll('#tbody-ski-lines .ski-bei').forEach(i=>{if(i.value!=='')beiZilizoandikwa[i.dataset.id]=i.value;});
+  const kipZilizochaguliwa={},kigZilizoandikwa={};
+  document.querySelectorAll('#tbody-ski-lines .ski-kip').forEach(i=>{kipZilizochaguliwa[i.dataset.id]=i.value;});
+  document.querySelectorAll('#tbody-ski-lines .ski-kig').forEach(i=>{kigZilizoandikwa[i.dataset.id]=i.value;});
   const ids=skiZote().split(',');
   const lines=skiKundi?allMaombiStock.filter(m=>ids.includes(String(m.kundi_id))&&m.aina_chanzo==='Bidhaa'&&m.hali==='Imethibitishwa'):[];
   const hasOrder=lines.length>0,h=lines[0]||{};
@@ -8313,8 +8326,13 @@ function skiJazaMistari(){
   $('ski-mteja').textContent=hasOrder?h.mteja:'—';
   $('ski-mradi').textContent=hasOrder?(miradi.join(' + ')||'—'):'—';
   $('tbody-ski-lines').innerHTML=hasOrder
-    ?lines.map(l=>`<tr><td>${escH(l.jina)}</td><td>${BRANCHES[l.tawi]||l.tawi}</td><td class="num">${l.idadi} ${l.kipimo||'pc'}</td><td class="num">${pesa(l.bei_stoo)}</td><td class="num"><input type="number" min="0" step="any" class="ski-bei" data-id="${l.id}" data-idadi="${l.idadi}" value="${beiZilizoandikwa[l.id]??(l.bei_serikali||'')}" placeholder="Bei ya Serikali" oninput="hesabuInvoiceSerikali()" style="width:140px;text-align:right;"/></td><td class="num" id="ski-j-${l.id}">—</td></tr>`).join('')
-    :`<tr style="opacity:.6"><td>Particulars <span style="font-size:11px;">(zinatoka kwenye agizo)</span></td><td>Tawi</td><td class="num">QTY</td><td class="num">Bei ya Stoo</td><td class="num"><input type="number" disabled placeholder="Bei ya Serikali (TZS)" style="width:170px;text-align:right;"/></td><td class="num">Jumla</td></tr>`;
+    ?lines.map(l=>{
+      const ks=l.kipimo||'pc',kc=kipZilizochaguliwa[l.id]||'',kg=kigZilizoandikwa[l.id]||'';
+      return `<tr><td>${escH(l.jina)}</td><td>${BRANCHES[l.tawi]||l.tawi}</td><td class="num">${fmtIdadi(l.idadi)} ${escH(ks)}<br><span id="ski-q-${l.id}" style="font-size:11px;color:var(--a-muted);"></span></td><td class="num">${pesa(l.bei_stoo)}<br><span style="font-size:11px;color:var(--a-muted);">kwa ${escH(ks)}</span></td>`
+      +`<td style="min-width:150px;"><select class="ski-kip" data-id="${l.id}" data-stoo="${escH(ks)}" onchange="skiBadilishaKipimo('${l.id}')" style="width:100%;"><option value="">Sawa na stoo (${escH(ks)})</option>${SK_VIPIMO.filter(k=>k!==ks).map(k=>`<option value="${k}"${k===kc?' selected':''}>${k}</option>`).join('')}</select>`
+      +`<div id="ski-kw-${l.id}" style="display:${kc?'flex':'none'};align-items:center;gap:4px;margin-top:4px;font-size:11px;white-space:nowrap;">1 ${escH(kc)} = <input type="number" min="0" step="any" class="ski-kig" data-id="${l.id}" data-kwa="${escH(kc)}" value="${escH(kg)}" oninput="hesabuInvoiceSerikali()" style="width:80px;"/> ${escH(ks)}</div></td>`
+      +`<td class="num"><input type="number" min="0" step="any" class="ski-bei" data-id="${l.id}" data-idadi="${l.idadi}" value="${beiZilizoandikwa[l.id]??(l.bei_serikali||'')}" placeholder="Bei ya Serikali" oninput="hesabuInvoiceSerikali()" style="width:140px;text-align:right;"/></td><td class="num" id="ski-j-${l.id}">—</td></tr>`;}).join('')
+    :`<tr style="opacity:.6"><td>Particulars <span style="font-size:11px;">(zinatoka kwenye agizo)</span></td><td>Tawi</td><td class="num">QTY</td><td class="num">Bei ya Stoo</td><td>Kipimo</td><td class="num"><input type="number" disabled placeholder="Bei ya Serikali (TZS)" style="width:170px;text-align:right;"/></td><td class="num">Jumla</td></tr>`;
   // other answered sends of the SAME customer that can join this invoice
   const box=$('ski-unganisha');
   if(box){
@@ -8335,8 +8353,12 @@ function skiTogglaEkstra(id){
 function hesabuInvoiceSerikali(){
   let jumla=0;
   document.querySelectorAll('#tbody-ski-lines .ski-bei').forEach(inp=>{
-    const v=parseFloat(inp.value)||0,j=Math.round(v*parseFloat(inp.dataset.idadi));jumla+=j;
-    $('ski-j-'+inp.dataset.id).textContent=v>0?pesa(j):'—';
+    const id=inp.dataset.id,kip=document.querySelector(`.ski-kip[data-id="${id}"]`),kig=parseFloat((document.querySelector(`.ski-kig[data-id="${id}"]`)||{}).value);
+    const q=kip&&kip.value?(kig>0?parseFloat(inp.dataset.idadi)/kig:0):parseFloat(inp.dataset.idadi);      // quantity in the unit the customer is invoiced in
+    const qe=$('ski-q-'+id);if(qe)qe.textContent=kip&&kip.value&&kig>0?`mteja: ${fmtIdadi(q)} ${kip.value}`:'';
+    inp.placeholder=kip&&kip.value?`Bei kwa ${kip.value}`:'Bei ya Serikali';
+    const v=parseFloat(inp.value)||0,j=Math.round(v*q);jumla+=j;
+    $('ski-j-'+id).textContent=v>0&&q>0?pesa(j):'—';
   });
   $('ski-jumla').textContent='Jumla ya Invoice: '+pesa(jumla);
 }
@@ -8351,6 +8373,12 @@ async function tengenezaInvoiceSerikali(){
     bei[inp.dataset.id]=v;
   });
   if(bila){kosa('❌ Weka bei ya serikali kwa: '+bila);return;}
+  const kipimo={},kigawe={};let bilaKig=null;
+  document.querySelectorAll('#tbody-ski-lines .ski-kip').forEach(sel=>{
+    const id=sel.dataset.id,kg=parseFloat((document.querySelector(`.ski-kig[data-id="${id}"]`)||{}).value);
+    if(sel.value){if(!(kg>0)&&!bilaKig)bilaKig=sel.closest('tr').children[0].textContent;kipimo[id]=sel.value;kigawe[id]=kg;}
+  });
+  if(bilaKig){kosa('❌ Andika 1 kipimo cha mteja ni sawa na ngapi cha stoo kwa: '+bilaKig);return;}
   const aina=$('ski-aina-malipo').value;
   const awali=aina==='Mkopo'?(parseFloat($('ski-awali').value)||0):0,mwisho=aina==='Mkopo'?$('ski-tarehe-mwisho').value:'';
   // the due date is optional: an Order without one is saved with no due date
@@ -8360,7 +8388,7 @@ async function tengenezaInvoiceSerikali(){
   try{
     // One database step: checks every price, creates the invoice and (for credit) the debt, and marks the order invoiced.
     const h=await authHeaders();
-    const r=await fetch(`${SB_URL}/rest/v1/rpc/serikali_tengeneza_invoice_kundi`,{method:'POST',headers:h,body:JSON.stringify({p:{kundi_ids:skiZote().split(','),bei,aina_malipo:aina,kilicholipwa_awali:awali,tarehe_mwisho:mwisho||null}})});
+    const r=await fetch(`${SB_URL}/rest/v1/rpc/serikali_tengeneza_invoice_kundi`,{method:'POST',headers:h,body:JSON.stringify({p:{kundi_ids:skiZote().split(','),bei,kipimo,kigawe,aina_malipo:aina,kilicholipwa_awali:awali,tarehe_mwisho:mwisho||null}})});
     d=await r.json();
     if(!r.ok||!d||!d.invoice_no)throw new Error((d&&(d.message||d.hint))||'Imeshindwa kutengeneza invoice');
     skiKundi=null;skiEkstra=[];skiRendered='__bado__';
