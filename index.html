@@ -8252,6 +8252,7 @@ const skMakundi=(kigezo)=>{const by={};allMaombiStock.filter(m=>m.aina_chanzo===
   return Object.values(vikundi).map(g=>{g.ids.sort();return {id:g.ids.join(','),ids:g.ids,lines:g.lines};}).filter(g=>kigezo(g.lines));};
 // ready = every branch has answered, at least one accepted, and no invoice made yet
 const skTayari=(lines)=>!lines.some(l=>l.hali==='Inasubiri')&&lines.some(l=>l.hali==='Imethibitishwa')&&!lines.some(l=>l.hali==='Imethibitishwa'&&l.invoice_no);
+const mradiLebo=(m)=>m?`<br><span class="mradi-lebo" style="display:inline-block;margin-top:2px;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:700;background:rgba(255,138,87,.18);color:#ff8a57;border:1px solid rgba(255,138,87,.45);">📁 ${escH(m)}</span>`:'';
 const skSiku=(x)=>String(x.tarehe||x.created_at||'').slice(0,10);
 const skKaribu=(a,b)=>skSiku(b).localeCompare(skSiku(a))||String(b.created_at||'').localeCompare(String(a.created_at||''));      // newest order date first
 const skChujio=(k)=>({a:($('sk-'+k+'-kuanzia')||{}).value||'',b:($('sk-'+k+'-hadi')||{}).value||''});
@@ -8283,7 +8284,7 @@ function renderSkQueue(){
     const hayakuja=rej.length?`<div style="font-size:11px;color:var(--a-red);margin-top:4px;">Hayakuja: ${rej.map(l=>`${escH(l.jina)} (${BRANCHES[l.tawi]||l.tawi})`).join(', ')}</div>`:'';
     const act=userRole==='serikali'?`<button class="btn sm gold" onclick="funguaInvoiceSerikali('${g.id}')">🧾 Andaa Invoice</button>`:'—';
     const sehemuB=(l)=>`<td style="font-size:12px;">${escH(l.jina)}</td><td class="num" style="white-space:nowrap;">${l.idadi} ${escH(l.kipimo||'pc')}</td><td style="font-size:12px;"><b>${escH(BRANCHES[l.tawi]||l.tawi)}</b></td>`;
-    return `<tr><td${rs}>${skSiku(h)}</td><td${rs}><strong>${escH(h.mteja)}</strong>${h.mradi?`<br><span style="font-size:11px;color:var(--a-muted);">${escH(h.mradi)}</span>`:''}${hayakuja}</td>${sehemuB(ok[0])}<td class="num"${rs}>${pesa(thamani)}</td><td${rs}>${act}</td></tr>`+ok.slice(1).map(l=>`<tr>${sehemuB(l)}</tr>`).join('');
+    return `<tr><td${rs}>${skSiku(h)}</td><td${rs}><strong>${escH(h.mteja)}</strong>${mradiLebo(h.mradi)}${hayakuja}</td>${sehemuB(ok[0])}<td class="num"${rs}>${pesa(thamani)}</td><td${rs}>${act}</td></tr>`+ok.slice(1).map(l=>`<tr>${sehemuB(l)}</tr>`).join('');
   }).join(''):safuTupu(7,(cq.a||cq.b)?'Hakuna order za kipindi hiki.':'Hakuna maagizo yanayosubiri invoice kwa sasa.');
   renderSkPanel(readyYote);
 }
@@ -8443,7 +8444,7 @@ function renderSerikali(){
     const paid=s.hali_malipo==='Imelipwa';
     let acts=`<button class="btn sm secondary" onclick="onyeshaInvoiceSerikaliNo('${s.invoice_no}')">🖨</button>`;
     if(userRole==='serikali')acts+=`<button class="btn sm gold" onclick="rekebishaSerikaliMoja('${s.id}')">✏ Rekebisha</button><button class="btn sm danger" onclick="futaSerikaliMoja('${s.id}')">🗑 Futa</button>`;
-    return `<tr><td>${s.invoice_no}</td><td>${s.tarehe}</td><td><strong>${escH(s.mteja)}</strong>${s.mradi?`<br><span style="font-size:11px;color:var(--a-muted);">${escH(s.mradi)}</span>`:''}</td><td>${escH(s.jina)}</td><td>${s.idadi} ${s.kipimo||'pc'}</td><td>${pesa(s.bei_serikali)}</td><td class="num"><strong>${pesa(s.jumla)}</strong></td><td>${BRANCHES[s.tawi]||s.tawi}</td><td><span class="pill ${paid?'pill-green':'pill-red'}">${paid?'Imelipwa':'Haijalipwa'}</span></td><td style="display:flex;gap:4px;flex-wrap:wrap;">${acts}</td></tr>`;
+    return `<tr><td>${s.invoice_no}</td><td>${s.tarehe}</td><td><strong>${escH(s.mteja)}</strong>${mradiLebo(s.mradi)}</td><td>${escH(s.jina)}</td><td>${s.idadi} ${s.kipimo||'pc'}</td><td>${pesa(s.bei_serikali)}</td><td class="num"><strong>${pesa(s.jumla)}</strong></td><td>${BRANCHES[s.tawi]||s.tawi}</td><td><span class="pill ${paid?'pill-green':'pill-red'}">${paid?'Imelipwa':'Haijalipwa'}</span></td><td style="display:flex;gap:4px;flex-wrap:wrap;">${acts}</td></tr>`;
   }).join(''):safuTupu(10,(ci.a||ci.b)?'Hakuna invoice za kipindi hiki.':'Bado hakuna invoice za serikali.');
 }
 
@@ -8571,7 +8572,7 @@ function renderSerikaliMafuta(){
     const paid=s.hali_malipo==='Imelipwa';
     let acts=`<button class="btn sm secondary" onclick="onyeshaInvoiceSerikaliMafutaNo('${s.invoice_no}')">🖨</button>`;
     if(userRole==='serikali_mafuta')acts+=kitufeMarekebisho('mafuta_mauzo_serikali',s.id);
-    return `<tr><td>${s.invoice_no}</td><td>${s.tarehe}</td><td><strong>${escH(s.mteja)}</strong>${s.mradi?`<br><span style="font-size:11px;color:var(--a-muted);">${escH(s.mradi)}</span>`:''}</td><td>${BRANCHES[s.tawi]||s.tawi}${s.rekodi_jina?`<br><span style="font-size:11px;color:var(--a-muted);">${escH(s.rekodi_jina)}</span>`:''}</td><td>${escH(s.gari||'—')}</td><td>${s.aina}</td><td>${Number(s.lita).toFixed(2)} L</td><td>${pesa(s.bei_kwa_lita_serikali)}</td><td class="num"><strong>${pesa(s.jumla)}</strong></td><td><span class="pill ${paid?'pill-green':'pill-red'}">${paid?'Imelipwa':'Haijalipwa'}</span></td><td style="display:flex;gap:4px;flex-wrap:wrap;">${acts}</td></tr>`;
+    return `<tr><td>${s.invoice_no}</td><td>${s.tarehe}</td><td><strong>${escH(s.mteja)}</strong>${mradiLebo(s.mradi)}</td><td>${BRANCHES[s.tawi]||s.tawi}${s.rekodi_jina?`<br><span style="font-size:11px;color:var(--a-muted);">${escH(s.rekodi_jina)}</span>`:''}</td><td>${escH(s.gari||'—')}</td><td>${s.aina}</td><td>${Number(s.lita).toFixed(2)} L</td><td>${pesa(s.bei_kwa_lita_serikali)}</td><td class="num"><strong>${pesa(s.jumla)}</strong></td><td><span class="pill ${paid?'pill-green':'pill-red'}">${paid?'Imelipwa':'Haijalipwa'}</span></td><td style="display:flex;gap:4px;flex-wrap:wrap;">${acts}</td></tr>`;
   }).join(''):safuTupu(11,'Bado hakuna invoice za mafuta za mkopo.');
 }
 function funguaHaririSerikaliMafutaGM(id,ombiId){
@@ -8624,7 +8625,7 @@ function renderMaombiStockTawi(containerId,aina_chanzo){
   if(userRole==='gm'||userRole==='cashier'||userRole==='matumizi'||userRole==='petroli'||userRole==='petroli_mauzo'){if(wrap)wrap.style.display='none';return;}   // Matumizi does not deal with orders; the petrol managers RECORD the orders themselves, so there is nothing for them to approve
   const list=maombiKwaTawiLangu().filter(m=>m.aina_chanzo===aina_chanzo);
   if(wrap)wrap.style.display=(list.length||ninaTawiLaKazi()||userRole==='petroli')?'':'none';
-  const kuhusu=(m)=>`<td><strong>${escH(m.mteja)}</strong>${m.mradi?`<br><span style="font-size:11px;color:var(--a-muted);">${escH(m.mradi)}</span>`:''}</td>`;
+  const kuhusu=(m)=>`<td><strong>${escH(m.mteja)}</strong>${mradiLebo(m.mradi)}</td>`;
   const vitendo=(m)=>`<td style="display:flex;gap:4px;flex-wrap:wrap;"><button class="btn sm gold" onclick="thibitishaMaombiStock('${m.id}')">✔ Thibitisha</button><button class="btn sm danger" onclick="kataaMaombiStockUI('${m.id}')">✖ Kataa</button></td>`;
   tb.innerHTML=list.length?list.map(m=>{
     const tarehe=(m.tarehe||m.created_at||'').slice(0,10);      // the date the officer chose for the order
@@ -8729,7 +8730,7 @@ function renderMaombiSerikaliYangu(containerId,aina_chanzo){
     const haliCell=`<td${rs}><span class="pill ${haliCls}">${haliTxt}</span>${invBtn}${futaBtn}${rejected?`<div style="font-size:11px;color:var(--a-muted);margin-top:4px;">${escH((lines.find(l=>l.jibu)||{}).jibu||'')}</div>`:''}</td>`;
     if(aina_chanzo==='Bidhaa'){
       const sehemuB=(l)=>`<td style="font-size:12px;">${escH(l.jina)}</td><td class="num" style="white-space:nowrap;">${l.idadi} ${escH(l.kipimo||'pc')}</td><td style="font-size:12px;"><b>${escH(BRANCHES[l.tawi]||l.tawi)}</b>${ikoni(l)}</td>`;
-      return `<tr><td${rs}>${(lines[0].tarehe||lines[0].created_at||'').slice(0,10)}</td><td${rs}>${escH(mteja)}</td>${sehemuB(lines[0])}<td class="num"${rs}>${pesa(jumla)}</td>${haliCell}</tr>`+lines.slice(1).map(l=>`<tr>${sehemuB(l)}</tr>`).join('');
+      return `<tr><td${rs}>${(lines[0].tarehe||lines[0].created_at||'').slice(0,10)}</td><td${rs}><strong>${escH(mteja)}</strong>${[...new Set(lines.map(l=>(l.mradi||'').trim()).filter(Boolean))].map(x=>mradiLebo(x)).join('')}</td>${sehemuB(lines[0])}<td class="num"${rs}>${pesa(jumla)}</td>${haliCell}</tr>`+lines.slice(1).map(l=>`<tr>${sehemuB(l)}</tr>`).join('');
     }
     return `<tr><td>${(lines[0].tarehe||lines[0].created_at||'').slice(0,10)}</td><td>${escH(mteja)}</td><td style="font-size:12px;">${escH(items)}</td><td class="num">${pesa(jumla)}</td>${haliCell}</tr>`;
   }).join(''):safuTupu(aina_chanzo==='Bidhaa'?7:5,aina_chanzo==='Bidhaa'?'Bado hujatuma order yoyote.':'Bado hujatuma agizo lolote.');
