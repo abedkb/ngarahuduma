@@ -1593,8 +1593,8 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       </div>
     </section>
     <section id="zorder" class="page">
-      <div class="topbar"><div class="topbar-left"><h2 class="zl" data-z="zorder">Order</h2><p>Order za serikali/kampuni kutoka stoo yako — ni zako peke yako, hazihusiani na order za kampuni.</p></div></div>
-      <div class="section" id="zoEntrySection">
+      <div class="topbar"><div class="topbar-left"><h2 class="zl" data-z="zorder">Order</h2><p>Maombi ya order kutoka kwa Afisa wa Order yanayohitaji bidhaa za stoo yako. Hapa unathibitisha au kukataa.</p></div></div>
+      <div class="section" id="zoEntrySection" style="display:none">
         <div class="section-header"><h3>➕ Order Mpya</h3></div>
         <div class="section-body">
           <div id="notifyZo" class="notify"></div>
@@ -1623,7 +1623,15 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
           <div class="controls"><button class="btn gold" id="zo-btn" onclick="hifadhiZOrder()">💾 Hifadhi Order na Utengeneze Invoice</button></div>
         </div>
       </div>
-      <div class="section">
+      <div class="section" id="zoMaombiSection">
+        <div class="section-header"><h3>🏛 Maombi ya Order Yanayosubiri Idhini Yako</h3></div>
+        <div class="section-body"><p style="font-size:12px;color:var(--a-muted);margin-bottom:10px;">Afisa wa Order anaomba bidhaa kutoka stoo yako kwa ajili ya order ya kampuni. Ukithibitisha, bidhaa zinapunguzwa mara moja na kuhesabiwa kama mauzo yako kwa bei ya stoo; invoice inaandaliwa na Afisa wa Order za Serikali.</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Tarehe</th><th>Mteja</th><th>Particulars</th><th class="num">QTY</th><th class="num">Unit Price</th><th class="num">Jumla</th><th></th><th>Kitendo</th></tr></thead>
+          <tbody id="tbody-maombi-stock-zuhura"></tbody>
+        </table></div></div>
+      </div>
+      <div class="section" id="zoZangu" style="display:none">
         <div class="section-header"><h3>📋 Order Zangu</h3>
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
             <label style="font-size:11px;color:var(--a-muted);display:flex;align-items:center;gap:4px;">Kuanzia <input type="date" id="zo-kuanzia" onchange="renderZOrder()" style="width:auto"/></label>
@@ -4084,6 +4092,7 @@ function applyRoleUI(){
   // no longer needed for anyone.
   const bidhaaMpyaEntry=$('bidhaaMpyaEntrySection');if(bidhaaMpyaEntry)bidhaaMpyaEntry.style.display='none';
   const skEntry=$('serikaliEntrySection');if(skEntry)skEntry.style.display=(userRole==='serikali_mauzo')?'':'none'; // only the Government SALES officers send orders
+  if((userRole==='serikali'||userRole==='serikali_mauzo')&&!BRANCHES.zuhura)BRANCHES.zuhura='Zuhura';      // orders can also be taken from Zuhura's shelf
   // The same page does two jobs (sending orders / preparing invoices), so its name follows the person using it.
   const skNav=(userRole==='serikali')?'Invoice za Order':(userRole==='serikali_mauzo'?'Order':'Order za Serikali'),skTab=(userRole==='serikali')?'Invoice':(userRole==='serikali_mauzo'?'Order':'Mauzo');
   document.querySelectorAll('.nav-btn[data-page="serikali"]').forEach(b=>{const t=[...b.childNodes].reverse().find(x=>x.nodeType===3&&x.textContent.trim());if(t)t.textContent=skNav;});
@@ -4215,7 +4224,7 @@ function fetchAllTables(hotOnly,lazima=true){
       ()=>DB.getKama('maombi_marekebisho','order=created_at.desc&limit=300',lazima),
       ()=>DB.getKama('mauzo_serikali','deleted_at=is.null&order=created_at.desc',lazima),
       ()=>DB.getKama('mafuta_mauzo_serikali','deleted_at=is.null&order=created_at.desc',lazima),
-      ()=>DB.getKama('maombi_stock_serikali','order=created_at.desc&limit=300',lazima)
+      ()=>DB.getKama('maombi_stock_serikali','order=created_at.desc',lazima)
     ];
   return endeshaKwaKikomo(kazi.map((k,i)=>((hotOnly&&BARIDI.has(i))||(userRole==='cashier'&&MAFUTA_IDX.has(i)))?()=>Promise.resolve(null):k),7);   // null = "keep what you have"
 }
@@ -4241,9 +4250,13 @@ async function _runLoad(hotOnly,lazima){
     if(Array.isArray(fp))allMafutaManunuzi=fp;
     if(Array.isArray(sa)&&sa[0])salioAwali=sa[0];
     if(Array.isArray(mo))allMaombi=mo;
-    if(Array.isArray(sk))allSerikali=sk.filter(x=>!niTawiLaFaragha(x.tawi));      // her private orders (tawi zuhura) never mix with the company's
+    if(Array.isArray(sk))allSerikali=sk.filter(x=>!(niTawiLaFaragha(x.tawi)&&String(x.invoice_no||'').startsWith('ZG-')));      // her PRIVATE orders (ZG-…) never mix with the company's; company orders taken from her shelf (GOV-…) do
     if(Array.isArray(skm))allSerikaliMafuta=skm;
     if(Array.isArray(mst))allMaombiStock=mst;
+    if(userRole==='serikali_mauzo'){      // the order officer may take goods from Zuhura's shelf too (only name, unit, quantity and shelf price are shared)
+      try{const h=await authHeaders();const r=await fetch(`${SB_URL}/rest/v1/rpc/order_bidhaa_za_zuhura`,{method:'POST',headers:h,body:'{}'});const z=await r.json();
+        if(Array.isArray(z))allBidhaa=allBidhaa.filter(x=>x.tawi!=='zuhura').concat(z.map(x=>Object.assign({deleted_at:null},x,{tawi:'zuhura'})));}catch(_e){}
+    }
     { const op=await opP; if(Array.isArray(op))allOdaPampu=op; }
     if(userRole==='cashier'){allMafutaMauzo=[];allMafutaManunuzi=[];allSerikaliMafuta=[];}   // (the very first load starts before the role is known)
     if(!hotOnly)_lastFullLoad=Date.now();
@@ -6848,7 +6861,8 @@ function anzaZOrder(){
   const dl=$('zo-bidhaa-sugg');if(dl)dl.innerHTML=chaguoZaBidhaaMauzo().map(c=>`<option value="${escH(c.value)}"></option>`).join('');
   if($('zoGridBody')&&!$('zoGridBody').children.length)jengaGridZo();
   zoMalipoBadilika();
-  const e=$('zoEntrySection');if(e)e.style.display=zoNiYeye()?'':'none';      // the Director only looks
+  const e=$('zoEntrySection');if(e)e.style.display='none';      // Zuhura makes no orders of her own: she only answers requests from the order officer
+  const zm=$('zoMaombiSection');if(zm)zm.style.display=zoNiYeye()?'':'none';      // only she answers requests from the order officer
   pakiaZOrder();
 }
 function zoMalipoBadilika(){
@@ -8135,7 +8149,7 @@ function futaSerikaliRekodi(id,onDone){
 let serikaliInaHifadhi=false;
 function jaziTawiSerikali(){
   const sel=$('sk-tawi');if(!sel||sel.options.length)return;
-  sel.innerHTML=Object.entries(HARDWARE_BRANCHES).filter(([k])=>!TAWI_BILA_OMBI_SERIKALI.includes(k)).map(([k,l])=>`<option value="${k}">${l}</option>`).join('');
+  sel.innerHTML=Object.entries(HARDWARE_BRANCHES).filter(([k])=>!TAWI_BILA_OMBI_SERIKALI.includes(k)&&k!=='zuhura').map(([k,l])=>`<option value="${k}">${l}</option>`).join('')+'<option value="zuhura">Zuhura</option>';
 }
 function jaziBidhaaSerikali(){
   const sel=$('sk-bidhaa'),tawi=$('sk-tawi')?$('sk-tawi').value:'';if(!sel)return;
@@ -8361,7 +8375,7 @@ function renderSerikali(){
   const ndiMauzo=userRole==='serikali_mauzo';
   if(ndiMauzo){jaziTawiSerikali();jaziBidhaaSerikali();renderDraftSerikali();}
   // One page, two jobs: the order senders never see invoices; the invoice officer and GM see the queue + invoices.
-  const sk=$('skInvoiceListSection');if(sk)sk.style.display=ndiMauzo?'none':'';
+  const sk=$('skInvoiceListSection');if(sk)sk.style.display='';      // the order officer sees the invoices made from her orders too (print only)
   const maelezo={serikali_mauzo:'Tuma order za bidhaa kwa matawi. Tawi hukubali kwa bei yake ya stoo; invoice huandaliwa na Afisa wa Order za Serikali.',
                  serikali:'Order zilizokubaliwa na matawi zinafika hapa — weka bei rasmi ya serikali na utengeneze invoice.',
                  gm:'Order za serikali zinazosubiri invoice na invoice zilizotolewa (kuangalia tu).'};
@@ -8371,7 +8385,8 @@ function renderSerikali(){
   const jumla=allSerikali.reduce((a,s)=>a+Number(s.jumla||0),0);
   const imelipwa=allSerikali.filter(s=>s.hali_malipo==='Imelipwa').reduce((a,s)=>a+Number(s.jumla||0),0);
   const sm=$('sk-summary');
-  if(sm)sm.innerHTML=`<div style="display:flex;gap:28px;flex-wrap:wrap;margin-bottom:14px;"><div><span style="font-size:11px;color:var(--a-muted);text-transform:uppercase;">Jumla ya Invoice</span><br><strong style="font-size:18px;">${pesa(jumla)}</strong></div><div><span style="font-size:11px;color:var(--a-muted);text-transform:uppercase;">Imelipwa</span><br><strong style="font-size:18px;color:var(--a-green,#4ade80);">${pesa(imelipwa)}</strong></div><div><span style="font-size:11px;color:var(--a-muted);text-transform:uppercase;">Haijalipwa</span><br><strong style="font-size:18px;color:var(--a-red,#f87171);">${pesa(jumla-imelipwa)}</strong></div></div>`;
+  if(sm&&ndiMauzo)sm.innerHTML='';
+  else if(sm)sm.innerHTML=`<div style="display:flex;gap:28px;flex-wrap:wrap;margin-bottom:14px;"><div><span style="font-size:11px;color:var(--a-muted);text-transform:uppercase;">Jumla ya Invoice</span><br><strong style="font-size:18px;">${pesa(jumla)}</strong></div><div><span style="font-size:11px;color:var(--a-muted);text-transform:uppercase;">Imelipwa</span><br><strong style="font-size:18px;color:var(--a-green,#4ade80);">${pesa(imelipwa)}</strong></div><div><span style="font-size:11px;color:var(--a-muted);text-transform:uppercase;">Haijalipwa</span><br><strong style="font-size:18px;color:var(--a-red,#f87171);">${pesa(jumla-imelipwa)}</strong></div></div>`;
   tb.innerHTML=allSerikali.length?allSerikali.map(s=>{
     const paid=s.hali_malipo==='Imelipwa';
     let acts=`<button class="btn sm secondary" onclick="onyeshaInvoiceSerikaliNo('${s.invoice_no}')">🖨</button>`;
@@ -8646,7 +8661,8 @@ function renderMaombiSerikaliYangu(containerId,aina_chanzo){
     const rs=(aina_chanzo==='Bidhaa'&&lines.length>1)?` rowspan="${lines.length}"`:'';
     const naweFuta=(userRole==='serikali_mauzo'&&aina_chanzo==='Bidhaa'&&!confirmed&&!invoiced);      // an order no branch has accepted yet can still be taken back
     const futaBtn=naweFuta?`<div style="margin-top:6px;"><button class="btn sm danger" onclick="futaOrderYangu('${kundi}')">🗑 Futa Order</button></div>`:'';
-    const haliCell=`<td${rs}><span class="pill ${haliCls}">${haliTxt}</span>${futaBtn}${rejected?`<div style="font-size:11px;color:var(--a-muted);margin-top:4px;">${escH((lines.find(l=>l.jibu)||{}).jibu||'')}</div>`:''}</td>`;
+    const invBtn=(aina_chanzo==='Bidhaa'&&invoiced)?`<div style="margin-top:6px;"><button class="btn sm secondary" onclick="onyeshaInvoiceSerikaliNo('${escH(invoiced.invoice_no)}')">🖨 Fungua Invoice</button></div>`:'';
+    const haliCell=`<td${rs}><span class="pill ${haliCls}">${haliTxt}</span>${invBtn}${futaBtn}${rejected?`<div style="font-size:11px;color:var(--a-muted);margin-top:4px;">${escH((lines.find(l=>l.jibu)||{}).jibu||'')}</div>`:''}</td>`;
     if(aina_chanzo==='Bidhaa'){
       const sehemuB=(l)=>`<td style="font-size:12px;">${escH(l.jina)}</td><td class="num" style="white-space:nowrap;">${l.idadi} ${escH(l.kipimo||'pc')}</td><td style="font-size:12px;"><b>${escH(BRANCHES[l.tawi]||l.tawi)}</b>${ikoni(l)}</td>`;
       return `<tr><td${rs}>${(lines[0].tarehe||lines[0].created_at||'').slice(0,10)}</td><td${rs}>${escH(mteja)}</td>${sehemuB(lines[0])}<td class="num"${rs}>${pesa(jumla)}</td>${haliCell}</tr>`+lines.slice(1).map(l=>`<tr>${sehemuB(l)}</tr>`).join('');
@@ -9088,7 +9104,7 @@ async function skaniBinCard(){
     <div class="table-wrap"><table><thead><tr><th>Tarehe</th><th>Maelezo</th><th class="num">Ndani</th><th class="num">Nje</th><th class="num">Salio</th></tr></thead><tbody>${safu}</tbody></table></div>
     <div style="font-size:11.5px;color:var(--a-muted);margin-top:6px;">Hii ni ya kuhakiki tu — haibadilishi stoo.</div></div>`;
 }
-function renderAll(){renderZMapato();renderDashibodi();renderMaagizo();renderManunuzi();renderMauzo();renderUhamisho();renderUhamishoSent();renderGharama();renderStock();renderWateja();renderWanunuzi();renderRipoti();renderKilaSiku();renderGrid(curFilter);renderMafuta();renderFomuTransfer();renderFomuManunuzi();renderBinCardSuggestions();hesabuGridMauzo();renderOmbiInProgress();renderMarekebisho();renderSerikali();renderSerikaliMafuta();renderWatejaSerikali();renderMaombiStockTawi('tbody-maombi-stock-mauzo','Bidhaa');renderMaombiStockTawi('tbody-maombi-stock-mafuta','Mafuta');renderMaombiSerikaliYangu('tbody-skm-maombi-yangu','Mafuta');renderMaombiSerikaliYangu('tbody-sk-maombi-yangu','Bidhaa');}
+function renderAll(){renderZMapato();renderDashibodi();renderMaagizo();renderManunuzi();renderMauzo();renderUhamisho();renderUhamishoSent();renderGharama();renderStock();renderWateja();renderWanunuzi();renderRipoti();renderKilaSiku();renderGrid(curFilter);renderMafuta();renderFomuTransfer();renderFomuManunuzi();renderBinCardSuggestions();hesabuGridMauzo();renderOmbiInProgress();renderMarekebisho();renderSerikali();renderSerikaliMafuta();renderWatejaSerikali();renderMaombiStockTawi('tbody-maombi-stock-mauzo','Bidhaa');if(typeof zoNiYeye==='function'&&zoNiYeye())renderMaombiStockTawi('tbody-maombi-stock-zuhura','Bidhaa');renderMaombiStockTawi('tbody-maombi-stock-mafuta','Mafuta');renderMaombiSerikaliYangu('tbody-skm-maombi-yangu','Mafuta');renderMaombiSerikaliYangu('tbody-sk-maombi-yangu','Bidhaa');}
 
 /* ─── WANUNUZI — broadcast ─── */
 async function ongezaMteja(){
