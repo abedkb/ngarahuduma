@@ -2346,7 +2346,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
           <p style="font-size:12px;color:var(--a-muted);margin-bottom:12px;">Chagua tawi na bidhaa unazoomba. Tawi litakubali order kwa bei yake ya stoo. Invoice ya serikali (kwa bei rasmi) huandaliwa na Afisa wa Order za Serikali baada ya matawi kukubali.</p>
           <div id="notifySerikali" class="notify"></div>
           <div class="form-grid">
-            <div class="field"><label>Tarehe ya Order</label><input type="date" id="sk-tarehe" readonly style="opacity:.8;cursor:not-allowed;" title="Tarehe ya leo — order, tawi na invoice zote zitatumia tarehe hii"/></div>
+            <div class="field"><label>Tarehe ya Order</label><input type="date" id="sk-tarehe" title="Matawi na invoice vitatumia tarehe hii"/></div>
             <div class="field"><label>Jina la Mteja (Taasisi ya Serikali / Kampuni / Mteja Binafsi) *</label><input type="text" id="sk-mteja" placeholder="mfano: Halmashauri ya Ngara, au jina la kampuni"/></div>
             <div class="field"><label>Aina ya Mteja</label><select id="sk-aina-taasisi"><option value="Serikali">Taasisi ya Serikali</option><option value="Kampuni">Kampuni</option><option value="Mteja Binafsi">Mteja Binafsi</option></select></div>
             <div class="field"><label>Mradi (Project)</label><input type="text" id="sk-mradi" placeholder="jina la mradi"/></div>
@@ -2372,7 +2372,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       </div>
       <div class="section" id="skTrackerSection">
         <div class="section-header"><h3>⏳ Order Zangu — Hali ya Kila Order</h3></div>
-        <div class="section-body"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;"><label style="font-size:11px;color:var(--a-muted);display:flex;align-items:center;gap:4px;">Kuanzia <input type="date" id="sk-y-kuanzia" onchange="renderSerikali()" style="width:auto"/></label><label style="font-size:11px;color:var(--a-muted);display:flex;align-items:center;gap:4px;">Hadi <input type="date" id="sk-y-hadi" onchange="renderSerikali()" style="width:auto"/></label><button class="btn sm secondary" onclick="skFutaChujio('y')">Zote</button></div><div class="table-wrap"><table>
+        <div class="section-body"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;"><label style="font-size:11px;color:var(--a-muted);display:flex;align-items:center;gap:4px;">Kuanzia <input type="date" id="sk-y-kuanzia" onchange="skChujioBadilika()" style="width:auto"/></label><label style="font-size:11px;color:var(--a-muted);display:flex;align-items:center;gap:4px;">Hadi <input type="date" id="sk-y-hadi" onchange="skChujioBadilika()" style="width:auto"/></label><button class="btn sm secondary" onclick="skFutaChujio('y')">Zote</button></div><div class="table-wrap"><table>
           <thead><tr><th>Tarehe</th><th>Mteja</th><th>Bidhaa</th><th class="num">Idadi</th><th>Imetoka Stoo</th><th>Thamani (bei ya stoo)</th><th>Hali</th></tr></thead>
           <tbody id="tbody-sk-maombi-yangu"></tbody>
         </table></div></div>
@@ -2380,7 +2380,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       <div class="section" id="skQueueSection" style="display:none;">
         <div class="section-header"><h3>📥 Order Zinazosubiri Invoice</h3></div>
         <div class="section-body">
-          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;"><label style="font-size:11px;color:var(--a-muted);display:flex;align-items:center;gap:4px;">Kuanzia <input type="date" id="sk-q-kuanzia" onchange="renderSerikali()" style="width:auto"/></label><label style="font-size:11px;color:var(--a-muted);display:flex;align-items:center;gap:4px;">Hadi <input type="date" id="sk-q-hadi" onchange="renderSerikali()" style="width:auto"/></label><button class="btn sm secondary" onclick="skFutaChujio('q')">Zote</button></div><p style="font-size:12px;color:var(--a-muted);margin-bottom:10px;">Matawi yamekubali maagizo haya kwa bei ya stoo. Weka bei rasmi ya serikali na utengeneze invoice. <span id="skQueueWaiting" style="font-weight:600;"></span></p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;"><label style="font-size:11px;color:var(--a-muted);display:flex;align-items:center;gap:4px;">Kuanzia <input type="date" id="sk-q-kuanzia" onchange="skChujioBadilika()" style="width:auto"/></label><label style="font-size:11px;color:var(--a-muted);display:flex;align-items:center;gap:4px;">Hadi <input type="date" id="sk-q-hadi" onchange="skChujioBadilika()" style="width:auto"/></label><button class="btn sm secondary" onclick="skFutaChujio('q')">Zote</button></div><p style="font-size:12px;color:var(--a-muted);margin-bottom:10px;">Matawi yamekubali maagizo haya kwa bei ya stoo. Weka bei rasmi ya serikali na utengeneze invoice. <span id="skQueueWaiting" style="font-weight:600;"></span></p>
           <div class="table-wrap"><table>
             <thead><tr><th>Tarehe</th><th>Mteja / Mradi</th><th>Bidhaa</th><th class="num">Idadi</th><th>Imetoka Stoo</th><th class="num">Thamani ya Stoo</th><th>Kitendo</th></tr></thead>
             <tbody id="tbody-sk-queue"></tbody>
@@ -2413,7 +2413,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       <div class="section" id="skInvoiceListSection">
         <div class="section-header"><h3>📋 Invoice za Serikali</h3></div>
         <div class="section-body">
-          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;"><label style="font-size:11px;color:var(--a-muted);display:flex;align-items:center;gap:4px;">Kuanzia <input type="date" id="sk-i-kuanzia" onchange="renderSerikali()" style="width:auto"/></label><label style="font-size:11px;color:var(--a-muted);display:flex;align-items:center;gap:4px;">Hadi <input type="date" id="sk-i-hadi" onchange="renderSerikali()" style="width:auto"/></label><button class="btn sm secondary" onclick="skFutaChujio('i')">Zote</button></div><div id="sk-summary"></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;"><label style="font-size:11px;color:var(--a-muted);display:flex;align-items:center;gap:4px;">Kuanzia <input type="date" id="sk-i-kuanzia" onchange="skChujioBadilika()" style="width:auto"/></label><label style="font-size:11px;color:var(--a-muted);display:flex;align-items:center;gap:4px;">Hadi <input type="date" id="sk-i-hadi" onchange="skChujioBadilika()" style="width:auto"/></label><button class="btn sm secondary" onclick="skFutaChujio('i')">Zote</button></div><div id="sk-summary"></div>
           <div class="table-wrap"><table>
             <thead><tr><th>Invoice</th><th>Tarehe</th><th>Taasisi / Mradi</th><th>Bidhaa</th><th>Idadi</th><th>Bei ya Serikali</th><th>Jumla</th><th>Tawi la Stoo</th><th>Malipo</th><th>Kitendo</th></tr></thead>
             <tbody id="tbody-serikali"></tbody>
@@ -8201,7 +8201,7 @@ async function hifadhiInvoiceSerikali(){
   try{
     // Stock is NOT taken yet and NO price is sent. Each branch confirms at its own stock price;
     // the invoice (at the official government price) is prepared later by the invoice officer.
-    const payload={aina_chanzo:'Bidhaa',tarehe:leoISO(),mteja,aina_taasisi:$('sk-aina-taasisi').value,mradi:$('sk-mradi').value.trim(),simu:$('sk-simu').value.trim(),
+    const payload={aina_chanzo:'Bidhaa',tarehe:$('sk-tarehe').value||leoISO(),mteja,aina_taasisi:$('sk-aina-taasisi').value,mradi:$('sk-mradi').value.trim(),simu:$('sk-simu').value.trim(),
       items:serikaliDraft.map(d=>({tawi:d.tawi,bidhaa_id:d.bidhaa_id,idadi:d.idadi}))};
     const h=await authHeaders();
     const r=await fetch(`${SB_URL}/rest/v1/rpc/serikali_tuma_maombi_stock`,{method:'POST',headers:h,body:JSON.stringify({p:payload})});
@@ -8246,7 +8246,8 @@ const skSiku=(x)=>String(x.tarehe||x.created_at||'').slice(0,10);
 const skKaribu=(a,b)=>skSiku(b).localeCompare(skSiku(a))||String(b.created_at||'').localeCompare(String(a.created_at||''));      // newest order date first
 const skChujio=(k)=>({a:($('sk-'+k+'-kuanzia')||{}).value||'',b:($('sk-'+k+'-hadi')||{}).value||''});
 const skNdani=(siku,c)=>(!c.a||siku>=c.a)&&(!c.b||siku<=c.b);
-function skFutaChujio(k){['kuanzia','hadi'].forEach(x=>{const e=$('sk-'+k+'-'+x);if(e)e.value='';});renderSerikali();}
+function skChujioBadilika(){renderSerikali();renderMaombiSerikaliYangu('tbody-sk-maombi-yangu','Bidhaa');}
+function skFutaChujio(k){['kuanzia','hadi'].forEach(x=>{const e=$('sk-'+k+'-'+x);if(e)e.value='';});skChujioBadilika();}
 function renderSkQueue(){
   const tb=$('tbody-sk-queue'),wrap=$('skQueueSection');if(!tb||!wrap)return;
   const show=userRole==='serikali'||userRole==='gm';
@@ -8386,7 +8387,7 @@ function renderSerikali(){
   const ndiMauzo=userRole==='serikali_mauzo';
   if(ndiMauzo){jaziTawiSerikali();jaziBidhaaSerikali();renderDraftSerikali();}
   // One page, two jobs: the order senders never see invoices; the invoice officer and GM see the queue + invoices.
-  if($('sk-tarehe'))$('sk-tarehe').value=leoISO();      // fixed to today: the order, the branch sale and the invoice all carry this date
+  if($('sk-tarehe')&&!$('sk-tarehe').value)$('sk-tarehe').value=leoISO();      // she may pick any date; the branch sale and the invoice carry the date she chose
   const sk=$('skInvoiceListSection');if(sk)sk.style.display='';      // the order officer sees the invoices made from her orders too (print only)
   const maelezo={serikali_mauzo:'Tuma order za bidhaa kwa matawi. Tawi hukubali kwa bei yake ya stoo; invoice huandaliwa na Afisa wa Order za Serikali.',
                  serikali:'Order zilizokubaliwa na matawi zinafika hapa — weka bei rasmi ya serikali na utengeneze invoice.',
