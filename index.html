@@ -659,6 +659,10 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 .field:has(>input[readonly])>label::after,.field:has(>select:disabled)>label::after{content:"AUTO";margin-left:6px;font-size:9px;font-weight:700;letter-spacing:.06em;color:#98A0B5;border:1px solid rgba(152,160,181,.5);border-radius:4px;padding:0 4px;vertical-align:1px;}
 /* cells in a table that the system calculates */
 .grid-entry td.g-jumla,.grid-entry td.g-bei,.grid-entry td.g-lita,.grid-entry td.g-kiasi{background:#F1EFE9;color:#5F5A4E;font-family:'IBM Plex Mono',monospace;font-weight:700;text-align:right;box-shadow:inset 0 0 0 1px #D5D0C4;}
+
+.grid-entry td.g-bei.g-bei-hariri{background:#FFF7EC;box-shadow:inset 0 0 0 2px #FF8A57;}
+.grid-entry td.g-bei.g-bei-hariri input.g-bei-in{width:100%;min-width:104px;background:#fff;color:#1d1d1f;border:1px solid #FF8A57;border-radius:6px;font-weight:700;text-align:right;}
+.grid-entry td.g-bei.g-bei-hariri .g-bei-min{display:block;font-size:10px;font-weight:600;color:#B25E00;margin-top:3px;font-family:inherit;white-space:normal;}
 .oto-lebo{display:block;font-size:8.5px;font-weight:700;letter-spacing:.08em;color:#98A0B5;margin-top:1px;}
 /* ── DAILY SALES REPORT FORM: the layout of the paper form ── */
 .ds-tbl{width:100%;border-collapse:collapse;table-layout:fixed;border:2px solid #1d1d1d;font-family:Arial,Helvetica,sans-serif;color:#111;margin:0;}
@@ -2140,7 +2144,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
          the branch switcher); Front Desk Officers automatically see only
          their own branch, same as everywhere else in the system. -->
     <section id="fomu" class="page">
-      <div class="topbar"><div class="topbar-left"><h2>Fomu</h2><p>Fomu za kuchapisha — Daily Sales Report, Transfer, Purchase, Bin Card, Monthly Closing, Discount, Malipo ya Benki na Cash Expenditure.</p></div></div>
+      <div class="topbar"><div class="topbar-left"><h2>Fomu</h2><p>Fomu za kuchapisha — Daily Sales Report, Transfer, Order, Purchase, Bin Card, Monthly Closing, Discount, Malipo ya Benki na Cash Expenditure.</p></div></div>
       <div class="section"><div class="section-header"><h3>📊 Daily Sales Report Form</h3></div>
     <div class="section-body">
       <div id="notifyDaily" class="notify"></div>
@@ -2156,6 +2160,12 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
         <div class="section-body"><div class="table-wrap"><table>
           <thead><tr><th>Tarehe</th><th>Bidhaa</th><th>Kutoka</th><th>Kwenda</th><th>Hali</th><th>Fomu</th></tr></thead>
           <tbody id="tbody-fomu-transfer"><tr class="loading-row"><td colspan="6">Inapakia...</td></tr></tbody>
+        </table></div></div>
+      </div>
+      <div class="section"><div class="section-header"><h3>📝 Fomu ya Order (Order Form)</h3></div>
+        <div class="section-body"><div class="table-wrap"><table>
+          <thead><tr><th>Tarehe</th><th>Mteja / Mradi</th><th>Bidhaa</th><th class="num">Jumla</th><th>Fomu</th></tr></thead>
+          <tbody id="tbody-fomu-order"><tr class="loading-row"><td colspan="5">Inapakia...</td></tr></tbody>
         </table></div></div>
       </div>
       <div class="section"><div class="section-header"><h3>📅 Monthly Closing Stock Form</h3></div>
@@ -2891,7 +2901,12 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       <div class="field"><label>Bei ya Kuuzia (TZS)</label><input type="number" id="e-bei"/></div>
       <div class="field"><label>Bei ya Kununulia (TZS)</label><input type="number" id="e-bei-gharama"/></div>
       <div class="field"><label>Kipimo</label>
-        <select id="e-kipimo"><option value="pc">Piece / Pisi</option><option value="bag">Bag / Mifuko</option><option value="roll">Roll / Rola</option><option value="meter">Meter / Mita</option><option value="litre">Litre / Lita</option><option value="kg">Kg / Kilo</option><option value="tonne">Tonne / Tani</option><option value="pack">Pack / Packets</option><option value="sheet">Sheet / Bati</option><option value="box">Box / Kasha</option><option value="katoni">Katoni / Carton</option><option value="set">Set / Seti</option><option value="pair">Pair / Jozi</option><option value="bando">Bando / Bundle</option><option value="ndoo">Ndoo / Bucket</option><option value="kopo">Kopo / Can</option></select>
+        <select id="e-kipimo" onchange="onEditKipimoBadilika()"><option value="pc">Piece / Pisi</option><option value="bag">Bag / Mifuko</option><option value="roll">Roll / Rola</option><option value="meter">Meter / Mita</option><option value="litre">Litre / Lita</option><option value="kg">Kg / Kilo</option><option value="tonne">Tonne / Tani</option><option value="pack">Pack / Packets</option><option value="sheet">Sheet / Bati</option><option value="box">Box / Kasha</option><option value="katoni">Katoni / Carton</option><option value="set">Set / Seti</option><option value="pair">Pair / Jozi</option><option value="bando">Bando / Bundle</option><option value="ndoo">Ndoo / Bucket</option><option value="kopo">Kopo / Can</option></select>
+      </div>
+      <div class="field full" id="e-kigawe-wrap" style="display:none;background:rgba(255,138,87,.10);border:1px solid rgba(255,138,87,.45);border-radius:10px;padding:10px 12px;">
+        <label id="e-kigawe-lebo">1 kipimo cha zamani ni sawa na ngapi cha kipya?</label>
+        <input type="number" id="e-kigawe" step="any" min="0" inputmode="decimal" placeholder="mf. 100" oninput="onEditKigawe()"/>
+        <div id="e-kigawe-maelezo" style="font-size:12px;color:var(--a-muted);margin-top:6px;"></div>
       </div>
       <div class="field"><label>Kategoria</label>
         <input type="hidden" id="e-kategoria" value=""/>
@@ -3244,6 +3259,50 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       <tr><td style="text-align:right;font-weight:700;">TOTAL CASH SALES, ORDER SALES AND TRANSFER SALES</td><td class="num" id="mcSalesTotal"></td></tr>
       <tr class="inv-total-row"><td style="text-align:right;">CLOSING BALANCE STOCK</td><td class="num" id="mcClosing"></td></tr>
     </table>
+    <div class="inv-print-btn" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="fomu-btn primary" onclick="chapishaFomu()">🖨 Chapisha / Print</button>
+      <button class="fomu-btn secondary" onclick="pakuaFomu()">⬇️ Pakua</button>
+      <button class="fomu-btn secondary" onclick="shirikiFomu()">📤 Shiriki (WhatsApp)</button>
+    </div>
+  </div>
+</div>
+
+<!-- ORDER FORM PRINT SHEET -->
+<div class="inv-overlay" id="ofOverlay">
+  <div class="inv-sheet">
+    <button class="inv-close" id="ofClose">&times;</button>
+    <div class="inv-header"><div class="inv-logo"></div></div>
+    <div class="inv-title">ORDER FORM</div>
+    <div class="inv-co">
+      <b>NGARA HUDUMA COMPANY LIMITED</b><br>
+      TIN NO. 147-228-198 — VRN NO. 40311079R<br>
+      P.O. BOX 123 NGARA, KAGERA-TANZANIA<br>
+      Email: ngarahudumacompanylimited@gmail.com<br>
+      Mobile NO. +255 764 748 447 / +255 786 029 703
+    </div>
+    <div class="inv-row2">
+      <div class="inv-field">Order No.: <span class="inv-dotline" id="ofNo" contenteditable="true" style="min-width:120px;"></span></div>
+      <div class="inv-field">Date: <span class="inv-dotline" id="ofDate"></span></div>
+    </div>
+    <div class="inv-subtitle">Customer details</div>
+    <div class="inv-row2">
+      <div class="inv-field">To: <span class="inv-dotline" id="ofTo"></span></div>
+      <div class="inv-field">Address: <span class="inv-dotline" id="ofAddress" contenteditable="true" style="min-width:120px;"></span></div>
+    </div>
+    <div class="inv-row2">
+      <div class="inv-field">TIN No.: <span class="inv-dotline" id="ofTin" contenteditable="true" style="min-width:120px;"></span></div>
+      <div class="inv-field">Phone No.: <span class="inv-dotline" id="ofPhone" contenteditable="true" style="min-width:120px;"></span></div>
+    </div>
+    <div class="inv-field">Store name: <span class="inv-dotline" id="ofStore"></span></div>
+    <table class="inv-table">
+      <thead><tr><th>S/N</th><th>Item</th><th>Description</th><th class="num">Rate</th><th class="num">Amount</th></tr></thead>
+      <tbody id="ofItemsBody"></tbody>
+      <tr class="inv-total-row"><td colspan="4" style="text-align:right;">TOTAL AMOUNT</td><td class="num" id="ofTotal"></td></tr>
+    </table>
+    <div class="inv-meta" style="margin-top:22px;">
+      Procurement Officer: <span class="inv-dotline" contenteditable="true" style="min-width:200px;"></span>
+      &nbsp;&nbsp; Signature: <span class="inv-dotline" style="min-width:160px;">&nbsp;</span>
+    </div>
     <div class="inv-print-btn" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
       <button class="fomu-btn primary" onclick="chapishaFomu()">🖨 Chapisha / Print</button>
       <button class="fomu-btn secondary" onclick="pakuaFomu()">⬇️ Pakua</button>
@@ -4182,6 +4241,7 @@ function enterAdmin(role='gm',tawi=null,jina=''){
   userNiDirector=(role==='director');
   if(userNiDirector)role='gm';          // every General Manager rule in the app applies to him
   isAdmin=true;userRole=role;userTawi=tawi;userJina=jina;
+  jengaGridMauzo();      // the sales table was built at page load, before we knew who is logged in — rebuild it so the private officer gets her price box
   if(role==='deski'&&niTawiLaFaragha(tawi))sajiliTawiLaFaragha(tawi);   // her private compartment exists only in HER session
   if(userNiDirector)Object.keys(TAWI_ZA_FARAGHA).forEach(sajiliTawiLaFaragha);   // …and in the Director's: he sees it like any other branch
   viewingTawi=(role==='deski'||role==='petroli'||role==='petroli_mauzo'||(role==='matumizi'&&tawi))?tawi:'yote';
@@ -5171,6 +5231,41 @@ async function ombaUhamisho(){
   }catch(e){arifu('notifyUhamisho','❌ Hitilafu: '+e.message,'error');}
 }
 
+// ── Fomu ya Order: the paper ORDER FORM, filled from an order the branch confirmed (one form per order, all its items). ──
+function _orderKundi(m){return m.kundi_id||m.id;}
+function _orderLines(kundi){return allMaombiStock.filter(x=>x.aina_chanzo==='Bidhaa'&&_orderKundi(x)===kundi).sort((a,b)=>String(a.created_at||'').localeCompare(String(b.created_at||'')));}
+function renderFomuOrder(){
+  const tbody=$('tbody-fomu-order');if(!tbody)return;
+  const orodha=filterByTawi(allMaombiStock).filter(m=>m.aina_chanzo==='Bidhaa'&&m.hali==='Imethibitishwa'&&!String(m.invoice_no||'').startsWith('ZG-'));
+  const vikundi={};orodha.forEach(m=>{(vikundi[_orderKundi(m)]=vikundi[_orderKundi(m)]||[]).push(m);});
+  const safu=Object.entries(vikundi).sort((a,b)=>skSiku(b[1][0]).localeCompare(skSiku(a[1][0]))||String(b[1][0].created_at||'').localeCompare(String(a[1][0].created_at||''))).slice(0,100);
+  tbody.innerHTML=safu.length?safu.map(([k,l])=>{
+    const m=l[0],jumla=l.reduce((a,x)=>a+(Number(x.jumla_stoo)||(Number(x.idadi)||0)*(Number(x.bei_stoo)||0)),0);
+    const vitu=l.length===1?escH(m.jina):`${escH(m.jina)} +${l.length-1} zaidi`;
+    return`<tr><td>${skSiku(m)}</td><td>${escH(m.mteja||'')}${m.mradi?' — '+escH(m.mradi):''}</td><td>${vitu}</td><td class="num">${pesa(jumla)}</td><td><button class="btn sm secondary" onclick="chapishaOrderForm('${k}')">🖨 Fomu</button></td></tr>`;
+  }).join(''):safuTupu(5,'Bado hakuna order zilizothibitishwa.');
+}
+function chapishaOrderForm(kundi){
+  const l=_orderLines(kundi);if(!l.length){toast('❌ Order haikupatikana');return;}
+  const m=l[0];
+  $('ofNo').textContent=m.namba_agizo||'';
+  $('ofDate').textContent=skSiku(m).split('-').reverse().join('/');
+  $('ofTo').textContent=[m.mteja,m.mradi].filter(Boolean).join(' ');
+  $('ofAddress').textContent='';$('ofTin').textContent='';$('ofPhone').textContent=m.simu_mteja||'';
+  $('ofStore').textContent=BRANCHES[m.tawi]||m.tawi;
+  let jumla=0;
+  const safu=l.map((x,i)=>{
+    const a=(Number(x.jumla_stoo)||(Number(x.idadi)||0)*(Number(x.bei_stoo)||0));jumla+=a;
+    return`<tr><td>${i+1}</td><td>${escH(x.kipimo_mteja||x.kipimo||'pc')} ${x.idadi}</td><td>${escH(x.jina)}</td><td class="num">${pesa(x.bei_stoo)}</td><td class="num">${pesa(a)}</td></tr>`;
+  });
+  for(let i=l.length;i<Math.max(20,l.length);i++)safu.push(`<tr><td>${i+1}</td><td>&nbsp;</td><td></td><td></td><td></td></tr>`);   // blank lines like the paper form (20 lines)
+  $('ofItemsBody').innerHTML=safu.join('');
+  $('ofTotal').textContent=pesa(jumla);
+  const ov=$('ofOverlay');ov.dataset.jina='order-form-'+String(m.mteja||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'-'+skSiku(m);
+  setWaPhone('ofOverlay',ADMIN_PHONE);
+  openSheet('ofOverlay');
+}
+
 // ── Fomu ya Manunuzi: direct access to the Purchase Form print sheet,
 //    same pattern as the Transfer forms list above it. ──
 function renderFomuManunuzi(){
@@ -5842,7 +5937,7 @@ function safuMauzoMpya(){
     <td><select class="g-aina" onchange="onAinaSafu(this)"><option value="Taslimu">Taslimu (Cash)</option><option value="NMB">NMB</option><option value="CRDB">CRDB</option><option value="Lipa Namba">Lipa Namba</option><option value="Mkopo">Madeni</option><option value="Mchanganyiko">Gawanya malipo</option></select>
       <div class="g-split" style="display:none"><div class="g-sp-gridi"><label>Cash<input type="number" class="g-sp-cash" min="0" step="any" inputmode="decimal" placeholder="0" oninput="onSafuMauzo(this)"/></label><label>Lipa Namba<input type="number" class="g-sp-lipa" min="0" step="any" inputmode="decimal" placeholder="0" oninput="onSafuMauzo(this)"/></label><label>NMB<input type="number" class="g-sp-nmb" min="0" step="any" inputmode="decimal" placeholder="0" oninput="onSafuMauzo(this)"/></label><label>CRDB<input type="number" class="g-sp-crdb" min="0" step="any" inputmode="decimal" placeholder="0" oninput="onSafuMauzo(this)"/></label></div><div class="g-sp-hint"></div></div></td>
     <td class="num"><input type="number" class="g-idadi" min="0" step="any" inputmode="decimal" placeholder="1" oninput="onSafuMauzo(this)"/></td>
-    <td class="num g-bei">${niFaragha()?'<input type="number" class="g-bei-in" min="0" step="any" inputmode="decimal" placeholder="Bei" oninput="onSafuMauzo(this)" style="width:100px;text-align:right;"/>':'—'}</td>
+    <td class="num g-bei${niFaragha()?' g-bei-hariri':''}">${niFaragha()?'<input type="number" class="g-bei-in" min="0" step="any" inputmode="decimal" placeholder="Bei" oninput="onSafuMauzo(this)"/><span class="g-bei-min"></span>':'—'}</td>
     <td class="num"><input type="number" class="g-punguzo" min="0" placeholder="0" oninput="onSafuMauzo(this)"/></td>
     <td class="num g-jumla">—</td>
     <td><button type="button" class="btn sm danger" onclick="futaSafuMauzo(this)" title="Ondoa mstari huu">✕</button></td>`;
@@ -5851,6 +5946,7 @@ function safuMauzoMpya(){
 }
 function jengaGridMauzo(){
   const b=$('mauzoGridBody');if(!b)return;
+  const th=document.querySelector('#mauzoGridBox thead th:nth-child(5)');if(th)th.innerHTML=niFaragha()?'Unit Price<small class="oto-lebo" style="color:#FF8A57;">HARIRI</small>':'Unit Price<small class="oto-lebo">AUTO</small>';
   b.innerHTML='';for(let i=0;i<SAFU_MWANZO_MAUZO;i++)b.appendChild(safuMauzoMpya());
   hesabuGridMauzo();
 }
@@ -5881,7 +5977,7 @@ function hesabuSafuMauzo(tr){
   if(beiIn){
     if(!p){tr.dataset.pid='';}
     else{
-      if(tr.dataset.pid!==String(p.id)){tr.dataset.pid=String(p.id);beiIn.value=p.bei_kuuzia;}      // a product was just chosen: start at its shelf price
+      if(tr.dataset.pid!==String(p.id)){tr.dataset.pid=String(p.id);beiIn.value=p.bei_kuuzia;beiIn.min=p.bei_kuuzia;beiIn.title='Bei ya chini: '+pesa(p.bei_kuuzia);const mn=tr.querySelector('.g-bei-min');if(mn)mn.textContent='Bei ya chini: '+pesa(p.bei_kuuzia);}      // a product was just chosen: start at its shelf price
       const v=parseFloat(beiIn.value);
       if(beiIn.value!==''&&v>=0)bei=v;
       if(bei<p.bei_kuuzia){hint.textContent=`Bei isiwe chini ya ${pesa(p.bei_kuuzia)}`;hint.classList.add('bad');}
@@ -6346,6 +6442,7 @@ $('ppClose') && $('ppClose').addEventListener('click',()=>closeSheet('ppOverlay'
 $('mcClose') && $('mcClose').addEventListener('click',()=>closeSheet('mcOverlay'));
 $('bcClose') && $('bcClose').addEventListener('click',()=>closeSheet('bcOverlay'));
 $('dcClose') && $('dcClose').addEventListener('click',()=>closeSheet('dcOverlay'));
+$('ofClose') && $('ofClose').addEventListener('click',()=>closeSheet('ofOverlay'));
 $('bpClose') && $('bpClose').addEventListener('click',()=>closeSheet('bpOverlay'));
 
 /* ─── GHARAMA ─── */
@@ -6535,6 +6632,25 @@ async function saveProductWithPhoto(){
   }catch(e){console.error('saveProductWithPhoto error:',e);toast('❌ '+e.message);}
   btn.disabled=false;btn.textContent='💾 Hifadhi na Onyesha Dukani';
 }
+let editAsili=null;      // the product as it was when the edit box was opened (before any unit change)
+// Changing the unit (roll -> meter): the box asks "1 roll = ? meters" and previews the new stock and price; saving converts everything.
+function onEditKipimoBadilika(){
+  if(!editAsili)return;
+  const w=$('e-kigawe-wrap'),mpya=$('e-kipimo').value,kale=editAsili.kipimo;
+  if(mpya===kale){w.style.display='none';$('e-kigawe').value='';$('e-idadi').value=editAsili.idadi;$('e-bei').value=editAsili.bei||'';$('e-bei-gharama').value=editAsili.gharama||'';return;}
+  w.style.display='';
+  const nm=(k)=>(KIPIMO_LABEL[k]||k).split(' / ')[0];
+  $('e-kigawe-lebo').textContent=`1 ${nm(kale)} ni sawa na ngapi ${nm(mpya)}?`;
+  onEditKigawe();
+}
+function onEditKigawe(){
+  if(!editAsili)return;
+  const f=parseFloat($('e-kigawe').value),mpya=$('e-kipimo').value,kale=editAsili.kipimo,nm=(k)=>(KIPIMO_LABEL[k]||k).split(' / ')[0],m=$('e-kigawe-maelezo');
+  if(!(f>0)){m.textContent='Andika namba (mf. rola 1 = mita 100) — stoo na bei vitabadilishwa kuwa kipimo kipya, pamoja na historia ya manunuzi na mauzo ya bidhaa hii.';return;}
+  const idadi=Math.round(editAsili.idadi*f*1000)/1000,bei=Math.round(editAsili.bei/f),gh=Math.round(editAsili.gharama/f);
+  $('e-idadi').value=idadi;$('e-bei').value=bei;$('e-bei-gharama').value=gh;
+  m.textContent=`Stoo: ${editAsili.idadi} ${nm(kale)} → ${idadi} ${nm(mpya)} · Bei ya kuuzia: ${pesa(editAsili.bei)} → ${pesa(bei)} kwa ${nm(mpya)}${bei*f!==editAsili.bei?' (imekadiriwa kwa namba nzima — unaweza kuiandika upya juu)':''}`;
+}
 let editUploadFile=null;
 function funguaHaririBidhaa(id){
   const p=allBidhaa.find(x=>x.id===id);if(!p)return;
@@ -6544,6 +6660,8 @@ function funguaHaririBidhaa(id){
   $('e-bei').value=p.bei_kuuzia||'';
   $('e-bei-gharama').value=p.bei_kununulia||'';
   $('e-kipimo').value=p.kipimo||'pc';
+  editAsili={kipimo:p.kipimo||'pc',idadi:Number(p.idadi)||0,bei:Number(p.bei_kuuzia)||0,gharama:Number(p.bei_kununulia)||0};
+  $('e-kigawe').value='';$('e-kigawe-wrap').style.display='none';
   $('e-kategoria').value=p.category||p.aina||'mengineyo';
   $('e-kiwango-chini').value=p.kiwango_chini||10;
   $('e-idadi').value=(p.idadi!=null?p.idadi:'');
@@ -6575,10 +6693,20 @@ async function hifadhiHaririBidhaa(){
   if(!jina){$('notifyEditBidhaa').textContent='❌ Jina la bidhaa linahitajika';$('notifyEditBidhaa').className='notify error show';return;}
   const btn=$('e-save-btn');btn.disabled=true;btn.textContent='Inahifadhi...';
   try{
-    const patch={jina,jina_sw,bei_kuuzia:bei_u,bei_kununulia:bei_k,kipimo,category,aina:category,kiwango_chini,badge,maelezo_sw,maelezo_en};
+    const kipimoKimebadilika=!!editAsili&&kipimo!==editAsili.kipimo;
+    if(kipimoKimebadilika){
+      const f=parseFloat($('e-kigawe').value);
+      if(!(f>0))throw new Error(`Andika 1 kipimo cha zamani ni sawa na ngapi cha kipya`);
+      const h=await authHeaders(),r=await fetch(`${SB_URL}/rest/v1/rpc/badilisha_kipimo_bidhaa`,{method:'POST',headers:h,body:JSON.stringify({p_id:editingBidhaaId,p_kipimo:kipimo,p_kigawe:f})});
+      const j=await r.json().catch(()=>({}));
+      if(!r.ok)throw new Error(j.message||'Kipimo hakikubadilishwa');
+      editAsili=null;
+    }
+    const patch={jina,jina_sw,bei_kuuzia:bei_u,bei_kununulia:bei_k,category,aina:category,kiwango_chini,badge,maelezo_sw,maelezo_en};
+    if(!kipimoKimebadilika)patch.kipimo=kipimo;
     const idadiMpya=$('e-idadi').value.trim()===''?null:Math.round(parseFloat($('e-idadi').value)*1000)/1000;
     const kb0=allBidhaa.find(x=>x.id===editingBidhaaId);
-    if(idadiMpya!==null){
+    if(idadiMpya!==null&&!kipimoKimebadilika){
       if(!(idadiMpya>=0))throw new Error('Idadi ya stoo si sahihi');
       if(kb0&&idadiMpya!==Math.round((Number(kb0.idadi)||0)*1000)/1000)patch.idadi=idadiMpya;
     }
@@ -6586,7 +6714,7 @@ async function hifadhiHaririBidhaa(){
       const up=await uploadPhoto(editUploadFile);
       patch.img=up.url;patch.media_type=up.type==='video'?'video':'image';
     }
-    const kabla=allBidhaa.find(x=>x.id===editingBidhaaId);
+    const kabla=kipimoKimebadilika?null:allBidhaa.find(x=>x.id===editingBidhaaId);
     await DB.patch('bidhaa',`id=eq.${editingBidhaaId}`,patch);
     // The purchases of this product (same name at its OLD price) follow every change made here: a new name, a new price (= their RATE)
     // and a new quantity (the difference goes to the latest purchase, so the stock history and the stock card agree).
@@ -9605,7 +9733,7 @@ async function skaniBinCard(){
     <div class="table-wrap"><table><thead><tr><th>Tarehe</th><th>Maelezo</th><th class="num">Ndani</th><th class="num">Nje</th><th class="num">Salio</th></tr></thead><tbody>${safu}</tbody></table></div>
     <div style="font-size:11.5px;color:var(--a-muted);margin-top:6px;">Hii ni ya kuhakiki tu — haibadilishi stoo.</div></div>`;
 }
-function renderAll(){try{renderMadeniNyuma();}catch(_e){}renderZMapato();renderDashibodi();renderMaagizo();renderManunuzi();renderMauzo();renderUhamisho();renderUhamishoSent();renderGharama();renderStock();renderWateja();renderWanunuzi();renderRipoti();renderKilaSiku();renderGrid(curFilter);renderMafuta();renderFomuTransfer();renderFomuManunuzi();renderBinCardSuggestions();hesabuGridMauzo();renderOmbiInProgress();renderMarekebisho();renderSerikali();renderSerikaliMafuta();renderWatejaSerikali();renderMaombiStockTawi('tbody-maombi-stock-mauzo','Bidhaa');if(typeof zoNiYeye==='function'&&zoNiYeye())renderMaombiStockTawi('tbody-maombi-stock-zuhura','Bidhaa');renderMaombiStockTawi('tbody-maombi-stock-mafuta','Mafuta');renderMaombiSerikaliYangu('tbody-skm-maombi-yangu','Mafuta');renderMaombiSerikaliYangu('tbody-sk-maombi-yangu','Bidhaa');}
+function renderAll(){try{renderMadeniNyuma();}catch(_e){}renderZMapato();renderDashibodi();renderMaagizo();renderManunuzi();renderMauzo();renderUhamisho();renderUhamishoSent();renderGharama();renderStock();renderWateja();renderWanunuzi();renderRipoti();renderKilaSiku();renderGrid(curFilter);renderMafuta();renderFomuTransfer();renderFomuOrder();renderFomuManunuzi();renderBinCardSuggestions();hesabuGridMauzo();renderOmbiInProgress();renderMarekebisho();renderSerikali();renderSerikaliMafuta();renderWatejaSerikali();renderMaombiStockTawi('tbody-maombi-stock-mauzo','Bidhaa');if(typeof zoNiYeye==='function'&&zoNiYeye())renderMaombiStockTawi('tbody-maombi-stock-zuhura','Bidhaa');renderMaombiStockTawi('tbody-maombi-stock-mafuta','Mafuta');renderMaombiSerikaliYangu('tbody-skm-maombi-yangu','Mafuta');renderMaombiSerikaliYangu('tbody-sk-maombi-yangu','Bidhaa');}
 
 /* ─── WANUNUZI — broadcast ─── */
 async function ongezaMteja(){
