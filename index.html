@@ -10948,7 +10948,7 @@ function hesabuGridMafuta(){
       if(e.dataset.otoOda&&!e.dataset.mwenyewe){e.value='';delete e.dataset.otoOda;}      // Orders of another zamu (or removed ones) are taken back
     }
     if(l>0&&!a)wazi[aina].push({tr,l});
-    return{tr,aina,l,a,lm,rtt};
+    return{tr,aina,l,a,lm,rtt,rttY,mpkY};
   });
   // exactly ONE mkono of a fuel is in use and an Order of that fuel is waiting: its Order litres are filled in (she can change them)
   ['Petroli','Dizeli'].forEach(a=>{
@@ -10956,7 +10956,7 @@ function hesabuGridMafuta(){
     else if(wazi[a].length>1)wazi[a].forEach(({tr})=>{const e=tr.querySelector('.g-oda');if(!e.dataset.mwenyewe)e.value='';});      // more than one mkono: nothing is guessed, the earlier suggestion is taken back
   });
   let lita=0,litaOda=0,kiasi=0,thamaniOda=0;const kwaAina={Petroli:0,Dizeli:0};
-  mistari.forEach(({tr,aina,l,a,lm,rtt})=>{
+  mistari.forEach(({tr,aina,l,a,lm,rtt,rttY,mpkY})=>{
     const odaE=tr.querySelector('.g-oda');if(l===0&&!odaE.dataset.mwenyewe&&!a)odaE.value='';
     const o=Math.max(0,parseFloat(odaE.value)||0),bei=beiYaMafuta(aina),zaidi=l>0&&o>l+0.0001,oHalali=Math.min(o,l),baada=l-oHalali;
     const k=round2(baada*bei);
