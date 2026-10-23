@@ -2814,6 +2814,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       <p style="font-size:14px;color:var(--a-red)">Baki: <strong id="mp-bakaa">—</strong></p>
     </div>
     <div class="field" style="margin-bottom:10px"><label id="mp-kiasi-lbl">Kiasi cha Malipo (TZS)</label><input type="number" id="mp-kiasi" placeholder="0" min="0.01" step="0.01" oninput="mpMakatoHesabu()"/></div>
+    <div id="mp-ziada-note" style="display:none;background:rgba(43,166,106,.10);border:1px solid rgba(43,166,106,.45);border-radius:10px;padding:9px 12px;margin-bottom:10px;font-size:12.5px;line-height:1.5;"></div>
     <div id="mp-makato-box" style="display:none;background:rgba(255,138,87,.08);border:1px solid rgba(255,138,87,.35);border-radius:10px;padding:10px 12px;margin-bottom:10px;">
       <div class="field" style="margin-bottom:8px"><label>Malipo haya ni</label><select id="mp-aina" onchange="mpMakatoHesabu()"><option value="Sehemu">Sehemu ya malipo (bado kuna deni)</option><option value="Kamili">Malipo kamili (order imemalizika — tofauti ni makato ya serikali)</option></select></div>
       <div class="field" style="margin-bottom:6px"><label>Makato ya Serikali (TZS)</label><input type="number" id="mp-makato" placeholder="0" min="0" step="0.01" oninput="mpMakatoHesabu()"/></div>
@@ -7976,6 +7977,43 @@ function bidhaaZaDeni(c){         // the goods behind one Order debt, each with 
   return allSerikali.filter(x=>x.invoice_no===c.invoice_no).map(x=>({jina:x.jina,kiasi:`${x.idadi} ${x.kipimo||'pc'}`,tawi:x.tawi,tarehe:x.tarehe}));
 }
 const ainaYaWokSasa=()=>document.querySelector('#serikali-wateja-mafuta.active')?'mafuta':'bidhaa';      // which Wateja wa Order page the person is on
+// ── KITABU: salio la ziada — money a customer paid beyond his debt, kept as a credit with every movement traceable ──
+let kitabuZiadaRows=[],kitabuZiadaMuda=0,kitabuZiadaSig='';
+const ziadaYa=(key)=>round2(kitabuZiadaRows.filter(x=>x.mteja_key===key).reduce((a,x)=>a+(Number(x.kiasi)||0),0));
+async function pakiaKitabuZiada(lazimisha){
+  if(!['gm','serikali','madeni'].includes(userRole))return;
+  if(!lazimisha&&Date.now()-kitabuZiadaMuda<20000)return;
+  kitabuZiadaMuda=Date.now();
+  try{
+    const r=await DB.get('kitabu_ziada','deleted_at=is.null&order=created_at.asc&select=*');
+    if(!Array.isArray(r))return;      // the table is not there yet (SQL not run) — nothing to show
+    const sig=r.length+'|'+r.reduce((a,x)=>a+(Number(x.kiasi)||0),0);
+    kitabuZiadaRows=r;
+    if(sig!==kitabuZiadaSig){kitabuZiadaSig=sig;renderWatejaSerikali();}
+  }catch(_e){}
+}
+function ziadaHtml(g){
+  const zr=kitabuZiadaRows.filter(x=>x.mteja_key===g.key);if(!zr.length)return'';
+  const zb=ziadaYa(g.key);
+  return `<div style="font-weight:700;margin:12px 0 6px;">💰 Salio la Ziada (Kitabu) — <span style="color:var(--a-green);">${pesa2(zb)}</span>${zb>0.004&&g.bakaa>0?` <button class="btn sm gold" onclick="tumiaSalioZiada('${kitabuFunguo(g.key)}')">Tumia salio kulipia deni</button>`:''}</div>
+    <div class="table-wrap"><table class="kitabu-tbl"><thead><tr><th>Tarehe</th><th>Aina</th><th class="num">Kiasi</th><th>Maelezo</th><th>Imerekodiwa na</th></tr></thead><tbody>${zr.map(x=>`<tr><td>${escH(x.tarehe)}${x.slip_ref?` <button class="btn sm secondary" style="padding:0 6px;" title="Angalia slip" onclick="onyeshaSlipMalipo('ref','${escH(x.slip_ref)}')">🧾</button>`:''}</td><td>${escH(x.aina)}</td><td class="num" style="color:${Number(x.kiasi)>=0?'var(--a-green)':'var(--a-red)'};font-weight:700;">${Number(x.kiasi)>=0?'+':''}${pesa2(x.kiasi)}</td><td>${escH(x.maelezo||'—')}</td><td>${escH(x.rekodi_jina||'—')}${JUKUMU_LABEL[x.rekodi_role]?` <span style="color:var(--a-muted);font-size:11px;">(${JUKUMU_LABEL[x.rekodi_role]})</span>`:''}</td></tr>`).join('')}</tbody></table></div>`;
+}
+async function tumiaSalioZiada(k){
+  const g=makundiYaWatejaOrder().find(x=>x.key===decodeURIComponent(k));if(!g)return;
+  const kiasi=round2(Math.min(ziadaYa(g.key),g.bakaa));
+  if(!(kiasi>0)){toast('Hakuna deni la kulipa kwa salio hili.');return;}
+  if(!navigator.onLine){toast('❌ Hakuna mtandao — inahitajika.');return;}
+  if(!confirm(`Tumia salio la ziada ${pesa2(kiasi)} kulipia deni la ${g.jina}?`))return;
+  const wazi=g.rekodi.filter(c=>!c.virtual&&(Number(c.bakaa)||0)>0).sort((a,b)=>String(a._tarehe).localeCompare(String(b._tarehe))||String(a.created_at||'').localeCompare(String(b.created_at||'')));
+  const rf='zt-'+idMpya(),maelezo='Kutoka salio la ziada (Kitabu)';let baki=kiasi;
+  const calls=[{rpc:'rekodi_salio_ziada',body:{p:{ref:rf+'-z',mteja_key:g.key,mteja:g.jina,mradi:g.mradi||'',tarehe:leoISO(),kiasi:-kiasi,aina:'Imetumika',maelezo:'Imetumika kulipia deni'}}}];
+  wazi.forEach((c,i)=>{if(baki<=0.004)return;const s=round2(Math.min(baki,Number(c.bakaa)));baki=round2(baki-s);
+    calls.push(userRole==='serikali'?{rpc:'rekodi_malipo_makato',body:{p_id:String(c.id),p_kiasi:s,p_makato:0,p_kamili:false,p_tarehe:leoISO(),p_maelezo:maelezo,p_ref:rf+'-'+i}}:{rpc:'rekodi_malipo_madeni',body:{p_id:String(c.id),p_kiasi:s,p_tarehe:leoISO(),p_maelezo:maelezo}});});
+  const kz=await tumaKaziKifaani(`Salio la ziada la ${g.jina} (${pesa2(kiasi)})`,calls);
+  if(kz.hali==='imekataliwa'){toast('❌ '+(kz.kosa||'Imeshindwa kutumia salio'));kitabuZiadaMuda=0;pakiaKitabuZiada(true);loadAllBaada();return;}
+  toast(kz.hali==='imehifadhiwa'?'⏳ Seva imechelewa — itatumwa yenyewe. Usirudie.':`✅ Salio la ${pesa2(kiasi)} limetumika kulipia deni.`);
+  kitabuMalipoAkiba.delete(g.key);kitabuZiadaMuda=0;pakiaKitabuZiada(true);loadAllBaada();
+}
 function makundiYaWatejaOrder(aina){
   aina=aina||ainaYaWokSasa();
   const m=new Map();
@@ -8017,6 +8055,7 @@ function kitabuHtml(g){
   return `<div style="font-weight:700;margin-bottom:6px;">📖 Kitabu cha ${escH(g.jina)}${g.mradi?' — '+escH(g.mradi):''} — rekodi ${nambaRekodi}</div>
     <div class="table-wrap"><table class="kitabu-tbl"><thead><tr><th>Invoice</th><th>Tarehe</th><th>Bidhaa</th><th class="num">Idadi</th><th>Stoo</th><th class="num">Order</th><th class="num">Kimelipwa</th><th class="num">Bakaa</th><th>Mwisho</th><th>Hali</th></tr></thead><tbody>${safu}</tbody>
     <tfoot>${g.makato>0?`<tr><td colspan="10" style="font-size:12px;color:var(--a-muted);">Makato ya serikali yaliyokatwa: <strong>${pesa2(g.makato)}</strong> (hayajahesabiwa kwenye "Kimelipwa" — ni sehemu ya deni lililofutwa)</td></tr>`:''}<tr style="font-weight:700;"><td colspan="5">JUMLA YA MTEJA</td><td class="num">${pesa2(g.deni)}</td><td class="num">${pesa2(g.lipwa)}</td><td class="num">${pesa2(g.bakaa)}</td><td colspan="2"><div style="display:flex;gap:4px;flex-wrap:wrap;">${g.bakaa>0?`<button class="btn sm gold" onclick="funguaMalipoLaMteja('${kitabuFunguo(g.key)}')">💳 Lipa</button>`:''}<button class="btn sm secondary" onclick="kitabuHistoriaBadili('${kitabuFunguo(g.key)}')">📋 Historia</button></div></td></tr></tfoot></table></div>
+    ${ziadaHtml(g)}
     ${kitabuHistoriaWazi.has(g.key)?`<div style="font-weight:700;margin:12px 0 6px;">📋 Historia ya malipo yote ya mteja huyu</div><div class="kitabu-malipo" data-k="${escH(kitabuFunguo(g.key))}"><div style="color:var(--a-muted);font-size:12px;">Inapakia malipo...</div></div>`:''}`;
 }
 async function kitabuPakiaMalipo(g){
@@ -8058,7 +8097,18 @@ function mpMakatoWasha(w){
   if(w){$('mp-aina').value='Sehemu';$('mp-makato').value='';$('mp-makato').readOnly=false;}
   mpMakatoHesabu();
 }
+const hesabuZiada=(g,kiasi,makato)=>Math.max(0,round2((Number(kiasi)||0)-Math.max(0,round2((Number(g.bakaa)||0)-(Number(makato)||0)))));
+function mpZiadaMuhtasari(){
+  const n=$('mp-ziada-note');if(!n)return;
+  const g=maalipoKundi?makundiYaWatejaOrder().find(x=>x.key===maalipoKundi):null;
+  if(!g){n.style.display='none';return;}
+  const r=parseFloat($('mp-kiasi').value)||0,box=$('mp-makato-box'),naMk=box&&box.style.display!=='none',kamili=naMk&&$('mp-aina').value==='Kamili';
+  const c=naMk?(kamili?Math.max(0,round2(g.bakaa-r)):(parseFloat($('mp-makato').value)||0)):0,z=hesabuZiada(g,r,c);
+  n.style.display=z>0.004?'block':'none';
+  if(z>0.004)n.innerHTML=`💰 Deni la ${pesa2(g.bakaa)} litalipwa lote. <strong>Ziada ya ${pesa2(z)}</strong> itabaki kwenye <strong>Kitabu</strong> cha mteja (salio la ziada) kwa kumbukumbu.`;
+}
 function mpMakatoHesabu(){
+  mpZiadaMuhtasari();
   const b=$('mp-makato-box');if(!b||b.style.display==='none')return;
   const g=makundiYaWatejaOrder().find(x=>x.key===maalipoKundi);if(!g)return;
   const r=parseFloat($('mp-kiasi').value)||0,kamili=$('mp-aina').value==='Kamili',mk=$('mp-makato');
@@ -8066,12 +8116,12 @@ function mpMakatoHesabu(){
   const c=parseFloat(mk.value)||0,baki=g.bakaa-r-c;
   $('mp-makato-muhtasari').innerHTML=kamili
     ?`Deni lote ${pesa2(g.bakaa)} litafutwa kabisa. Pesa halisi iliyopokelewa ${pesa2(r)} + makato ya serikali ${pesa2(c)}.`
-    :`Deni litapungua kwa ${pesa2(r+c)} (pesa ${pesa2(r)} + makato ${pesa2(c)}). Baki: <strong>${pesa2(Math.max(0,baki))}</strong>${baki<-0.5?' — <span style="color:var(--a-red)">kiasi kinazidi deni</span>':''}`;
+    :`Deni litapungua kwa ${pesa2(r+c)} (pesa ${pesa2(r)} + makato ${pesa2(c)}). Baki: <strong>${pesa2(Math.max(0,baki))}</strong>`;
 }
 async function lipaKwaMtejaMzima(g,kiasi,tarehe,maelezo,kosa){
   const wazi=g.rekodi.filter(c=>(Number(c.bakaa)||0)>0).sort((a,b)=>String(a._tarehe).localeCompare(String(b._tarehe))||String(a.created_at||'').localeCompare(String(b.created_at||'')));
-  if(kiasi>g.bakaa+0.005){kosa(`❌ Kiasi kinazidi deni lote (${pesa2(g.bakaa)}).`);return false;}
-  const h=await authHeaders();let baki=kiasi,jumlaHalisi=0,sehemu=[];
+  const ziada=hesabuZiada(g,kiasi,0),kiasiDeni=round2(kiasi-ziada);
+  const h=await authHeaders();let baki=kiasiDeni,jumlaHalisi=0,sehemu=[];
   for(const c of wazi){
     if(baki<=0.004)break;
     const sehemuHii=Math.min(baki,Number(c.bakaa));
@@ -8087,16 +8137,22 @@ async function lipaKwaMtejaMzima(g,kiasi,tarehe,maelezo,kosa){
   }
   if(g.simu){const baada=wazi.reduce((a,c)=>a+(Number(c.bakaa)||0),0)+g.rekodi.filter(c=>!wazi.includes(c)).reduce((a,c)=>a+(Number(c.bakaa)||0),0);
     sendSms(g.simu,`Ndugu ${g.jina}, Asante kwa kupunguza kiasi cha Tsh.${Math.round(jumlaHalisi).toLocaleString()} kutoka katika deni lako la Tsh.${Math.round(g.deni).toLocaleString()}, kiasi cha deni lililobaki ni Tsh.${Math.round(baada).toLocaleString()}. Karibu Sana.`);}
+  let ziadaImeandikwa=true;
+  if(ziada>0.004){
+    try{const rz=await fetch(`${SB_URL}/rest/v1/rpc/rekodi_salio_ziada`,{method:'POST',headers:h,body:JSON.stringify({p:{ref:'zi-'+idMpya(),mteja_key:g.key,mteja:g.jina,mradi:g.mradi||'',tarehe:tarehe||leoISO(),kiasi:ziada,aina:'Ziada ya malipo',maelezo:maelezo||'Malipo yaliyozidi deni'}})});ziadaImeandikwa=rz.ok;}catch(_e){ziadaImeandikwa=false;}
+    kitabuZiadaMuda=0;pakiaKitabuZiada(true);
+  }
   kitabuMalipoAkiba.delete(g.key);
-  renderAll();fungaAdminModal();toast(`✅ Malipo ya ${pesa2(jumlaHalisi)} yamehifadhiwa!`);loadAllBaada();
+  renderAll();fungaAdminModal();toast(`✅ Malipo ya ${pesa2(jumlaHalisi)} yamehifadhiwa!`+(ziada>0.004?(ziadaImeandikwa?` Ziada ${pesa2(ziada)} imewekwa kwenye Kitabu.`:` ⚠ Ziada ${pesa2(ziada)} haikuandikwa kwenye Kitabu — iandike kwa mkono.`):''));loadAllBaada();
   return true;
 }
 async function lipaKwaMtejaMzimaMakato(g,kiasi,makato,kamili,tarehe,maelezo,kosa){
   const wazi=g.rekodi.filter(c=>(Number(c.bakaa)||0)>0).sort((a,b)=>String(a._tarehe).localeCompare(String(b._tarehe))||String(a.created_at||'').localeCompare(String(b.created_at||'')));
-  if(kamili){makato=Math.max(0,round2(g.bakaa-kiasi));if(kiasi>g.bakaa+0.005){kosa(`❌ Kiasi kinazidi deni lote (${pesa2(g.bakaa)}).`);return false;}}
-  const jumlaYote=round2(kiasi+makato);
-  if(jumlaYote>g.bakaa+0.5){kosa(`❌ Kiasi na makato (${pesa2(jumlaYote)}) vinazidi deni lote (${pesa2(g.bakaa)}).`);return false;}
-  if(!(jumlaYote>0)){kosa('❌ Weka kiasi sahihi.');return false;}
+  if(kamili)makato=Math.max(0,round2(g.bakaa-kiasi));
+  if(makato>g.bakaa+0.5){kosa(`❌ Makato (${pesa2(makato)}) yanazidi deni lote (${pesa2(g.bakaa)}).`);return false;}
+  const ziada=hesabuZiada(g,kiasi,makato),kiasiDeni=round2(kiasi-ziada);      // what is more than the debt stays in his Kitabu
+  const jumlaYote=round2(kiasiDeni+makato);
+  if(!(kiasi>0)){kosa('❌ Weka kiasi sahihi.');return false;}
   const hundi=($('mp-hundi')||{}).value?$('mp-hundi').value.trim():'',slipFaili=$('mp-slip')&&$('mp-slip').files&&$('mp-slip').files[0];
   const benki=($('mp-benki')||{}).value||'';
   if(!benki){kosa('❌ Chagua benki (NMB au CRDB).');return false;}
@@ -8113,7 +8169,8 @@ async function lipaKwaMtejaMzimaMakato(g,kiasi,makato,kamili,tarehe,maelezo,kosa
     bakiJumla=round2(bakiJumla-gross);bakiMakato=round2(bakiMakato-mkHii);
   }
   const slipCall={rpc:'rekodi_slip_malipo',body:{p:{ref:rf,mteja:g.jina+(g.mradi?' — '+g.mradi:''),kiasi,hundi_no:hundi,benki,tarehe:tarehe||leoISO(),picha:slipPicha}}};
-  const kz=await tumaKaziKifaani(`Malipo ya ${g.jina} (${pesa2(kiasi)})`,[slipCall].concat(mpango.map(m=>({rpc:m.rpc,body:m.body}))),{baadaMuda:g.simu?{aina:'sms-malipo',simu:g.simu,ujumbe:`Ndugu ${g.jina}, Asante kwa malipo ya Tsh.${Math.round(kiasi).toLocaleString()}. Karibu Sana.`}:null});
+  const ziadaCall=ziada>0.004?[{rpc:'rekodi_salio_ziada',body:{p:{ref:rf+'-z',mteja_key:g.key,mteja:g.jina,mradi:g.mradi||'',tarehe:tarehe||leoISO(),kiasi:ziada,aina:'Ziada ya malipo',maelezo:maelezo,slip_ref:rf}}}]:[];
+  const kz=await tumaKaziKifaani(`Malipo ya ${g.jina} (${pesa2(kiasi)})`,[slipCall].concat(mpango.map(m=>({rpc:m.rpc,body:m.body})),ziadaCall),{baadaMuda:g.simu?{aina:'sms-malipo',simu:g.simu,ujumbe:`Ndugu ${g.jina}, Asante kwa malipo ya Tsh.${Math.round(kiasi).toLocaleString()}. Karibu Sana.`}:null});
   if(kz.hali==='imekataliwa'){
     const kamiliSehemu=Math.max(0,(kz.sehemuZilizokamilika||0)-1);      // the first call is the slip
     if(kamiliSehemu>0){loadAllBaada();kosa(`❌ ${kz.kosa||'Imeshindwa'} — sehemu ${kamiliSehemu} tayari zimehifadhiwa. Angalia kitabu kisha rudia kwa kilichobaki.`);}
@@ -8132,7 +8189,8 @@ async function lipaKwaMtejaMzimaMakato(g,kiasi,makato,kamili,tarehe,maelezo,kosa
   if(g.simu){const baada=g.rekodi.reduce((a,c)=>a+(Number(c.bakaa)||0),0);
     sendSms(g.simu,`Ndugu ${g.jina}, Asante kwa malipo ya Tsh.${Math.round(halisiJumla).toLocaleString()}, ${baada>0?`kiasi cha deni lililobaki ni Tsh.${Math.round(baada).toLocaleString()}`:'deni lako limekamilika'}. Karibu Sana.`);}
   kitabuMalipoAkiba.delete(g.key);
-  renderAll();fungaAdminModal();toast(`✅ Malipo ya ${pesa2(halisiJumla)} yamehifadhiwa${makato>0?` (makato ya serikali ${pesa2(makato)})`:''}${kamili?' — order imekamilika':''}`);loadAllBaada();
+  if(ziada>0.004){kitabuZiadaMuda=0;pakiaKitabuZiada(true);}
+  renderAll();fungaAdminModal();toast(`✅ Malipo ya ${pesa2(halisiJumla)} yamehifadhiwa${makato>0?` (makato ya serikali ${pesa2(makato)})`:''}${kamili?' — order imekamilika':''}${ziada>0.004?` — ziada ${pesa2(ziada)} imewekwa kwenye Kitabu`:''}`);loadAllBaada();
   return true;
 }
 async function kumbushiaDeniLaMteja(k){
@@ -8143,7 +8201,7 @@ async function kumbushiaDeniLaMteja(k){
   const r=await sendSms(g.simu,msg);
   toast(r&&r.ok?`✅ Ukumbusho umetumwa kwa ${g.jina}`:'❌ Ujumbe haukutumwa — jaribu tena');
 }
-function renderWatejaSerikali(){renderWatejaOrderAina('bidhaa');renderWatejaOrderAina('mafuta');}
+function renderWatejaSerikali(){pakiaKitabuZiada();renderWatejaOrderAina('bidhaa');renderWatejaOrderAina('mafuta');}
 function renderWatejaOrderAina(aina){
   const sfx=aina==='mafuta'?'-mf':'';
   const tb=$('tbody-wateja-serikali'+sfx);if(!tb)return;
@@ -8155,7 +8213,8 @@ function renderWatejaOrderAina(aina){
   if($('sk-w-idadi'+sfx))$('sk-w-idadi'+sfx).textContent=`(wateja ${wote.length} · rekodi ${rekodiZote})`;
   tb.innerHTML=orodha.length?orodha.map(g=>{
     const prog=g.deni>0?Math.round(((g.lipwa+(g.makato||0))/g.deni)*100):0,wazi=kitabuZilizofunguliwa.has(g.key),k=kitabuFunguo(g.key);
-    const pills=g.aina.map(a=>`<span class="pill" style="background:${rangiYaTaasisi(a)};color:#fff;font-size:10px;">${labelYaTaasisi(a)}</span>`).join(' ')+(g.rekodi.some(c=>c.ni_ya_nyuma)?' <span class="pill" style="background:#8a6d3b;color:#fff;font-size:10px;">📜 Deni la nyuma</span>':'')+(g.mafuta?' <span class="pill" style="background:#F5A524;color:#1a1200;font-size:10px;">⛽ Mafuta</span>':'');
+    const ziB=ziadaYa(g.key),ziP=ziB>0.004?`<span class="pill pill-green" style="font-size:10px;">💰 Ziada ${pesa2(ziB)}</span> `:'';
+    const pills=ziP+g.aina.map(a=>`<span class="pill" style="background:${rangiYaTaasisi(a)};color:#fff;font-size:10px;">${labelYaTaasisi(a)}</span>`).join(' ')+(g.rekodi.some(c=>c.ni_ya_nyuma)?' <span class="pill" style="background:#8a6d3b;color:#fff;font-size:10px;">📜 Deni la nyuma</span>':'')+(g.mafuta?' <span class="pill" style="background:#F5A524;color:#1a1200;font-size:10px;">⛽ Mafuta</span>':'');
     const kuu=`<tr style="${wazi?'background:rgba(127,127,127,.07);':''}"><td><strong>${escH(g.jina)}</strong>${g.mradi?mradiLebo(g.mradi):''} <span style="font-size:10px;color:var(--a-muted);">(rekodi ${g.rekodi.length})</span><br>${pills}<br><div style="margin-top:4px;height:4px;background:var(--a-line);border-radius:2px;width:80px"><div style="height:100%;width:${prog}%;background:${prog===100?'var(--a-green)':'var(--a-rg)'};border-radius:2px"></div></div><span style="font-size:10px;color:var(--a-muted)">${prog}% imelipwa</span></td><td>${escH(g.simu||'—')}</td><td>${pesa2(g.deni)}</td><td style="color:var(--a-green);font-weight:600">${pesa2(g.lipwa)}</td><td style="color:${g.bakaa>0?'var(--a-red)':'var(--a-green)'};font-weight:700">${pesa2(g.bakaa)}</td><td style="${g.imepita?'color:var(--a-red);font-weight:600;':''}">${g.mwisho||'—'}</td><td><span class="pill ${g.cls}">${g.hali}</span></td><td><div style="display:flex;gap:4px;flex-wrap:wrap;"><button class="btn sm secondary" onclick="kitabuBadili('${k}')">${wazi?'📖 Funga Kitabu':'📖 Fungua Kitabu'}</button>${g.bakaa>0?`<button class="btn sm" style="background:var(--a-blue);color:#fff;" onclick="kumbushiaDeniLaMteja('${k}')">🔔 Kumbushia</button>`:''}</div></td></tr>`;
     return kuu+(wazi?`<tr class="kitabu-ndani"><td colspan="8" style="background:rgba(127,127,127,.07);padding:12px 16px;">${kitabuHtml(g)}</td></tr>`:'');
   }).join(''):safuTupu(8,q?'Hakuna mteja anayelingana na utafutaji huu.':'Hakuna wateja wa serikali/kampuni wenye deni.');
