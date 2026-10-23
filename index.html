@@ -2436,9 +2436,9 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
           </table></div>
           <div style="text-align:right;margin:10px 0 14px;"><strong id="ski-jumla" style="font-size:16px;">Jumla ya Invoice: TZS 0</strong></div>
           <div class="form-grid">
-            <div class="field"><label>Aina ya Malipo</label><select id="ski-aina-malipo" onchange="togglaInvoiceSerikali()"><option value="Mkopo">Order (italipwa baadaye)</option><option value="Taslimu">Hundi / Cheque (imelipwa)</option></select></div>
+            <div class="field"><label>Aina ya Malipo</label><select id="ski-aina-malipo" onchange="togglaInvoiceSerikali()"><option value="Mkopo">Order (italipwa baadaye)</option><option value="Taslimu">Slip / Hundi / Cheque (imelipwa)</option></select></div>
             <div class="field" id="wrap-ski-benki" style="display:none"><label>Benki</label><select id="ski-benki"><option value="">— chagua benki —</option><option value="NMB">NMB</option><option value="CRDB">CRDB</option></select></div>
-            <div class="field" id="wrap-ski-hundi" style="display:none"><label>Namba ya Hundi / Cheque</label><input type="text" id="ski-hundi" placeholder="mfano: 000123" autocomplete="off"/></div>
+            <div class="field" id="wrap-ski-hundi" style="display:none"><label>Namba ya Slip / Hundi / Cheque</label><input type="text" id="ski-hundi" placeholder="mfano: 000123" autocomplete="off"/></div>
             <div class="field" id="wrap-ski-slip" style="display:none"><label>Picha ya Slip</label><input type="file" id="ski-slip" accept="image/*" onchange="slipChagua(this,'ski-slip-pv')"/><img id="ski-slip-pv" alt="Slip" style="display:none;max-width:100%;max-height:120px;margin-top:6px;border-radius:8px;"/></div>
             <div class="field" id="wrap-ski-awali"><label>Kiasi Kilicholipwa Awali (TZS)</label><input type="number" id="ski-awali" placeholder="0" min="0" step="0.01"/></div>
             <div class="field" id="wrap-ski-mwisho"><label>Tarehe ya Mwisho wa Malipo (hiari)</label><input type="date" id="ski-tarehe-mwisho"/></div>
@@ -2820,9 +2820,9 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       <div id="mp-makato-muhtasari" style="font-size:12px;color:var(--a-muted);line-height:1.5;"></div>
     </div>
     <div id="mp-hundi-box" style="display:none;background:rgba(80,140,255,.07);border:1px solid rgba(80,140,255,.35);border-radius:10px;padding:10px 12px;margin-bottom:10px;">
-      <div class="field" style="margin-bottom:8px"><label>Njia ya Malipo</label><input type="text" value="Hundi / Cheque" readonly/></div>
+      <div class="field" style="margin-bottom:8px"><label>Njia ya Malipo</label><input type="text" value="Slip / Hundi / Cheque" readonly/></div>
 <div class="field" style="margin-bottom:8px"><label>Benki</label><select id="mp-benki"><option value="">— chagua benki —</option><option value="NMB">NMB</option><option value="CRDB">CRDB</option></select></div>
-      <div class="field" style="margin-bottom:8px"><label>Namba ya Hundi / Cheque</label><input type="text" id="mp-hundi" placeholder="mfano: 000123" autocomplete="off"/></div>
+      <div class="field" style="margin-bottom:8px"><label>Namba ya Slip / Hundi / Cheque</label><input type="text" id="mp-hundi" placeholder="mfano: 000123" autocomplete="off"/></div>
       <div class="field"><label>Picha ya Slip</label><input type="file" id="mp-slip" accept="image/*" onchange="slipChagua(this,'mp-slip-pv')"/><img id="mp-slip-pv" alt="Slip" style="display:none;max-width:100%;max-height:150px;margin-top:6px;border-radius:8px;"/></div>
     </div>
     <div class="field" style="margin-bottom:10px"><label>Tarehe ya Malipo</label><input type="date" id="mp-tarehe"/></div>
@@ -8100,10 +8100,9 @@ async function lipaKwaMtejaMzimaMakato(g,kiasi,makato,kamili,tarehe,maelezo,kosa
   const hundi=($('mp-hundi')||{}).value?$('mp-hundi').value.trim():'',slipFaili=$('mp-slip')&&$('mp-slip').files&&$('mp-slip').files[0];
   const benki=($('mp-benki')||{}).value||'';
   if(!benki){kosa('❌ Chagua benki (NMB au CRDB).');return false;}
-  if(!hundi){kosa('❌ Weka namba ya hundi / cheque.');return false;}
   if(!slipFaili){kosa('❌ Pakia picha ya slip ya malipo.');return false;}
   let slipPicha;try{slipPicha=await punguzaPicha(slipFaili,1100,0.6);}catch(e){kosa('❌ '+e.message);return false;}
-  maelezo=`Hundi/Cheque ${hundi} · ${benki}`+(maelezo?' — '+maelezo:'');
+  maelezo=(hundi?`Hundi/Cheque ${hundi} · ${benki}`:`Slip ya benki · ${benki}`)+(maelezo?' — '+maelezo:'');
   // the whole plan is worked out first and every part carries its own reference, so a part is never recorded twice even if the server is slow
   let bakiJumla=jumlaYote,bakiMakato=makato;const mpango=[],rf=idMpya();
   for(let i=0;i<wazi.length;i++){
@@ -8971,7 +8970,6 @@ async function tengenezaInvoiceSerikali(){
     const hundi=$('ski-hundi').value.trim(),f=$('ski-slip').files&&$('ski-slip').files[0];
     const benkiInv=$('ski-benki').value;
     if(!benkiInv){kosa('❌ Chagua benki (NMB au CRDB).');return;}
-    if(!hundi){kosa('❌ Weka namba ya hundi / cheque.');return;}
     if(!f){kosa('❌ Pakia picha ya slip ya malipo.');return;}
     let pic;try{pic=await punguzaPicha(f,1100,0.6);}catch(e){kosa('❌ '+e.message);return;}
     slipCallInv={rpc:'rekodi_slip_malipo',body:{p:{ref:'inv-'+idMpya(),kundi_id:skiZote().split(',')[0],mteja:($('ski-mteja')||{}).textContent||'',hundi_no:hundi,benki:benkiInv,tarehe:leoISO(),picha:pic}}};
@@ -10676,7 +10674,7 @@ async function onyeshaSlipMalipo(kwa,thamani){
     const r=await DB.get('slip_malipo_order',`${q}&deleted_at=is.null&select=picha,tarehe,hundi_no,benki,kiasi,mteja,rekodi_jina&order=created_at.desc&limit=1`);
     if(!Array.isArray(r)||!r[0])throw new Error('Slip haipatikani');
     const s=r[0];
-    $('slipMaelezo').innerHTML=`<strong>${s.benki?escH(s.benki)+' · ':''}Hundi / Cheque ${escH(s.hundi_no||'—')}</strong>${s.kiasi?' — '+pesa(s.kiasi):''} · ${escH(s.tarehe||'')}<br>${escH(s.mteja||'')}<br><span style="opacity:.7">Imewekwa na ${escH(s.rekodi_jina||'—')}</span>`;
+    $('slipMaelezo').innerHTML=`<strong>${s.benki?escH(s.benki)+' · ':''}${s.hundi_no?'Hundi / Cheque '+escH(s.hundi_no):'Slip ya malipo'}</strong>${s.kiasi?' — '+pesa(s.kiasi):''} · ${escH(s.tarehe||'')}<br>${escH(s.mteja||'')}<br><span style="opacity:.7">Imewekwa na ${escH(s.rekodi_jina||'—')}</span>`;
     $('slipPicha').src=s.picha;
   }catch(e){$('slipMaelezo').textContent='❌ '+e.message;}
 }
