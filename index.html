@@ -397,6 +397,8 @@ footer b{color:var(--rg);font-weight:600;}
 #adminApp .modal-overlay.open{display:flex;}
 #adminApp .modal{background:rgba(18,24,40,0.92);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border-radius:var(--a-radius);padding:24px;width:90%;max-width:460px;box-shadow:0 30px 80px rgba(0,0,0,0.55);border:1px solid rgba(255,255,255,0.1);}
 #adminApp .modal.wide{max-width:640px;max-height:88vh;overflow-y:auto;}
+#adminApp .modal{max-height:92vh;max-height:92dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}      /* a long form (e.g. the payment screen with the slip photo) scrolls inside the window instead of getting stuck */
+#adminApp .modal-overlay{overflow-y:auto;}
 #adminApp .modal h3{font-size:17px;font-weight:600;margin-bottom:14px;}
 #adminApp .modal-actions{display:flex;gap:10px;margin-top:16px;justify-content:flex-end;}
 #adminApp .a-hamburger{display:none;background:rgba(16,21,36,0.8);backdrop-filter:blur(10px);color:#fff;border:1px solid var(--a-line);padding:9px 13px;cursor:pointer;font-size:18px;position:fixed;top:12px;left:12px;z-index:9400;border-radius:10px;}
@@ -10612,7 +10614,7 @@ function punguzaPicha(faili,upande=1280,ubora=0.72){
         const cv=document.createElement('canvas');cv.width=w;cv.height=h;
         const cx=cv.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,w,h);cx.drawImage(img,0,0,w,h);
         let q=ubora,out=cv.toDataURL('image/jpeg',q);
-        while(out.length>900000&&q>0.35){q-=0.1;out=cv.toDataURL('image/jpeg',q);}      // keep one photo under about 650 KB
+        while(out.length>550000&&q>0.3){q-=0.1;out=cv.toDataURL('image/jpeg',q);}      // keep one photo under about 400 KB so it uploads even on a weak phone connection
         res(out);
       };
       img.src=fr.result;
@@ -10851,10 +10853,27 @@ async function hifadhiSlipYaMauzo(){
   let picha;
   try{picha=await punguzaPicha(faili);}catch(e){arifu('notifySlipMauzo','❌ '+e.message,'error');return;}
   kumbukaHifadhi('slip_mauzo',{tarehe,benki,kiasi,rejea,tawi:userTawi});
-  try{await endeshaMiito([{op:'post',table:'slip_za_matawi',data:[{tarehe,tawi:userTawi,benki,kiasi,rejea:rejea||null,picha,rekodi_jina:userJina||null}]}]);}
-  catch(e){
+  // The photo travels with the save, so a weak phone connection can drop it ("Load failed"). The row has its own id and the save ignores
+  // duplicates, so trying again is safe: up to 3 tries, each with a smaller photo.
+  const mstari={id:idMpya(),tarehe,tawi:userTawi,benki,kiasi,rejea:rejea||null,picha,rekodi_jina:userJina||null};
+  let kosa=null;
+  for(let jaribio=1;jaribio<=3;jaribio++){
+    try{await endeshaMiito([{op:'post',table:'slip_za_matawi',data:[mstari]}]);kosa=null;break;}
+    catch(e){
+      kosa=e;
+      if(e&&e.api===true)break;                       // the server refused it — trying again will not help
+      if(jaribio<3){
+        arifu('notifySlipMauzo',`⏳ Mtandao umekatika — inajaribu tena (${jaribio}/2)…`,'info');
+        try{mstari.picha=await punguzaPicha(faili,jaribio===1?1000:800,jaribio===1?0.55:0.45);}catch(_e){}
+        await new Promise(r=>setTimeout(r,1500*jaribio));
+      }
+    }
+  }
+  if(kosa){
     sahauKumbukumbu('slip_mauzo');
-    arifu('notifySlipMauzo',`❌ Slip haikuhifadhiwa: ${/relation|slip_za_matawi|schema cache/i.test(e.message)?'hifadhidata bado haijasasishwa — endesha ngara-huduma-branch-sales-slips-migration.sql kwanza.':e.message}`,'error');
+    const ni=/relation|slip_za_matawi|schema cache/i.test(kosa.message||'');
+    const mtandao=!(kosa&&kosa.api===true)&&/load failed|failed to fetch|network|aborted/i.test(kosa.message||'');
+    arifu('notifySlipMauzo',`❌ Slip haikuhifadhiwa: ${ni?'hifadhidata bado haijasasishwa — endesha ngara-huduma-branch-sales-slips-migration.sql kwanza.':(mtandao?'mtandao ni dhaifu au umekatika wakati wa kupakia picha. Hakikisha una mtandao mzuri (Wi-Fi au data ya kutosha) kisha bonyeza Hifadhi Slip tena.':kosa.message)}`,'error');
     return;
   }
   safishaSlipYaMauzo();
