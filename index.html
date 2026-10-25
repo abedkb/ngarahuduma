@@ -3620,10 +3620,26 @@ const sbClient=supabase.createClient(SB_URL,SB_KEY);
 // treated as an anonymous visitor: reads came back EMPTY and saves failed with a confusing "row-level security" error.
 // Now the session is renewed first; if that is impossible the person is told to sign in again and nothing is sent.
 let _sessionImekwishaImeonyeshwa=false;
+function hifadhiKilichoandikwa(){      // what was typed on the open page is kept on this device, so signing in again does not lose it
+  try{const pg=document.querySelector('#adminApp .page.active');if(!pg)return;const v={};
+    pg.querySelectorAll('input,select,textarea').forEach(e=>{if(!e.id||e.type==='password'||e.type==='file'||e.type==='button')return;const x=(e.type==='checkbox'||e.type==='radio')?(e.checked?'1':''):e.value;if(x!==''&&x!=null)v[e.id]=x;});
+    if(Object.keys(v).length)localStorage.setItem('nh_rasimu',JSON.stringify({t:Date.now(),page:pg.id,v}));}catch(_e){}
+}
+function rudishaKilichoandikwa(){
+  try{const raw=localStorage.getItem('nh_rasimu');if(!raw)return;localStorage.removeItem('nh_rasimu');const d=JSON.parse(raw);if(!d||Date.now()-d.t>30*60000)return;
+    if(typeof switchPage==='function')switchPage(d.page);
+    let n=0;Object.entries(d.v).forEach(([id,x])=>{const e=$(id);if(!e||e.type==='file')return;if(e.type==='checkbox'||e.type==='radio'){e.checked=!!x;}else if(!e.value){e.value=x;}else return;n++;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));});
+    if(n)setTimeout(()=>{try{toast('↩ Nimerudisha ulichokuwa umeandika ('+n+' sehemu) — kagua kisha uhifadhi.');}catch(_e){}},800);}catch(_e){}
+}
 function sessionImekwisha(){
-  if(_sessionImekwishaImeonyeshwa)return;_sessionImekwishaImeonyeshwa=true;
+  if(_sessionImekwishaImeonyeshwa)return;_sessionImekwishaImeonyeshwa=true;hifadhiKilichoandikwa();
   try{tangazaKati('Muda wa kuingia umekwisha (huenda mtandao ulikatika). Hakuna kitu kilichopotea kwenye mfumo — bonyeza "Ingia Tena", kisha ujaze tena kilichokuwa kinahifadhiwa.','error',null,'Ingia Tena');}catch(_e){}
   setTimeout(()=>{if(!confirm('Muda wa kuingia umekwisha. Bonyeza OK kuingia tena.'))return;try{localStorage.removeItem('nh_cached_profile');}catch(_e){}sbClient.auth.signOut().finally(()=>location.reload());},300);
+}
+let _refreshInaendelea=null;
+function _refreshMoja(){      // many requests can need a new sign-in token at the same moment — they must share ONE renewal (two at once make the server throw the session away)
+  if(!_refreshInaendelea)_refreshInaendelea=sbClient.auth.refreshSession().finally(()=>{setTimeout(()=>{_refreshInaendelea=null;},300);});
+  return _refreshInaendelea;
 }
 async function authHeaders(){
   let session=null;
@@ -3634,7 +3650,8 @@ async function authHeaders(){
     let mtandao=!navigator.onLine;
     for(let k=0;k<3&&!session;k++){
       try{
-        const r=await sbClient.auth.refreshSession();session=r&&r.data&&r.data.session||null;
+        const r=await _refreshMoja();session=r&&r.data&&r.data.session||null;
+        if(!session){try{const r2=await sbClient.auth.getSession();session=r2&&r2.data&&r2.data.session||null;}catch(_e){}}      // another request may have renewed it a moment ago
         if(!session&&r&&r.error){const e=r.error;mtandao=/retryable|fetch|network|timeout|failed/i.test(String(e.name||'')+' '+String(e.message||''))||!e.status||e.status>=500||!navigator.onLine;if(!mtandao)break;}
       }catch(_e){mtandao=true;}
       if(!session&&k<2)await new Promise(ok=>setTimeout(ok,1000*(k+1)));
@@ -4344,6 +4361,7 @@ function enterAdmin(role='gm',tawi=null,jina=''){
   pakiaZamuYangu();jazaZamuZaOda();
   pollInterval=setInterval(loadAllPoll,POLL_MS+Math.round(Math.random()*6000));   // random 0-6s extra so people don't all refresh at the same instant
   applyRoleUI();
+  setTimeout(rudishaKilichoandikwa,2500);
   updateOfflineBanner();
   processPendingQueue();
 }
@@ -4566,7 +4584,7 @@ let _loadRunning=null,_loadPending=null,_lastFullLoad=0;
 async function _runLoad(hotOnly,lazima){
   try{
     if(navigator.onLine&&pendingQueue.length)processPendingQueue();
-    const opP=(userRole==='cashier')?Promise.resolve(null):DB.get('mafuta_oda_pampu','order=created_at.asc&limit=5000').catch(()=>null);
+    const opP=(userRole==='cashier'||(hotOnly&&allOdaPampu.length))?Promise.resolve(null):DB.get('mafuta_oda_pampu','order=created_at.asc&limit=5000').catch(()=>null);
     let rows;
     if(_prefetch){const pf=_prefetch;_prefetch=null;rows=await pf.catch(()=>fetchAllTables());}
     else rows=await fetchAllTables(hotOnly,lazima);
@@ -4613,14 +4631,14 @@ function loadAll(){
   return _startLoad();
 }
 // The 8-second background refresh: simply skip a tick if the last one hasn't finished.
-const POLL_MS=75000;     // how often an open, visible, in-use screen quietly refreshes itself
+const POLL_MS=120000;     // how often an open, visible, in-use screen quietly refreshes itself
 const IDLE_MS=90000;     // a screen nobody has touched for 2 minutes stops refreshing until someone does
 let _pollTick=0,_lastActivity=Date.now();
 function loadAllPoll(){
   if(document.hidden||_loadRunning||_loadPending)return;
   if(Date.now()-_lastActivity>IDLE_MS)return;            // nobody is looking: don't ask the server for nobody
   _pollTick++;
-  _startLoad(_pollTick%4!==0,false);                      // 2 routine refreshes, then 1 full one (so a General Manager correction reaches everyone within ~1.5 min) — and nothing is redrawn if nothing changed
+  _startLoad(_pollTick%6!==0,false);                      // 2 routine refreshes, then 1 full one (so a General Manager correction reaches everyone within ~1.5 min) — and nothing is redrawn if nothing changed
 }
 // Someone touches an idle or just-returned-to screen: catch up straight away (at most once every 20 seconds).
 function _kamaTena(){if(isAdmin&&!document.hidden&&Date.now()-_lastFullLoad>45000)loadAll();}
