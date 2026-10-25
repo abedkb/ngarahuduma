@@ -3994,7 +3994,20 @@ let pollInterval=null,lastHash='';
 // URLs are treated as unique security origins"), which was silently breaking
 // startup. Plain class toggling, like the rest of the app's modals already
 // use, needs no such API and can never hit that wall.
-function openSheet(id){const el=$(id);if(!el)return;el.classList.add('open');}
+function openSheet(id){const el=$(id);if(!el)return;el.classList.add('open');try{andaaFomuKwaWhatsApp(el);}catch(_e){}}
+// A phone only lets the share sheet open straight after a tap, but making the picture takes a few seconds. So on a phone the
+// picture is made quietly as soon as a form opens — by the time "Shiriki (WhatsApp)" is pressed it is ready and opens WhatsApp at once.
+let _andaaKitambulisho=0;
+function andaaFomuKwaWhatsApp(el){
+  if(typeof niSimu!=='function'||!niSimu()||!el.querySelector('.fomu-btn'))return;
+  const kt=++_andaaKitambulisho;
+  setTimeout(async()=>{
+    if(kt!==_andaaKitambulisho||!el.classList.contains('open')||typeof fomuKamataPicha!=='function')return;
+    try{const f0=jinaLaFomuLiloWazi();if(_fomuTayari&&_fomuTayari.filename===f0&&Date.now()-_fomuTayari.at<600000)return;
+      const canvas=await fomuKamataPicha(true);if(!canvas||kt!==_andaaKitambulisho||!el.classList.contains('open'))return;
+      const blob=await new Promise(r=>canvas.toBlob(r,'image/png'));if(blob)_fomuTayari={blob,filename:f0,at:Date.now()};}catch(_e){}
+  },1500);
+}
 function closeSheet(id){const el=$(id);if(el)el.classList.remove('open');}
 
 
@@ -6516,12 +6529,12 @@ async function chapishaFomu(){
   window.print();
 }
 // DOWNLOAD / SHARE: the document is copied off-screen at the same width as the printed page, WITHOUT the buttons, then photographed
-async function fomuKamataPicha(){
+async function fomuKamataPicha(kimya){
   const sheet=document.querySelector('.inv-overlay.open .inv-sheet');
-  if(!sheet){toast('❌ Hakuna fomu iliyo wazi');return null;}
+  if(!sheet){if(!kimya)toast('❌ Hakuna fomu iliyo wazi');return null;}
   if(typeof html2canvas==='undefined'){
-    toast('⏳ Inapakia zana ya kupakua...');
-    try{await pakiaMaktaba('html2canvas');}catch(e){toast('❌ Zana ya kupakua haijapakiwa — angalia mtandao wako.');return null;}
+    if(!kimya)toast('⏳ Inapakia zana ya kupakua...');
+    try{await pakiaMaktaba('html2canvas');}catch(e){if(!kimya)toast('❌ Zana ya kupakua haijapakiwa — angalia mtandao wako.');return null;}
   }
   const klon=sheet.cloneNode(true);
   klon.querySelectorAll('.inv-close,.inv-print-btn,.fomu-btn').forEach(e=>e.remove());      // the buttons are not part of the document
@@ -6576,8 +6589,9 @@ const niSimu=()=>/Android|iPhone|iPad|iPod/i.test(navigator.userAgent||'')||(nav
 async function shirikiFomu(){
   const sheet=document.querySelector('.inv-overlay.open .inv-sheet');
   const waPhone=sheet?sheet.dataset.waPhone:'';
+  const waKiungo=waPhone?`https://wa.me/${waIntlPhone(waPhone)}`:'https://api.whatsapp.com/send';
   const openWaChat=()=>{
-    const w=window.open(waPhone?`https://wa.me/${waIntlPhone(waPhone)}`:'https://wa.me/','_blank');
+    const w=window.open(waKiungo,'_blank');
     return !!w;
   };
   const pakua=(blob,filename)=>{
@@ -6586,7 +6600,7 @@ async function shirikiFomu(){
   };
   const filename0=jinaLaFomuLiloWazi();
   let blob,filename=filename0,tayariSasa=false;
-  if(_fomuTayari&&_fomuTayari.filename===filename0&&Date.now()-_fomuTayari.at<180000){blob=_fomuTayari.blob;tayariSasa=true;}      // second tap: the picture is already made
+  if(_fomuTayari&&_fomuTayari.filename===filename0&&Date.now()-_fomuTayari.at<600000){blob=_fomuTayari.blob;tayariSasa=true;}      // second tap: the picture is already made
   else{
     const canvas=await fomuKamataPicha();if(!canvas)return;
     blob=await new Promise(r=>canvas.toBlob(r,'image/png'));
@@ -6616,11 +6630,23 @@ async function shirikiFomu(){
       return;
     }catch(e){/* this browser does not allow copying a picture — carry on */}
   }
-  // 3) Last resort: save the picture and open WhatsApp, the person attaches it (paperclip → Gallery/Files).
-  pakua(blob,filename);
-  const wazi=openWaChat();
-  toast(wazi?'📥 Fomu imepakuliwa — kwenye WhatsApp bonyeza kiambatisho (📎) kisha ichague kutoka Picha/Faili.'
-            :'📥 Fomu imepakuliwa kwenye simu — fungua WhatsApp mwenyewe, bonyeza 📎 kisha uchague fomu hiyo.');
+  // 3) Last resort — works on every device: a small window with two buttons, each pressed by the person (a phone never blocks a tap):
+  //    save the picture, then open WhatsApp and attach it (paperclip → Gallery/Files).
+  waMbadala(blob,filename,waKiungo);
+}
+function waMbadala(blob,filename,kiungo){
+  let m=$('waMbadala');if(m)m.remove();
+  m=document.createElement('div');m.id='waMbadala';
+  m.style.cssText='position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;padding:16px;';
+  m.innerHTML=`<div style="background:#fff;color:#1d2733;border-radius:12px;max-width:380px;width:100%;padding:18px;font-family:inherit;box-shadow:0 10px 40px rgba(0,0,0,.4);">
+    <div style="font-weight:700;font-size:16px;margin-bottom:6px;">📤 Tuma kwa WhatsApp</div>
+    <div style="font-size:13px;line-height:1.5;margin-bottom:14px;">Simu hii haifungui WhatsApp moja kwa moja. Fanya hatua mbili:<br><b>1.</b> Bonyeza "Pakua picha".<br><b>2.</b> Bonyeza "Fungua WhatsApp", kisha 📎 → Picha/Faili → chagua fomu.</div>
+    <button id="waPakua" style="width:100%;padding:12px;margin-bottom:8px;border:0;border-radius:8px;background:#E8590C;color:#fff;font-weight:700;font-size:14px;">📥 1. Pakua picha</button>
+    <a id="waFungua" href="${kiungo}" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none;padding:12px;margin-bottom:8px;border-radius:8px;background:#25D366;color:#fff;font-weight:700;font-size:14px;">💬 2. Fungua WhatsApp</a>
+    <button id="waFunga" style="width:100%;padding:10px;border:1px solid #c9d2de;border-radius:8px;background:#fff;color:#1d2733;font-size:13px;">Funga</button></div>`;
+  document.body.appendChild(m);
+  $('waPakua').onclick=()=>{const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename+'.png';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),4000);$('waPakua').textContent='✅ Imepakuliwa';};
+  $('waFunga').onclick=()=>m.remove();
 }
 $('tfClose') && $('tfClose').addEventListener('click',()=>closeSheet('tfOverlay'));
 $('rfClose') && $('rfClose').addEventListener('click',()=>closeSheet('rfOverlay'));
