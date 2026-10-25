@@ -569,6 +569,9 @@ body.gm-ripoti #serikali #gmKadi-order,body.gm-ripoti #serikali #gmKadi-invsk,bo
   .inv-close,.inv-print-btn,.fomu-btn{display:none!important;}      /* the buttons are never part of the document */
   .inv-sheet,.inv-sheet *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   .inv-table tr{break-inside:avoid;}
+  .inv-overlay.open .inv-sheet:has(.ds-tbl){padding:6mm 10mm!important;}      /* the daily sales form is ONE page */
+  .ds-tbl td,.ds-tbl th{height:5.4mm!important;padding-top:0!important;padding-bottom:0!important;}
+  .ds-tbl .ds-firma{height:9mm!important;}.ds-tbl .ds-kichwa{height:8mm!important;}.ds-tbl .ds-jumla-kubwa{height:8mm!important;}
 }
 
 /* Mobile topnav */
@@ -3994,6 +3997,9 @@ let pollInterval=null,lastHash='';
 // URLs are treated as unique security origins"), which was silently breaking
 // startup. Plain class toggling, like the rest of the app's modals already
 // use, needs no such API and can never hit that wall.
+// The daily sales form must print on ONE page: if it is still taller than the paper, it is shrunk just enough to fit.
+window.addEventListener('beforeprint',()=>{try{document.querySelectorAll('.inv-overlay.open .ds-tbl').forEach(t=>{t.style.zoom='';const h=t.getBoundingClientRect().height,maks=(297-14)*3.7795;if(h>maks)t.style.zoom=String(Math.max(0.6,maks/h));});}catch(_e){}});
+window.addEventListener('afterprint',()=>{try{document.querySelectorAll('.ds-tbl').forEach(t=>{t.style.zoom='';});}catch(_e){}});
 function openSheet(id){const el=$(id);if(!el)return;el.classList.add('open');try{andaaFomuKwaWhatsApp(el);}catch(_e){}}
 // A phone only lets the share sheet open straight after a tap, but making the picture takes a few seconds. So on a phone the
 // picture is made quietly as soon as a form opens — by the time "Shiriki (WhatsApp)" is pressed it is ready and opens WhatsApp at once.
@@ -4005,7 +4011,7 @@ function andaaFomuKwaWhatsApp(el){
     if(kt!==_andaaKitambulisho||!el.classList.contains('open')||typeof fomuKamataPicha!=='function')return;
     try{const f0=jinaLaFomuLiloWazi();if(_fomuTayari&&_fomuTayari.filename===f0&&Date.now()-_fomuTayari.at<600000)return;
       const canvas=await fomuKamataPicha(true);if(!canvas||kt!==_andaaKitambulisho||!el.classList.contains('open'))return;
-      const blob=await new Promise(r=>canvas.toBlob(r,'image/png'));if(blob)_fomuTayari={blob,filename:f0,at:Date.now()};}catch(_e){}
+      const f=await fomuFaili(canvas);if(f)_fomuTayari={blob:f.blob,ext:f.ext,type:f.type,filename:f0,at:Date.now()};}catch(_e){}
   },1500);
 }
 function closeSheet(id){const el=$(id);if(el)el.classList.remove('open');}
@@ -6543,11 +6549,21 @@ async function fomuKamataPicha(kimya){
   let canvas=null;
   try{
     await subiriPicha(andaaNembo(klon));
-    canvas=await html2canvas(klon,{scale:2,backgroundColor:'#ffffff',useCORS:true,windowWidth:klon.scrollWidth});
+    const _w=klon.scrollWidth||794,_h=klon.scrollHeight||1123,_sc=Math.min(3,Math.max(1.5,Math.sqrt(14e6/(_w*_h))));      // as sharp as the phone's memory allows (a very long form gets a little less)
+    canvas=await html2canvas(klon,{scale:_sc,backgroundColor:'#ffffff',useCORS:true,windowWidth:klon.scrollWidth});
     canvas.pana=sheet.classList.contains('rp-sheet');        // the wide debt report is landscape; every form and invoice is portrait
   }catch(e){toast('❌ Imeshindikana kunasa fomu: '+e.message);}
   klon.remove();
   return canvas;
+}
+// What is sent: a long form (the bin card, a statement) goes as a PDF — WhatsApp squeezes a tall picture until the numbers blur, but never touches a PDF.
+async function fomuFaili(canvas){
+  if(canvas.height/canvas.width>1.45){
+    try{if(!(window.jspdf&&window.jspdf.jsPDF))await pakiaMaktaba('jspdf');
+      const blob=canvasKwaPdf(canvas).output('blob');if(blob&&blob.size)return{blob,ext:'.pdf',type:'application/pdf'};}catch(_e){}
+  }
+  const blob=await new Promise(r=>canvas.toBlob(r,'image/png'));
+  return blob?{blob,ext:'.png',type:'image/png'}:null;
 }
 // a tall canvas becomes a PDF of A4 pages
 function canvasKwaPdf(canvas){
@@ -6594,19 +6610,19 @@ async function shirikiFomu(){
     const w=window.open(waKiungo,'_blank');
     return !!w;
   };
-  const pakua=(blob,filename)=>{
-    const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename+'.png';
+  const pakua=(blob,filename,ext)=>{
+    const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename+(ext||'.png');
     document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),4000);
   };
   const filename0=jinaLaFomuLiloWazi();
-  let blob,filename=filename0,tayariSasa=false;
-  if(_fomuTayari&&_fomuTayari.filename===filename0&&Date.now()-_fomuTayari.at<600000){blob=_fomuTayari.blob;tayariSasa=true;}      // second tap: the picture is already made
+  let blob,filename=filename0,tayariSasa=false,ext='.png',aina='image/png';
+  if(_fomuTayari&&_fomuTayari.filename===filename0&&Date.now()-_fomuTayari.at<600000){blob=_fomuTayari.blob;ext=_fomuTayari.ext||'.png';aina=_fomuTayari.type||'image/png';tayariSasa=true;}      // second tap: the picture is already made
   else{
     const canvas=await fomuKamataPicha();if(!canvas)return;
-    blob=await new Promise(r=>canvas.toBlob(r,'image/png'));
+    const f=await fomuFaili(canvas);blob=f&&f.blob;if(f){ext=f.ext;aina=f.type;}
     if(!blob){toast('❌ Picha ya fomu haikutengenezwa (simu haina nafasi ya kutosha?). Jaribu tena au tumia "Pakua".');return;}
   }
-  const file=new File([blob],filename+'.png',{type:'image/png'});
+  const file=new File([blob],filename+ext,{type:aina});
   const simu=niSimu();
 
   // 1) Phone: the native share sheet — the form goes straight into WhatsApp.
@@ -6614,9 +6630,9 @@ async function shirikiFomu(){
   if(simu&&shareInawezekana){
     try{await navigator.share({files:[file],title:filename});_fomuTayari=null;return;}
     catch(e){
-      if(e.name==='AbortError'){_fomuTayari={blob,filename:filename0,at:Date.now()};return;}      // the person closed the sheet
+      if(e.name==='AbortError'){_fomuTayari={blob,ext,type:aina,filename:filename0,at:Date.now()};return;}      // the person closed the sheet
       if(!tayariSasa){      // the phone wants a fresh tap: keep the picture and ask for one more tap
-        _fomuTayari={blob,filename:filename0,at:Date.now()};
+        _fomuTayari={blob,ext,type:aina,filename:filename0,at:Date.now()};
         toast('✅ Fomu iko tayari — bonyeza "Shiriki (WhatsApp)" mara moja zaidi ili kuituma.');return;
       }
     }
@@ -6624,7 +6640,7 @@ async function shirikiFomu(){
   // 2) Computer (or a phone without a share sheet): copy the picture, open WhatsApp, paste.
   if(!simu&&navigator.clipboard&&window.ClipboardItem){
     try{
-      await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
+      if(ext!=='.png')throw new Error('pdf');await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
       openWaChat();
       toast(waPhone?'✅ Fomu imenakiliwa na WhatsApp imefunguliwa — bandika (Ctrl+V) kwenye ujumbe kisha "Tuma".':'✅ Fomu imenakiliwa — fungua mazungumzo unayotaka na ubandike (Ctrl+V) kisha "Tuma".');
       return;
@@ -6632,7 +6648,7 @@ async function shirikiFomu(){
   }
   // 3) Last resort — works on every device: a small window with two buttons, each pressed by the person (a phone never blocks a tap):
   //    save the picture, then open WhatsApp and attach it (paperclip → Gallery/Files).
-  waMbadala(blob,filename,waKiungo);
+  waMbadala(blob,filename+ext,waKiungo);
 }
 function waMbadala(blob,filename,kiungo){
   let m=$('waMbadala');if(m)m.remove();
@@ -6645,7 +6661,7 @@ function waMbadala(blob,filename,kiungo){
     <a id="waFungua" href="${kiungo}" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none;padding:12px;margin-bottom:8px;border-radius:8px;background:#25D366;color:#fff;font-weight:700;font-size:14px;">💬 2. Fungua WhatsApp</a>
     <button id="waFunga" style="width:100%;padding:10px;border:1px solid #c9d2de;border-radius:8px;background:#fff;color:#1d2733;font-size:13px;">Funga</button></div>`;
   document.body.appendChild(m);
-  $('waPakua').onclick=()=>{const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename+'.png';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),4000);$('waPakua').textContent='✅ Imepakuliwa';};
+  $('waPakua').onclick=()=>{const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),4000);$('waPakua').textContent='✅ Imepakuliwa';};
   $('waFunga').onclick=()=>m.remove();
 }
 $('tfClose') && $('tfClose').addEventListener('click',()=>closeSheet('tfOverlay'));
