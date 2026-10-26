@@ -704,6 +704,10 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 .grid-entry td.g-bei.g-bei-hariri input.g-bei-in{width:100%;min-width:104px;background:#fff;color:#1d1d1f;border:1px solid #FF8A57;border-radius:6px;font-weight:700;text-align:right;}
 .grid-entry td.g-bei.g-bei-hariri .g-bei-min{display:block;font-size:10px;font-weight:600;color:#B25E00;margin-top:3px;font-family:inherit;white-space:normal;}
 .oto-lebo{display:block;font-size:8.5px;font-weight:700;letter-spacing:.08em;color:#98A0B5;margin-top:1px;}
+/* ── DAILY MAPATO BREAKDOWN (Matumizi page) ── */
+#adminApp .mz-vyanzo table.stmt-tbl td{color:#1d2733!important;background:#fff!important;font-size:12.5px;}
+#adminApp .mz-vyanzo table.stmt-tbl tr:nth-child(even) td{background:#F4F7FB!important;}
+#adminApp .mz-vyanzo table.stmt-tbl tr.stmt-tot td{background:#DCE6F2!important;font-weight:700;}
 /* ── DAILY SALES REPORT FORM: the layout of the paper form ── */
 .ds-tbl{width:100%;border-collapse:collapse;table-layout:fixed;border:2px solid #1d1d1d;font-family:Arial,Helvetica,sans-serif;color:#111;margin:0;}
 .ds-tbl td,.ds-tbl th{border:1.5px solid #1d1d1d;padding:1px 5px;height:6.3mm;font-size:12px;vertical-align:middle;overflow:hidden;}
@@ -1551,6 +1555,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
             <div class="card" style="border-left:3px solid var(--a-rg)"><div class="c-label">Salio la Siku (Mapato − Matumizi)</div><div class="c-value" id="ghSalio" style="color:var(--a-rg)">—</div></div>
           </div>
           <p id="ghMaelezo" style="font-size:12px;color:var(--a-muted);margin:8px 0 0;"></p>
+          <div id="ghVyanzo" class="mz-vyanzo" style="margin-top:12px;"></div>
         </div>
       </div>
       <div class="section" id="gharamaEntrySection">
@@ -1592,6 +1597,22 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
         <div class="section-body" style="display:none;"><div class="table-wrap"><table>
           <thead><tr><th>#</th><th>Tarehe</th><th>Notes</th><th class="num">Kiasi</th><th>Kitendo</th></tr></thead>
           <tbody id="tbody-gharama"><tr class="loading-row"><td colspan="5">Inapakia...</td></tr></tbody>
+        </table></div></div>
+      </div>
+      <div class="section" id="mzMapatoSection">
+        <div class="section-header"><h3>📥 Mapato Form</h3>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <button class="btn sm secondary" onclick="badiliSehemu(this)">Onyesha Orodha</button>
+            <input type="date" id="mzm-kuanzia" onchange="renderGharama()" style="width:auto"/>
+            <span style="color:var(--a-muted);font-size:12px;">hadi</span>
+            <input type="date" id="mzm-hadi" onchange="renderGharama()" style="width:auto"/>
+            <button class="btn sm secondary" onclick="$('mzm-kuanzia').value='';$('mzm-hadi').value='';renderGharama()">Onyesha Yote</button>
+            <button class="btn sm secondary" onclick="chapishaMapatoMz()">🖨 Chapisha Ripoti</button>
+          </div>
+        </div>
+        <div class="section-body" style="display:none;"><div class="table-wrap"><table>
+          <thead><tr><th>#</th><th>Tarehe</th><th>Aliyekabidhi</th><th>Maelezo</th><th class="num">Cash</th><th class="num">Lipa Namba</th><th class="num">NMB</th><th class="num">CRDB</th><th class="num">Jumla</th></tr></thead>
+          <tbody id="tbody-mapato-mz"><tr class="loading-row"><td colspan="9">Inapakia...</td></tr></tbody>
         </table></div></div>
       </div>
     </section>
@@ -4826,6 +4847,7 @@ function switchPage(page){
   if(!allowed.includes(page))return;
   document.querySelectorAll('#adminApp .nav-btn,.a-tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
   document.querySelectorAll('#adminApp .page').forEach(p=>p.classList.toggle('active',p.id===page));
+  _navPush(page);
   if(page==='takataka')loadTakataka();
   if(page==='tenda')pakiaTenda();
   if(page==='makusanyo'){renderMakusanyo();renderBankSlips('bs');}
@@ -5495,23 +5517,45 @@ function onBinCardSearchInput(){
   if(matches.length===1)$('bc-bidhaa-id').value=matches[0].id;
 }
 function generateBinCard(){
-  const q=($('bc-search').value||'').trim().toLowerCase();
+  const q=($('bc-search').value||'').trim().toLowerCase().replace(/\s+/g,' ');
   let p=allBidhaa.find(x=>String(x.id)===$('bc-bidhaa-id').value);
-  if(!p||!bidhaaInalingana(p,q)){
-    const matches=allBidhaa.filter(x=>bidhaaInalingana(x,q));
-    if(matches.length===1)p=matches[0];
+  if(!p||!(bidhaaInalingana(p,q)&&filterByTawi([p]).length)){
+    p=null;
+    const pool=filterByTawi(allBidhaa).filter(x=>!x.deleted_at);
+    // the exact name first (the name as written on the card), then anything that contains the words typed
+    const sawa=pool.filter(x=>[x.jina,x.jina_sw].some(n=>String(n||'').trim().toLowerCase().replace(/\s+/g,' ')===q));
+    const m=sawa.length?sawa:pool.filter(x=>bidhaaInalingana(x,q));
+    const matawi=[...new Set(m.map(x=>x.tawi))];
+    if(m.length&&matawi.length>1){toast(`Bidhaa hii ipo kwenye matawi ${matawi.length} (${matawi.map(t=>BRANCHES[t]||t).join(', ')}) — chagua tawi juu kushoto kwanza, kisha utengeneze tena.`);return;}
+    if(m.length)p=m.slice().sort((a,b)=>(Number(b.idadi)||0)-(Number(a.idadi)||0))[0];      // the same name at several prices in one branch: the line with the most stock
   }
-  if(!p){toast('Chagua bidhaa sahihi kwanza — andika jina kamili kama linavyoonekana kwenye Stock');return;}
+  if(!p){toast('Bidhaa haikupatikana — andika jina kama linavyoonekana kwenye Stock, au chagua kutoka kwenye orodha.');return;}
 
-  const mafungu=allBidhaa.filter(x=>x.tawi===p.tawi&&x.jina.toLowerCase()===p.jina.toLowerCase()).length>1;      // the same name kept at several prices: each price has its own card
-  const ins=allManunuzi.filter(m=>!m._pending&&m.tawi===p.tawi&&m.jina.toLowerCase()===p.jina.toLowerCase()&&(!mafungu||(Number(m.bei_kununulia)||0)===(Number(p.bei_kuuzia)||0)))
-    .map(m=>({tarehe:m.tarehe,created_at:m.created_at,in:m.idadi,out:0,bei:m.bei_kununulia,cash:0,order:0,purchase:m.jumla,jina:m.jina_muhusika||'—'}));
-  const outs=allMauzo.filter(s=>!s._pending&&s.deleted_at==null&&s.tawi===p.tawi&&s.jina.toLowerCase()===p.jina.toLowerCase()&&(!mafungu||s.bidhaa_id==null||String(s.bidhaa_id)===String(p.id))&&s.hali_order!=='Inasubiri'&&s.hali_order!=='Imekataliwa')
+  const jl=(x)=>String(x||'').toLowerCase();
+  const mafungu=allBidhaa.filter(x=>x.tawi===p.tawi&&jl(x.jina)===jl(p.jina)).length>1;      // the same name kept at several prices: each price has its own card
+  const ins=allManunuzi.filter(m=>!m._pending&&m.deleted_at==null&&m.tawi===p.tawi&&jl(m.jina)===jl(p.jina)&&(!mafungu||(Number(m.bei_kununulia)||0)===(Number(p.bei_kuuzia)||0)))
+    .map(m=>({tarehe:m.tarehe,created_at:m.created_at,in:m.idadi,out:0,bei:m.bei_kununulia,cash:0,order:0,purchase:m.msambazaji==='Stoo ya Awali'?0:m.jumla,jina:m.msambazaji==='Stoo ya Awali'?'B/F':(m.jina_muhusika||'—'),awali:m.msambazaji==='Stoo ya Awali'}));
+  const outs=allMauzo.filter(s=>!s._pending&&s.deleted_at==null&&s.tawi===p.tawi&&jl(s.jina)===jl(p.jina)&&(!mafungu||s.bidhaa_id==null||String(s.bidhaa_id)===String(p.id))&&s.hali_order!=='Inasubiri'&&s.hali_order!=='Imekataliwa')
     .map(s=>({tarehe:s.tarehe,created_at:s.created_at,in:0,out:s.idadi,bei:s.bei_kuuzia,cash:s.aina==='Taslimu'?s.jumla:0,order:s.aina==='Mkopo'?s.jumla:0,purchase:0,jina:s.muuzaji||'—'}));
+  // goods that left this branch on a Transfer (the sale is recorded under the branch that asked) and Stock transfers in and out
+  const tOut=allMauzo.filter(s=>!s._pending&&s.deleted_at==null&&s.chanzo==='Transfer'&&s.tawi_chanzo_stock===p.tawi&&s.tawi!==p.tawi&&String(s.bidhaa_id)===String(p.id))
+    .map(s=>({tarehe:s.tarehe,created_at:s.created_at,in:0,out:s.idadi,bei:s.bei_kuuzia,cash:0,order:0,purchase:0,jina:'TRANSFER → '+(BRANCHES[s.tawi]||s.tawi)}));
+  const sOut=allUhamisho.filter(u=>!u.deleted_at&&u.aina==='Stock'&&String(u.bidhaa_id)===String(p.id)&&(u.hali==='Imethibitishwa'||u.hali==='Imepokelewa'))
+    .map(u=>({tarehe:u.tarehe_kukabidhi||u.tarehe,created_at:u.created_at,in:0,out:u.idadi,bei:u.bei_kuuzia,cash:0,order:0,purchase:0,jina:'TRANSFER → '+(BRANCHES[u.tawi_muombaji]||u.tawi_muombaji)}));
+  const sIn=allUhamisho.filter(u=>!u.deleted_at&&u.aina==='Stock'&&u.hali==='Imepokelewa'&&u.tawi_muombaji===p.tawi&&jl(u.jina)===jl(p.jina))
+    .map(u=>({tarehe:u.tarehe_kupokea||u.tarehe,created_at:u.created_at,in:u.idadi,out:0,bei:u.bei_kuuza_mpokeaji||u.bei_kuuzia,cash:0,order:0,purchase:0,jina:'TRANSFER ← '+(BRANCHES[u.tawi_chanzo]||u.tawi_chanzo)}));
 
-  const rows=ins.concat(outs).sort((a,b)=>(a.tarehe||'').localeCompare(b.tarehe||'')||(a.created_at||'').localeCompare(b.created_at||''));
+  const rows=ins.concat(outs,tOut,sOut,sIn).sort((a,b)=>(a.tarehe||'').localeCompare(b.tarehe||'')||((b.awali?1:0)-(a.awali?1:0))||(a.created_at||'').localeCompare(b.created_at||''));
+  // The card must END at the figure the Stock tab shows. Whatever the recorded purchases/sales/transfers do not explain (stock that was
+  // already on the shelf when the system started, corrections made by the manager) is shown as its own line instead of being hidden.
+  const stockSasa=Number(p.idadi)||0,net=rows.reduce((a,r)=>a+(Number(r.in)||0)-(Number(r.out)||0),0),tofauti=Math.round((stockSasa-net)*1000)/1000;
+  if(tofauti>0){      // stock that was added without a purchase record: it goes right after the opening balance (or first, if there is none)
+    let k=0;while(k<rows.length&&rows[k].awali)k++;
+    rows.splice(k,0,{tarehe:(rows[k]&&rows[k].tarehe)||(rows[0]&&rows[0].tarehe)||leoISO(),in:tofauti,out:0,bei:p.bei_kuuzia,cash:0,order:0,purchase:0,jina:k?'PURCHASE':'B/F'});
+  }
+  else if(tofauti<0)rows.push({tarehe:(rows.length&&rows[rows.length-1].tarehe)||leoISO(),in:0,out:-tofauti,bei:p.bei_kuuzia,cash:0,order:0,purchase:0,jina:'MAREKEBISHO'});
   let balance=0;
-  const withBalance=rows.map(r=>{balance+=r.in-r.out;return Object.assign({},r,{balance});});
+  const withBalance=rows.map(r=>{balance=Math.round((balance+(Number(r.in)||0)-(Number(r.out)||0))*1000)/1000;return Object.assign({},r,{balance});});
 
   $('bcItemName').textContent=p.jina+(p.jina_sw?' / '+p.jina_sw:'');
   $('bcTawi').textContent=BRANCHES[p.tawi]||p.tawi;
@@ -7665,6 +7709,16 @@ function renderGharama(){
       const jt=n=>`<td class="num"><strong>${pesa2(round2(n))}</strong></td>`;
       return `<tr class="safu-jumla" style="background:rgba(255,255,255,0.07);border-top:2px solid var(--a-line);"><td colspan="4"><strong>JUMLA (${rows.length} rekodi)</strong></td>${jt(j.cash)}${jt(j.lipa)}${jt(j.nmb)}${jt(j.crdb)}${jt(j.cash+j.lipa+j.nmb+j.crdb)}<td></td></tr>`;})():safuTupu(10,q?'Hakuna mapato yanayolingana na jina hilo.':'Bado hakuna mapato.');
   }
+  // MAPATO FORM on the Matumizi page: the same records as "Orodha ya Mapato", listed like the Cash Expenditure list
+  const tbMz=$('tbody-mapato-mz');
+  if(tbMz){
+    const k2=$('mzm-kuanzia')?$('mzm-kuanzia').value:'',h2=$('mzm-hadi')?$('mzm-hadi').value:'';
+    const rws=computeMatumiziLedger(k2,h2).rows.filter(e=>jumlaYaMapato(e)>0),j={cash:0,lipa:0,nmb:0,crdb:0};
+    rws.forEach(e=>{j.cash+=Number(e.cash_in)||0;j.lipa+=Number(e.lipa_in)||0;j.nmb+=Number(e.nmb_in)||0;j.crdb+=Number(e.crdb_in)||0;});
+    const jt=n=>`<td class="num"><strong>${pesa2(round2(n))}</strong></td>`;
+    tbMz.innerHTML=rws.length?rws.map((e,i)=>`<tr><td>${i+1}</td><td>${e._pending?'⏳ ':''}${e.tarehe}</td><td><strong>${escH(e.mkabidhi||'—')}</strong></td><td>${escH(e.maelezo||'—')}</td>${seli(e.cash_in)}${seli(e.lipa_in)}${seli(e.nmb_in)}${seli(e.crdb_in)}<td class="num"><strong>${pesa2(jumlaYaMapato(e))}</strong></td></tr>`).join('')
+      +`<tr class="safu-jumla" style="background:rgba(255,255,255,0.07);border-top:2px solid var(--a-line);"><td colspan="4"><strong>JUMLA (${rws.length} rekodi)</strong></td>${jt(j.cash)}${jt(j.lipa)}${jt(j.nmb)}${jt(j.crdb)}${jt(j.cash+j.lipa+j.nmb+j.crdb)}</tr>`:safuTupu(9,'Bado hakuna mapato.');
+  }
   // All-time cards (independent of the date filters above). The cash balance counts CASH only.
   const allTime=computeMatumiziLedger('',''),t={cash:0,lipa:0,nmb:0,crdb:0};
   allGharama.forEach(e=>{t.cash+=e.cash_in||0;t.lipa+=e.lipa_in||0;t.nmb+=e.nmb_in||0;t.crdb+=e.crdb_in||0;});
@@ -7679,6 +7733,20 @@ function renderGharama(){
     const mapato=round2(salioJana+sk.cash+sk.lipa+sk.nmb+sk.crdb+salioAwaliLeo),nje=round2(sk.nje),salio=round2(mapato-nje);
     $('ghMapato').textContent=pesa2(mapato);$('ghMatumizi').textContent=pesa2(nje);
     const se=$('ghSalio');se.textContent=pesa2(salio);se.style.color=salio<0?'var(--a-red,#f87171)':'var(--a-rg)';
+    try{      // the breakdown of the mapato by category (how it came in) and by who handed it over
+      const mw=siku.slice(0,7),m={cash:0,lipa:0,nmb:0,crdb:0,awali:0},who={};
+      allGharama.filter(e=>!e.deleted_at&&String(e.tarehe||'').slice(0,7)===mw).forEach(e=>{m.cash+=Number(e.cash_in)||0;m.lipa+=Number(e.lipa_in)||0;m.nmb+=Number(e.nmb_in)||0;m.crdb+=Number(e.crdb_in)||0;});
+      if(salioAwali&&String(salioAwali.tarehe||'').slice(0,7)===mw)m.awali=parseFloat(salioAwali.salio)||0;
+      allGharama.filter(e=>e.tarehe===siku&&!e.deleted_at&&jumlaYaMapato(e)>0).forEach(e=>{const k=String(e.mkabidhi||'—').trim()||'—',w=who[k]||(who[k]={cash:0,lipa:0,nmb:0,crdb:0});w.cash+=Number(e.cash_in)||0;w.lipa+=Number(e.lipa_in)||0;w.nmb+=Number(e.nmb_in)||0;w.crdb+=Number(e.crdb_in)||0;});
+      const v=(n)=>n?pesa2(round2(n)):'—',tr=(l,a,b,kali)=>`<tr${kali?' class="stmt-tot"':''}><td>${l}</td><td class="num">${v(a)}</td><td class="num">${b===null?'':v(b)}</td></tr>`;
+      const sJ=round2(sk.cash+sk.lipa+sk.nmb+sk.crdb),mJ=round2(m.cash+m.lipa+m.nmb+m.crdb+m.awali);
+      const mwili=[['Salio la Jana',salioJana,null],...(salioAwaliLeo||m.awali?[['Salio la Awali',salioAwaliLeo,m.awali]]:[]),['Cash',sk.cash,m.cash],['Lipa Namba',sk.lipa,m.lipa],['NMB',sk.nmb,m.nmb],['CRDB',sk.crdb,m.crdb]].map(r=>tr(r[0],r[1],r[2],false)).join('')+tr('JUMLA YA MAPATO',round2(salioJana+sJ+salioAwaliLeo),mJ,true);
+      const wRows=Object.entries(who).sort((a,b)=>(b[1].cash+b[1].lipa+b[1].nmb+b[1].crdb)-(a[1].cash+a[1].lipa+a[1].nmb+a[1].crdb));
+      const wMwili=wRows.length?wRows.map(([k,w],i)=>`<tr><td>${i+1}</td><td>${escH(k)}</td><td class="num">${v(w.cash)}</td><td class="num">${v(w.lipa)}</td><td class="num">${v(w.nmb)}</td><td class="num">${v(w.crdb)}</td><td class="num"><b>${pesa2(round2(w.cash+w.lipa+w.nmb+w.crdb))}</b></td></tr>`).join(''):'<tr><td colspan="7" style="text-align:center;color:#666;">Hakuna mapato yaliyoingizwa siku hii.</td></tr>';
+      $('ghVyanzo').innerHTML=`<div class="table-wrap"><table class="inv-table stmt-tbl" style="width:auto;min-width:0;max-width:100%;"><thead><tr><th>Aina ya Mapato</th><th class="num">${siku}</th><th class="num">Mwezi ${mw}</th></tr></thead><tbody>${mwili}</tbody></table></div>
+        <div style="font-weight:700;font-size:12.5px;margin:14px 0 6px;">Mapato ya ${siku} — kwa aliyekabidhi</div>
+        <div class="table-wrap"><table class="inv-table stmt-tbl" style="width:auto;min-width:0;max-width:100%;"><thead><tr><th>#</th><th>Aliyekabidhi</th><th class="num">Cash</th><th class="num">Lipa</th><th class="num">NMB</th><th class="num">CRDB</th><th class="num">Jumla</th></tr></thead><tbody>${wMwili}</tbody></table></div>`;
+    }catch(_e){}
     $('ghMaelezo').textContent=(mapato||salioJana)?`Mapato ya ${siku}: Salio la Jana ${pesa2(salioJana)} · ${salioAwaliLeo?`Salio la Awali ${pesa2(round2(salioAwaliLeo))} · `:''}Cash ${pesa2(round2(sk.cash))} · Lipa Namba ${pesa2(round2(sk.lipa))} · NMB ${pesa2(round2(sk.nmb))} · CRDB ${pesa2(round2(sk.crdb))}`:`Hakuna mapato mapya yaliyoingizwa tarehe ${siku}.${salioJana?` Salio la Jana ${pesa2(salioJana)}.`:''}`;
   }
   if($('mz-maf-siku'))renderMauzoYaSikuMatumizi();
@@ -7700,6 +7768,12 @@ async function wekaSalioAwali(){
     arifu('notifySalio','✅ Salio la awali limewekwa!','success');
     loadAllBaada();
   }catch(e){arifu('notifySalio','❌ Hitilafu: '+e.message,'error');}
+}
+function chapishaMapatoMz(){      // the printable Income Report for the dates chosen in "Mapato Form"
+  const k=$('mzm-kuanzia').value,h=$('mzm-hadi').value;
+  if(!k||!h){toast('❌ Chagua tarehe ya kuanzia na ya mwisho');return;}
+  if(k>h){toast('❌ Tarehe ya kuanzia iko baada ya ya mwisho');return;}
+  $('gmrp-mapato-k').value=k;$('gmrp-mapato-h').value=h;gmRipoti('mapato');
 }
 function chapishaMatumiziRipoti(kuanzia,hadi){
   if(typeof kuanzia!=='string'){kuanzia=$('mz-kuanzia').value;hadi=$('mz-hadi').value;}
@@ -10163,6 +10237,39 @@ async function tumaBroadcast(){
   const selAll=$('bc-select-all');if(selAll)selAll.checked=false;updateSelectedCount();
   if(btn){btn.disabled=false;btn.textContent='📨 Tuma Ujumbe';}
 }
+
+/* ─── BACK ARROW: goes to the PREVIOUS page (or closes the open form), instead of leaving the system ───
+   Every page the person opens becomes one step in the browser's history; an open form/window is one step too.
+   All of this is wrapped in try/catch: a browser that refuses history calls (a file opened straight from disk) simply keeps the old behaviour. */
+let _navPage=null,_navPopping=false,_ovPushed=false;
+function _navPush(page){
+  if(_navPopping)return;
+  try{
+    if(_navPage===null)history.replaceState({nh:'page',page},'');
+    else if(page!==_navPage)history.pushState({nh:'page',page},'');
+    _navPage=page;
+  }catch(_e){}
+}
+const _ovFungule=()=>document.querySelector('.inv-overlay.open,.modal-overlay.open');
+try{
+  new MutationObserver(()=>{
+    if(_ovPushed||!isAdmin||!_ovFungule())return;
+    try{history.pushState({nh:'ov'},'');_ovPushed=true;}catch(_e){}
+  }).observe(document.body,{subtree:true,attributes:true,attributeFilter:['class']});
+}catch(_e){}
+window.addEventListener('popstate',(e)=>{
+  if(!isAdmin)return;
+  if(_ovFungule()){      // a form or window is open: the back arrow closes it
+    document.querySelectorAll('.inv-overlay.open').forEach(o=>o.classList.remove('open'));
+    try{fungaAdminModal();}catch(_e){}
+    _ovPushed=false;return;
+  }
+  if(_ovPushed){_ovPushed=false;try{history.back();}catch(_e){}return;}      // the window was closed by its own button earlier: this step only throws its leftover entry away
+  const st=e.state;
+  if(st&&st.nh==='page'&&st.page&&st.page!==_navPage){
+    _navPopping=true;try{switchPage(st.page);_navPage=st.page;}finally{_navPopping=false;}
+  }
+});
 
 /* ─── INIT ─── */
 // No history.pushState/replaceState anywhere in this file anymore (see the
