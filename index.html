@@ -1853,6 +1853,23 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
         <div class="card"><div class="c-label">Wamelipa Sehemu (Partial)</div><div class="c-value" id="mdPartial" style="color:var(--a-amber,#E8A33D)">—</div><span class="c-badge badge-gray">wateja</span></div>
         <div class="card"><div class="c-label">Hawajalipa (Not Paid)</div><div class="c-value" id="mdHajalipa" style="color:var(--a-red)">—</div><span class="c-badge badge-gray">wateja</span></div>
       </div>
+      <div class="section" id="mnZuhuraSection" style="display:none;"><div class="section-header"><h3>📜 Madeni ya Nyuma</h3></div>
+        <div class="section-body">
+          <p style="font-size:12.5px;color:var(--a-muted);margin-bottom:10px;">Weka madeni ya wateja yaliyoanza kabla ya mfumo. Yanaingia kwenye orodha ya "Wateja Wenye Madeni" hapa chini, na malipo yanarekodiwa kwa kitufe cha 💳 Lipa kama madeni mengine.</p>
+          <div id="notifyMnZ" class="notify"></div>
+          <div class="form-grid">
+            <div class="field"><label>Jina la Mdaiwa *</label><input type="text" id="mnz-jina" list="mnz-majina" autocomplete="off" placeholder="Jina kamili"/><datalist id="mnz-majina"></datalist></div>
+            <div class="field"><label>Simu</label><input type="tel" id="mnz-simu" autocomplete="off" placeholder="07xx xxx xxx"/></div>
+            <div class="field"><label>Tarehe ya Deni *</label><input type="date" id="mnz-tarehe"/></div>
+            <div class="field"><label>Deni Lote (TZS) *</label><input type="number" id="mnz-deni" min="0" step="any" placeholder="0" oninput="mnzHesabu()"/></div>
+            <div class="field"><label>Alicholipa Tayari (TZS)</label><input type="number" id="mnz-lipwa" min="0" step="any" placeholder="0" oninput="mnzHesabu()"/></div>
+            <div class="field"><label>Baki</label><input type="text" id="mnz-baki" readonly value="TSh 0"/></div>
+            <div class="field"><label>Tarehe ya Mwisho ya Kulipa</label><input type="date" id="mnz-mwisho"/></div>
+            <div class="field"><label>Maelezo (deni la nini)</label><input type="text" id="mnz-maelezo" autocomplete="off" placeholder="mfano: cement na bati"/></div>
+          </div>
+          <div class="controls"><button class="btn gold" id="mnz-btn" onclick="hifadhiDeniLaNyumaZ()">💾 Hifadhi Deni la Nyuma</button></div>
+        </div>
+      </div>
       <div class="section gm-kadi" id="gmKadi-madeni"><div class="section-header"><h3>📋 Orodha ya Madeni</h3></div><div class="section-body"><div class="controls" style="align-items:flex-end;flex-wrap:wrap;gap:10px;"><div class="field" style="margin:0;"><label>Kuanzia</label><input type="date" id="gmrp-madeni-k" onchange="gmRipotiOtomatiki('madeni')"/></div><div class="field" style="margin:0;"><label>Hadi</label><input type="date" id="gmrp-madeni-h" onchange="gmRipotiOtomatiki('madeni')"/></div><div class="field" style="margin:0;"><label>Chagua tawi</label><select id="gmrp-madeni-t" style="width:auto;min-width:170px"><option value="">— Chagua tawi —</option></select></div><button class="btn gold" onclick="gmRipoti('madeni')">🖨 Tengeneza Fomu</button><button class="btn sm secondary" onclick="gmOrodhaKamili('madeni')">📋 Orodha kamili</button></div><div style="margin-top:14px;"><b style="font-size:13px;">Muhtasari wa madeni kwa kila tawi</b> <span style="font-size:11px;color:var(--a-muted);">(gusa tawi kuona wadaiwa wake)</span><div id="gmSum-madeni"></div></div></div></div>
       <div class="section gm-orodha" id="gmOr-madeni"><div class="section-header"><h3>💳 Wateja Wenye Madeni</h3>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
@@ -7984,7 +8001,7 @@ const labelYaTaasisi=(v)=>v==='Kampuni Kubwa'?'Kampuni':(v||'Serikali');
 const rangiYaTaasisi=(v)=>(!v||v==='Serikali')?'var(--a-purple,#7c5cff)':(v==='Mteja Binafsi'?'#2BA66A':'var(--a-blue)');
 
 // ═══════════════ MADENI YA NYUMA — debts that began before the system (invoice officer) ═══════════════
-const kaziMadeniNyuma=()=>allWateja.filter(w=>w.ni_ya_nyuma&&!w.deleted_at).sort((a,b)=>String(b.tarehe_deni||b.created_at||'').localeCompare(String(a.tarehe_deni||a.created_at||'')));
+const kaziMadeniNyuma=()=>allWateja.filter(w=>w.ni_ya_nyuma&&!w.deleted_at&&!niTawiLaFaragha(w.tawi)).sort((a,b)=>String(b.tarehe_deni||b.created_at||'').localeCompare(String(a.tarehe_deni||a.created_at||'')));
 function renderMadeniNyuma(){
   const tb=$('tbody-madeni-nyuma');if(!tb)return;
   const dl=$('mn-majina');if(dl){const m=new Map();watejaTaasisi().forEach(w=>{const k=jinaKey(w.jina);if(!m.has(k))m.set(k,String(w.jina).trim());});const sig=[...m.values()].join('|');if(dl.dataset.sig!==sig){dl.dataset.sig=sig;dl.innerHTML=[...m.values()].sort().map(n=>`<option value="${escH(n)}">`).join('');}}
@@ -8194,7 +8211,47 @@ function jazaChaguoZaMadeni(){
   const html='<option value="">— Chagua tawi —</option><option value="yote">Matawi yote</option>'+tawi.map(t=>`<option value="${escH(t)}">${escH(BRANCHES[t]||t)}</option>`).join('');
   if(sel.dataset.sig!==html){sel.innerHTML=html;sel.dataset.sig=html;sel.value=sasa;}
 }
+// MADENI YA NYUMA for the private officer: a debt that began before the system, saved as an ordinary debt of her own branch
+function mnzHesabu(){const d=parseFloat($('mnz-deni').value)||0,l=parseFloat($('mnz-lipwa').value)||0;$('mnz-baki').value=pesa(Math.max(0,d-l));}
+function jazaMnZ(){
+  const sec=$('mnZuhuraSection');if(!sec)return;
+  const wazi=niFaragha();sec.style.display=wazi?'':'none';if(!wazi)return;
+  if(!$('mnz-tarehe').value)$('mnz-tarehe').value=leoISO();
+  const dl=$('mnz-majina');if(dl)dl.innerHTML=[...new Set(allWateja.filter(w=>w.tawi===userTawi).map(w=>String(w.jina).trim()))].sort().map(n=>`<option value="${escH(n)}"></option>`).join('');
+}
+async function hifadhiDeniLaNyumaZ(){
+  if(!niFaragha())return;
+  const jina=$('mnz-jina').value.trim().replace(/\s+/g,' '),simu=$('mnz-simu').value.trim(),tarehe=$('mnz-tarehe').value,mwisho=$('mnz-mwisho').value||null,maelezo=$('mnz-maelezo').value.trim();
+  const deni=round2(parseFloat($('mnz-deni').value)||0),lipwa=round2(parseFloat($('mnz-lipwa').value)||0);
+  const kosa=!jina?'Andika jina la mdaiwa':!tarehe?'Chagua tarehe ya deni':!(deni>0)?'Weka kiasi cha deni':lipwa<0||lipwa>deni?'Alicholipa hakiwezi kuzidi deni':'';
+  if(kosa){arifu('notifyMnZ','❌ '+kosa,'error');return;}
+  if(!navigator.onLine){arifu('notifyMnZ','❌ Hakuna mtandao — deni linahitaji mtandao ili lihifadhiwe','error');return;}
+  const btn=$('mnz-btn');btn.disabled=true;
+  try{
+    const baki=round2(deni-lipwa),hali=baki<=0?'Amelipa Kamili':lipwa>0?'Amelipa Sehemu':'Hajalipa';
+    const c=allWateja.find(x=>String(x.jina).trim().toLowerCase()===jina.toLowerCase()&&x.tawi===userTawi&&!x.deleted_at);
+    let r;
+    if(c){      // the same person already owes: the old debt is added to his account
+      const p={deni_lote:round2((Number(c.deni_lote)||0)+deni),kilicholipwa:round2((Number(c.kilicholipwa)||0)+lipwa),bakaa:round2((Number(c.bakaa)||0)+baki)};
+      p.hali=p.bakaa<=0?'Amelipa Kamili':p.kilicholipwa>0?'Amelipa Sehemu':'Hajalipa';
+      if(simu&&(!c.simu||c.simu==='Haijasemwa'))p.simu=simu;
+      if(mwisho)p.tarehe_mwisho=mwisho;
+      r=await DB.patch('wateja',`id=eq.${c.id}`,p);
+      if(Array.isArray(r)&&r[0])Object.assign(c,r[0]);else throw new Error((r&&r.message)||'Haikuhifadhiwa');
+    }else{
+      r=await DB.post('wateja',{jina,tawi:userTawi,simu:simu||'Haijasemwa',aina_mteja:'Kawaida',chanzo:'Bidhaa',deni_lote:deni,kilicholipwa:lipwa,bakaa:baki,hali,tarehe_mwisho:mwisho,tarehe_deni:tarehe,maelezo:maelezo||null,ni_ya_nyuma:true});
+      if(!Array.isArray(r)||!r[0])throw new Error((r&&(r.message||r.hint))||'Haikuhifadhiwa');
+      allWateja.unshift(r[0]);
+    }
+    ['mnz-jina','mnz-simu','mnz-deni','mnz-lipwa','mnz-mwisho','mnz-maelezo'].forEach(i=>$(i).value='');$('mnz-tarehe').value=leoISO();mnzHesabu();
+    arifu('notifyMnZ',`✅ Deni la ${jina} limehifadhiwa (baki ${pesa(baki)})`,'success');
+    madeniOnyeshaZote=true;renderWateja();
+  }catch(e){arifu('notifyMnZ','❌ '+e.message,'error');}
+  btn.disabled=false;
+}
+
 function renderWateja(){
+  try{jazaMnZ();}catch(_e){}
   renderKadiZaMadeni();jazaChaguoZaMadeni();try{renderMdaiwaMpya();}catch(_e){}
   if(allWateja.length&&_madeniCtx.sig!==sahihiYaMadeni()&&!_madeniCtx.inaleta&&['madeni','gm','deski','matumizi'].includes(userRole))pakiaMuktadhaYaMadeni();
   const mwisho=new Map();_madeniCtx.malipo.forEach(m=>{const t=mwisho.get(m.mteja_id);if(!t||m.tarehe>t)mwisho.set(m.mteja_id,m.tarehe);});
