@@ -1377,7 +1377,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
             <div class="field"><label>Bidhaa</label><input type="search" id="uh-bidhaa-tafuta" autocomplete="off" placeholder="🔍 Tafuta bidhaa — jina, aina, bei au tawi" oninput="jaziUhamishoChaguoBidhaa()" onkeydown="if(event.key==='Enter')event.preventDefault()" style="margin-bottom:6px;"/><select id="uh-bidhaa" onchange="jaziUhamishoTawiKwaBidhaa()"></select><div id="uh-bidhaa-idadi" style="font-size:11px;color:var(--a-muted);margin-top:3px;"></div></div>
             <div class="field"><label>Tawi Unaloomba Uhamisho</label><select id="uh-tawi-chanzo" onchange="updateUhamishoBeiSummary()"></select></div>
             <div class="field"><label>Idadi</label><input type="number" id="uh-idadi" placeholder="1" min="0" step="any" oninput="updateUhamishoBeiSummary()"/><div class="field-error" id="err-uh-idadi">Weka idadi</div></div>
-            <div class="field uh-ya-stock" id="uh-kipimo-wrap"><label>Kipimo Changu cha Kuuzia</label><select id="uh-kipimo-yangu" onchange="updateUbadilishaUhamisho()"><option value="">Sawa na cha chanzo</option><option value="pc">Piece / Pisi</option><option value="bag">Bag / Mifuko</option><option value="roll">Roll / Rola</option><option value="meter">Meter / Mita</option><option value="litre">Litre / Lita</option><option value="kg">Kg / Kilo</option><option value="tonne">Tonne / Tani</option><option value="pack">Pack / Packets</option><option value="sheet">Sheet / Bati</option><option value="box">Box / Kasha</option><option value="katoni">Katoni / Carton</option><option value="set">Set / Seti</option><option value="pair">Pair / Jozi</option><option value="bando">Bando / Bundle</option><option value="ndoo">Ndoo / Bucket</option><option value="kopo">Kopo / Can</option></select></div>
+            <div class="field uh-ya-stock" id="uh-kipimo-wrap"><label>Kipimo Changu cha Kuuzia</label><select id="uh-kipimo-yangu" onchange="this.dataset.mwenyewe='1';updateUhamishoBeiSummary()"><option value="">Sawa na cha chanzo</option><option value="pc">Piece / Pisi</option><option value="bag">Bag / Mifuko</option><option value="roll">Roll / Rola</option><option value="meter">Meter / Mita</option><option value="litre">Litre / Lita</option><option value="kg">Kg / Kilo</option><option value="tonne">Tonne / Tani</option><option value="pack">Pack / Packets</option><option value="sheet">Sheet / Bati</option><option value="box">Box / Kasha</option><option value="katoni">Katoni / Carton</option><option value="set">Set / Seti</option><option value="pair">Pair / Jozi</option><option value="bando">Bando / Bundle</option><option value="ndoo">Ndoo / Bucket</option><option value="kopo">Kopo / Can</option></select></div>
             <div class="field uh-ya-stock" id="uh-uwiano-wrap" style="display:none;"><label id="uh-uwiano-lebo">1 kipimo cha chanzo = vipimo vingapi vyangu?</label><input type="number" id="uh-uwiano" min="0" step="any" placeholder="mfano: 20" oninput="updateUbadilishaUhamisho()"/></div>
             <div class="field uh-ya-stock" id="uh-omba-kwa-wrap" style="display:none;"><label>Idadi niliyoandika ni ya kipimo cha</label><select id="uh-omba-kwa" onchange="updateUhamishoBeiSummary()"><option value="chanzo">Chanzo</option><option value="yangu">Changu</option></select></div>
             <div class="field uh-ya-stock" id="uh-bei-yangu-wrap" style="display:none;"><label id="uh-bei-yangu-lebo">Bei yangu ya kuuza kwa kipimo changu (TZS)</label><input type="number" id="uh-bei-yangu" min="0" placeholder="mfano: 15000" oninput="updateUbadilishaUhamisho()"/></div>
@@ -5234,6 +5234,7 @@ function jaziUhamishoTawiKwaBidhaa(){
   if(!bidhaaSel||!tawiSel)return;
   const prev=tawiSel.value;
   const chosenName=bidhaaSel.value;
+  if(bidhaaSel.dataset.mwisho!==chosenName){bidhaaSel.dataset.mwisho=chosenName;const ks=$('uh-kipimo-yangu');if(ks)ks.dataset.mwenyewe='';}      // a new product: start from the unit he already has for it again
   const myTawi=ninaTawiLaKazi()?userTawi:null;
   let matches=allBidhaa.filter(p=>p.jina.toLowerCase()===chosenName&&(!myTawi||p.tawi!==myTawi)&&!TAWI_BILA_UHAMISHO.includes(p.tawi)&&(!naMairiTu()||(p.tawi===TAWI_LA_KUCHUKUA_MAIRI&&niTairiLaOrodhaYaRose(p.jina))));
   // Mid-batch: every item in one Transfer request must come from the same
@@ -5249,7 +5250,10 @@ const kipimoSawa=(a,b)=>String(a||'pc').trim().toLowerCase()===String(b||'pc').t
 function bidhaaYanguYaUhamisho(chanzo){
   const myTawi=ninaTawiLaKazi()?userTawi:viewingTawi;
   if(!chanzo||!myTawi||myTawi==='yote')return null;
-  return allBidhaa.find(x=>x.tawi===myTawi&&kawaidishaJina(x.jina)===kawaidishaJina(chanzo.jina))||null;
+  const zangu=allBidhaa.filter(x=>x.tawi===myTawi&&kawaidishaJina(x.jina)===kawaidishaJina(chanzo.jina));
+  const sel=$('uh-kipimo-yangu');
+  if(sel&&sel.dataset.mwenyewe==='1')return zangu.find(x=>kipimoSawa(x.kipimo,sel.value||chanzo.kipimo))||null;      // the officer chose a unit himself (e.g. sells kg, source is bag): use his line of THAT unit, or none yet
+  return zangu.find(x=>kipimoSawa(x.kipimo,chanzo.kipimo))||zangu[0]||null;      // he keeps one line per unit (wholesale bag / retail kg): by default the one in the SAME unit as the source
 }
 function hesabuUbadilishaUhamisho(){      // what the request means for both stores (null = same unit, or not a stock request)
   if(!$('uh-lengo')||$('uh-lengo').value!=='Stock')return null;
@@ -5272,7 +5276,9 @@ function updateUbadilishaUhamisho(){
   const chanzo=allBidhaa.find(x=>x.id===$('uh-tawi-chanzo').value);
   const yangu=bidhaaYanguYaUhamisho(chanzo),sel=$('uh-kipimo-yangu');
   if(!stock||!chanzo){['uh-uwiano-wrap','uh-omba-kwa-wrap','uh-bei-yangu-wrap','uh-ubadilisha-info'].forEach(id=>$(id).style.display='none');return;}
-  if(yangu){sel.value=yangu.kipimo||'pc';sel.disabled=true;} else sel.disabled=false;
+  sel.disabled=false;
+  if(yangu&&sel.dataset.mwenyewe!=='1')sel.value=yangu.kipimo||'pc';      // pre-filled from the line he already has — he can change it, e.g. to kg when the source sends bags
+  const zangu=allBidhaa.filter(x=>x.tawi===(ninaTawiLaKazi()?userTawi:viewingTawi)&&kawaidishaJina(x.jina)===kawaidishaJina(chanzo.jina));
   const r=hesabuUbadilishaUhamisho();
   const ku=chanzo.kipimo||'pc';
   $('uh-uwiano-wrap').style.display=r&&r.badili?'':'none';
@@ -5288,7 +5294,8 @@ function updateUbadilishaUhamisho(){
   if(r&&r.badili){
     if(r.marekebisho)t+=`<span style="color:var(--a-rg)">${escH(r.marekebisho)}</span> `;
     t+=r.kosa?`<span style="color:var(--a-red)">${escH(r.kosa)}</span>`:(r.uwiano>0&&r.idadi>0?`Chanzo kitapunguza <b>${r.idadiChanzo} ${escH(ku)}</b>; stock yako itaongezeka <b>${r.idadiYangu} ${escH(r.kipimoYangu)}</b>.`:`Weka idadi na uwiano wa kipimo ili kuona stock itakayoongezeka.`);
-  }else if(!yangu)t+='Kipimo kikiwa tofauti na cha chanzo (mfano chanzo ni bando, wewe unauza pc), chagua kipimo chako hapo juu.';
+  }else if(!yangu)t+='Kipimo kikiwa tofauti na cha chanzo (mfano chanzo ni bag, wewe unauza kg), chagua kipimo chako hapo juu kisha weka 1 bag ni kg ngapi.';
+  if(!yangu&&zangu.length&&r&&r.badili)t=`Una bidhaa hii kwa kipimo cha <b>${escH(zangu[0].kipimo||'pc')}</b>, lakini umechagua <b>${escH(r.kipimoYangu)}</b> — ukipokea, stock itaongezwa kwenye ${escH(r.kipimoYangu)} (mstari wako wa ${escH(r.kipimoYangu)} ukiwepo, au mpya). `+t;
   w.innerHTML=t;w.style.display=t?'':'none';
 }
 function updateUhamishoBeiSummary(){
@@ -5351,6 +5358,7 @@ function safishaUhamisho(keepCustomer){
   const fields=(keepCustomer?['uh-idadi','uh-kiasi','uh-tarehe-mkopo']:['uh-mteja','uh-idadi','uh-simu','uh-kiasi','uh-tarehe-mkopo']).concat(['uh-uwiano','uh-bei-yangu']);
   fields.forEach(id=>{const el=$(id);if(el)el.value='';});
   $('uh-aina').value='Taslimu';togglaMkopoUhamisho();
+  { const ks=$('uh-kipimo-yangu');if(ks)ks.dataset.mwenyewe=''; }
   updateUhamishoBeiSummary();
 }
 function renderOmbiInProgress(){
