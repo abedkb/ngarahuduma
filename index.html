@@ -800,7 +800,11 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 .inv-benki td{padding:2px 6px;}
 
 .inv-table .kc{display:none;}
-.inv-table.kundi .kc{display:table-cell;font-size:11px;line-height:1.35;min-width:120px;}
+.inv-table.kundi .kc{display:table-cell;font-size:11px;line-height:1.35;}
+.kundi-sheet .kc-footer{display:none;}
+.kundi-sheet .inv-field{white-space:nowrap;}
+.kundi-sheet .inv-field .inv-dotline{white-space:normal;flex:1 1 auto;min-height:1.1em;}
+.kundi-sheet .inv-row2{grid-template-columns:1.2fr 1fr;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
@@ -1427,11 +1431,11 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
     <!-- GENERAL MANAGER: Transfer and Received, each with its own tab -->
     <section id="gm-uhamisho" class="page">
       <div class="topbar"><div class="topbar-left"><h2>Transfer</h2><p>Transfer zilizotumwa na tawi — chagua tawi na tarehe kisha tengeneza fomu.</p></div></div>
-      <div class="section gm-kadi" id="gmKadi-uhamisho"><div class="section-header"><h3>📋 Transfer Zilizotumwa</h3></div><div class="section-body"><div class="controls" style="align-items:flex-end;flex-wrap:wrap;gap:10px;"><div class="field" style="margin:0;"><label>Kuanzia</label><input type="date" id="gmrp-uhamisho-k" onchange="gmRipotiOtomatiki('uhamisho')"/></div><div class="field" style="margin:0;"><label>Hadi</label><input type="date" id="gmrp-uhamisho-h" onchange="gmRipotiOtomatiki('uhamisho')"/></div><div class="field" style="margin:0;"><label>Chagua tawi</label><select id="gmrp-uhamisho-t" style="width:auto;min-width:170px"><option value="">— Chagua tawi —</option></select></div><button class="btn gold" onclick="gmRipoti('uhamisho')">🖨 Tengeneza Fomu</button></div></div></div>
+      <div class="section gm-kadi" id="gmKadi-uhamisho"><div class="section-header"><h3>📋 Transfer Zilizotumwa</h3></div><div class="section-body"><div class="controls" style="align-items:flex-end;flex-wrap:wrap;gap:10px;"><div class="field" style="margin:0;"><label>Kuanzia</label><input type="date" id="gmrp-uhamisho-k" onchange="gmRipotiOtomatiki('uhamisho')"/></div><div class="field" style="margin:0;"><label>Hadi</label><input type="date" id="gmrp-uhamisho-h" onchange="gmRipotiOtomatiki('uhamisho')"/></div><div class="field" style="margin:0;"><label>Chagua tawi</label><select id="gmrp-uhamisho-t" style="width:auto;min-width:170px"><option value="">— Chagua tawi —</option></select></div><button class="btn gold" onclick="gmRipoti('uhamisho')">🖨 Tengeneza Fomu</button></div><div style="margin-top:14px;"><div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:6px;"><b style="font-size:13px;">Transfer ya kila tawi</b><div class="field" style="margin:0;"><label>Tarehe</label><input type="date" id="gmsum-uhamisho-d" onchange="gmUhamishoMuhtasari('uhamisho')" style="width:auto"/></div></div><div id="gmSum-uhamisho"></div></div></div></div>
     </section>
     <section id="gm-pokea" class="page">
       <div class="topbar"><div class="topbar-left"><h2>Received</h2><p>Transfer zilizotumwa kwa tawi — chagua tawi na tarehe kisha tengeneza fomu.</p></div></div>
-      <div class="section gm-kadi" id="gmKadi-pokea"><div class="section-header"><h3>📥 Transfer Zilizopokelewa</h3></div><div class="section-body"><div class="controls" style="align-items:flex-end;flex-wrap:wrap;gap:10px;"><div class="field" style="margin:0;"><label>Kuanzia</label><input type="date" id="gmrp-pokea-k" onchange="gmRipotiOtomatiki('pokea')"/></div><div class="field" style="margin:0;"><label>Hadi</label><input type="date" id="gmrp-pokea-h" onchange="gmRipotiOtomatiki('pokea')"/></div><div class="field" style="margin:0;"><label>Chagua tawi</label><select id="gmrp-pokea-t" style="width:auto;min-width:170px"><option value="">— Chagua tawi —</option></select></div><button class="btn gold" onclick="gmRipoti('pokea')">🖨 Tengeneza Fomu</button></div></div></div>
+      <div class="section gm-kadi" id="gmKadi-pokea"><div class="section-header"><h3>📥 Transfer Zilizopokelewa</h3></div><div class="section-body"><div class="controls" style="align-items:flex-end;flex-wrap:wrap;gap:10px;"><div class="field" style="margin:0;"><label>Kuanzia</label><input type="date" id="gmrp-pokea-k" onchange="gmRipotiOtomatiki('pokea')"/></div><div class="field" style="margin:0;"><label>Hadi</label><input type="date" id="gmrp-pokea-h" onchange="gmRipotiOtomatiki('pokea')"/></div><div class="field" style="margin:0;"><label>Chagua tawi</label><select id="gmrp-pokea-t" style="width:auto;min-width:170px"><option value="">— Chagua tawi —</option></select></div><button class="btn gold" onclick="gmRipoti('pokea')">🖨 Tengeneza Fomu</button></div><div style="margin-top:14px;"><div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:6px;"><b style="font-size:13px;">Receiving ya kila tawi</b><div class="field" style="margin:0;"><label>Tarehe</label><input type="date" id="gmsum-pokea-d" onchange="gmUhamishoMuhtasari('pokea')" style="width:auto"/></div></div><div id="gmSum-pokea"></div></div></div></div>
     </section>
 
     <!-- GHARAMA — now a company-wide cash ledger (Cash In/Cash Out/Balance),
@@ -3236,18 +3240,18 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       <div class="inv-field">Signature: <span class="inv-dotline"></span></div>
     </div>
     <table class="inv-table">
-      <thead><tr><th>S/N</th><th>Particulars</th><th>Unit</th><th class="num">Qty</th><th class="num">Rate</th><th class="num">Amount</th><th class="kc">Date / Driver / Truck</th></tr></thead>
+      <thead><tr><th>S/N</th><th class="kc">Date</th><th>Particulars</th><th class="kc">To</th><th>Unit</th><th class="num">Qty</th><th class="num">Rate</th><th class="num">Amount</th><th class="kc">Driver</th><th class="kc">Truck</th></tr></thead>
       <tbody id="tfItemsBody"></tbody>
-      <tr class="inv-total-row"><td colspan="5" style="text-align:right;">TOTAL AMOUNT</td><td class="num" id="tfTotalAmount"></td></tr>
+      <tr class="inv-total-row"><td colspan="5" style="text-align:right;">TOTAL AMOUNT</td><td class="num" id="tfTotalAmount"></td><td class="kc" colspan="2"></td></tr>
     </table>
-    <div class="inv-subtitle" style="font-size:20px;margin-top:18px;">Driver Information</div>
+    <div class="kc-footer"><div class="inv-subtitle" style="font-size:20px;margin-top:18px;">Driver Information</div>
     <div class="inv-row2">
       <div class="inv-field">Name of Driver: <input type="text" id="tfDriverName" placeholder="Jina la dereva" style="flex:1;border:none;border-bottom:1px dotted #222;font:inherit;font-size:14px;background:transparent;"/></div>
       <div class="inv-field">Date of handover: <input type="date" id="tfHandoverDate" style="flex:1;border:none;border-bottom:1px dotted #222;font:inherit;font-size:14px;background:transparent;-webkit-appearance:none;appearance:none;"/></div>
     </div>
     <div class="inv-field">
       Signature: <span class="inv-dotline"></span>
-    </div>
+    </div></div>
     <div class="inv-print-btn" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
       <button class="fomu-btn primary" onclick="chapishaFomu()">🖨 Chapisha / Print</button>
       <button class="fomu-btn secondary" onclick="pakuaFomu()">⬇️ Pakua</button>
@@ -3277,15 +3281,15 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       <div class="inv-field">Signature: <span class="inv-dotline"></span></div>
     </div>
     <table class="inv-table">
-      <thead><tr><th>S/N</th><th>Particulars</th><th>Unit</th><th class="num">Qty</th><th class="num">Rate</th><th class="num">Amount</th><th class="kc">Date / Driver / Truck</th></tr></thead>
+      <thead><tr><th>S/N</th><th class="kc">Date</th><th>Particulars</th><th class="kc">From</th><th>Unit</th><th class="num">Qty</th><th class="num">Rate</th><th class="num">Amount</th><th class="kc">Driver</th><th class="kc">Truck</th></tr></thead>
       <tbody id="rfItemsBody"></tbody>
-      <tr class="inv-total-row"><td colspan="5" style="text-align:right;">TOTAL AMOUNT</td><td class="num" id="rfTotalAmount"></td></tr>
+      <tr class="inv-total-row"><td colspan="5" style="text-align:right;">TOTAL AMOUNT</td><td class="num" id="rfTotalAmount"></td><td class="kc" colspan="2"></td></tr>
     </table>
-    <div class="inv-subtitle" style="font-size:20px;margin-top:18px;">Driver Information</div>
+    <div class="kc-footer"><div class="inv-subtitle" style="font-size:20px;margin-top:18px;">Driver Information</div>
     <div class="inv-row2">
       <div class="inv-field">Name of Driver: <span class="inv-dotline" id="rfDriverName"></span></div>
       <div class="inv-field">Truck number: <span class="inv-dotline" id="rfTruckNo"></span></div>
-    </div>
+    </div></div>
     <div class="inv-meta" style="margin-top:10px;">
       ➜ FROM: <span class="inv-dotline" id="rfFrom"></span>
     </div>
@@ -5607,6 +5611,16 @@ function generateBinCard(){
   openSheet('bcOverlay');
 }
 
+// Daily forms: every transfer sent (or received) by a branch on one date goes on ONE merged form
+const sikuYa=(u,pk)=>String((pk?(u.tarehe_kupokea||u.tarehe):u.tarehe)||u.created_at||'').slice(0,10);
+function chapishaSiku(kind,tarehe,tawi){
+  const pk=kind==='pokea';
+  const l=allUhamisho.filter(u=>!u.deleted_at&&(pk?u.hali==='Imepokelewa':(u.hali==='Imethibitishwa'||u.hali==='Imepokelewa'))
+      &&sikuYa(u,pk)===tarehe&&(tawi==='yote'||(pk?u.tawi_muombaji:u.tawi_chanzo)===tawi))
+    .sort((a,b)=>String(a.created_at||'').localeCompare(String(b.created_at||'')));
+  (pk?chapishaReceivingKundi:chapishaTransferKundi)(l,tarehe);
+}
+function kundiLaSiku(list,pk){const m={};list.forEach(u=>{const k=sikuYa(u,pk)+'|'+(pk?u.tawi_muombaji:u.tawi_chanzo);(m[k]=m[k]||[]).push(u);});return Object.values(m);}
 function renderFomuTransfer(){
   const tbody=$('tbody-fomu-transfer');if(!tbody)return;
   const ft=fomuTarehe('ft-tr');if(!ft.ok){tbody.innerHTML=safuTupu(6,'Chagua tarehe ya kuanzia na ya mwisho ili kuona orodha.');return;}
@@ -5617,17 +5631,15 @@ function renderFomuTransfer(){
     if(userRole==='gm'&&myTawi==='yote')return true;
     return u.tawi_chanzo===myTawi;      // Transfer = what THIS branch sent; what it received is in the Receiving section below
   }).sort((a,b)=>(b.tarehe||'').localeCompare(a.tarehe||''));
-  const groupsMap={};
-  relevant.forEach(u=>{const key=ufunguoWaOmbi(u);(groupsMap[key]=groupsMap[key]||[]).push(u);});
-  const groups=Object.values(groupsMap);
+  const groups=kundiLaSiku(relevant,false);
   tbody.innerHTML=groups.length?groups.map(group=>{
     const u=group[0];
-    const cls=u.hali==='Imepokelewa'?'pill-blue':'pill-green';
-    const label=group.length>1?`${u.jina} +${group.length-1} zaidi`:u.jina;
+    const cls=group.every(x=>x.hali==='Imepokelewa')?'pill-blue':'pill-green';const hali=group.every(x=>x.hali==='Imepokelewa')?'Imepokelewa':group.some(x=>x.hali==='Imepokelewa')?'Baadhi zimepokelewa':'Imethibitishwa';
+    const label=`${group.length} ${group.length>1?'bidhaa':'bidhaa'}: ${u.jina}${group.length>1?' +'+(group.length-1)+' zaidi':''}`;
     const buttons=`<div style="display:flex;gap:4px;flex-wrap:wrap;">
-      <button class="btn sm secondary" onclick="chapishaTransferForm('${u.id}')">🖨 Transfer</button>
+      <button class="btn sm secondary" onclick="chapishaSiku('transfer','${sikuYa(u,false)}','${u.tawi_chanzo}')">🖨 Fomu ya Siku</button>
     </div>`;
-    return`<tr><td>${u.tarehe}</td><td>${label}</td><td>${BRANCHES[u.tawi_chanzo]||u.tawi_chanzo}</td><td>${BRANCHES[u.tawi_muombaji]||u.tawi_muombaji}</td><td><span class="pill ${cls}">${u.hali}</span></td><td>${buttons}</td></tr>`;
+    return`<tr><td>${u.tarehe}</td><td>${label}</td><td>${BRANCHES[u.tawi_chanzo]||u.tawi_chanzo}</td><td>${[...new Set(group.map(x=>BRANCHES[x.tawi_muombaji]||x.tawi_muombaji))].join(', ')}</td><td><span class="pill ${cls}">${hali}</span></td><td>${buttons}</td></tr>`;
   }).join(''):safuTupu(6,'Hakuna transfer zilizotumwa katika kipindi hiki.');
 }
 function renderFomuReceiving(){
@@ -5640,13 +5652,11 @@ function renderFomuReceiving(){
     if(userRole==='gm'&&myTawi==='yote')return true;
     return u.tawi_muombaji===myTawi;
   }).sort((a,b)=>String(b.tarehe_kupokea||b.tarehe||'').localeCompare(String(a.tarehe_kupokea||a.tarehe||'')));
-  const groupsMap={};
-  relevant.forEach(u=>{const key=ufunguoWaOmbi(u);(groupsMap[key]=groupsMap[key]||[]).push(u);});
-  const groups=Object.values(groupsMap);
+  const groups=kundiLaSiku(relevant,true);
   tbody.innerHTML=groups.length?groups.map(group=>{
     const u=group[0];
-    const label=group.length>1?`${u.jina} +${group.length-1} zaidi`:u.jina;
-    return`<tr><td>${u.tarehe_kupokea||u.tarehe}</td><td>${label}</td><td>${BRANCHES[u.tawi_chanzo]||u.tawi_chanzo}</td><td>${BRANCHES[u.tawi_muombaji]||u.tawi_muombaji}</td><td><span class="pill pill-blue">${u.hali}</span></td><td><button class="btn sm secondary" onclick="chapishaReceivingForm('${u.id}')">🖨 Receiving</button></td></tr>`;
+    const label=`${group.length} bidhaa: ${u.jina}${group.length>1?' +'+(group.length-1)+' zaidi':''}`;
+    return`<tr><td>${u.tarehe_kupokea||u.tarehe}</td><td>${label}</td><td>${[...new Set(group.map(x=>BRANCHES[x.tawi_chanzo]||x.tawi_chanzo))].join(', ')}</td><td>${BRANCHES[u.tawi_muombaji]||u.tawi_muombaji}</td><td><span class="pill pill-blue">${u.hali}</span></td><td><button class="btn sm secondary" onclick="chapishaSiku('pokea','${sikuYa(u,true)}','${u.tawi_muombaji}')">🖨 Fomu ya Siku</button></td></tr>`;
   }).join(''):safuTupu(6,'Hakuna transfer zilizopokelewa katika kipindi hiki.');
 }
 // ONE form with every transfer sent (or received) by the branch in the chosen dates
@@ -5724,14 +5734,14 @@ function renderUhamisho(){
       let action='—';
       if(isFirstInGroup&&u.hali==='Imethibitishwa'){
         action=`<div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;">
-          <button class="btn sm secondary" onclick="chapishaTransferForm('${u.id}')">🖨 Transfer</button>
+          <button class="btn sm secondary" onclick="chapishaSiku('transfer','${sikuYa(u,false)}','${u.tawi_chanzo}')">🖨 Transfer ya Siku</button>
           <input type="${myOfficerName()?'hidden':'text'}" id="uh-recv-jina-${groupKey}" placeholder="Jina lako (uliyepokea)" style="width:150px;padding:7px 9px;border-radius:7px;border:1.5px solid var(--a-line);background:rgba(255,255,255,0.05);color:var(--a-text);font-size:12px;"/>
           <button class="btn sm success" onclick="pokeaUhamishoBatch('${groupKey}')">📥 Nimepokea</button>
         </div>`;
       } else if(isFirstInGroup&&u.hali==='Imepokelewa'){
         action=`<div style="display:flex;gap:4px;flex-wrap:wrap;">
-          <button class="btn sm secondary" onclick="chapishaTransferForm('${u.id}')">🖨 Transfer</button>
-          <button class="btn sm secondary" onclick="chapishaReceivingForm('${u.id}')">🖨 Receiving</button>
+          <button class="btn sm secondary" onclick="chapishaSiku('transfer','${sikuYa(u,false)}','${u.tawi_chanzo}')">🖨 Transfer ya Siku</button>
+          <button class="btn sm secondary" onclick="chapishaSiku('pokea','${sikuYa(u,true)}','${u.tawi_muombaji}')">🖨 Receiving ya Siku</button>
         </div>`;
       } else if(!isFirstInGroup&&(u.hali==='Imethibitishwa'||u.hali==='Imepokelewa')){
         action='<span style="font-size:11px;color:var(--a-muted);">Sehemu ya ombi hapo juu</span>';
@@ -5953,7 +5963,8 @@ function chapishaTransferForm(id){
   const groupKey=ufunguoWaOmbi(u);
   chapishaTransferKundi(allUhamisho.filter(x=>ufunguoWaOmbi(x)===groupKey&&(x.hali==='Imethibitishwa'||x.hali==='Imepokelewa')),null);
 }
-const kcSeli=(tarehe,dereva,gari)=>`<td class="kc">${escH(tarehe||'—')}<br>${escH(dereva||'—')}<br>${escH(gari||'—')}</td>`;      // date, driver and truck of THIS line: merged lines can differ
+const kcSeli=(dereva,gari)=>`<td class="kc">${escH(dereva||'—')}</td><td class="kc">${escH(gari||'—')}</td>`;
+const kcTarehe=(t)=>`<td class="kc" style="white-space:nowrap;">${escH(t||'—')}</td>`,kcTawi=(t)=>`<td class="kc">${escH(BRANCHES[t]||t||'—')}</td>`;      // date, driver and truck of THIS line: merged lines can differ
 // ONE transfer form for a list of transfers (one request, or every transfer of a branch in a range of dates)
 function chapishaTransferKundi(group,kipindi){
   if(!group.length){toast('Hakuna transfer katika kipindi hiki');return;}
@@ -5962,12 +5973,13 @@ function chapishaTransferKundi(group,kipindi){
   const jb=(a)=>a.map(t=>BRANCHES[t]||t).join(', ');
   $('tfFromStore').textContent=jb(ch);
   $('tfFromDate').textContent=nyingi?kipindi:u.tarehe;
-  $('tfFromOwner').textContent=nyingi?dots:(u.jina_muuzaji_chanzo||dots);
+  $('tfFromOwner').textContent=nyingi?'':(u.jina_muuzaji_chanzo||dots);
   $('tfToStore').textContent=jb(mp);
   $('tfToDate').textContent=nyingi?kipindi:u.tarehe;
-  $('tfToOwner').textContent=nyingi?dots:(u.jina_muombaji||dots);
-  const rows=group.map((it,i)=>`<tr><td>${i+1}</td><td>${it.jina}${it.jina_sw?' / '+it.jina_sw:''}${nyingi?`<div style="font-size:10px;color:#555;">→ ${escH(BRANCHES[it.tawi_muombaji]||it.tawi_muombaji)}</div>`:''}</td><td>${it.kipimo||'pc'}</td><td class="num">${it.idadi}</td><td class="num">${pesa(it.bei_kuuzia)}</td><td class="num">${pesa(it.jumla)}</td>${nyingi?kcSeli(it.tarehe_kukabidhi||it.tarehe,it.jina_dereva,it.namba_gari):''}</tr>`);
-  const blankRows=Array.from({length:Math.max(0,10-group.length)}).map((_,i)=>`<tr><td>${group.length+i+1}</td><td></td><td></td><td></td><td></td><td></td>${nyingi?'<td class="kc"></td>':''}</tr>`);
+  $('tfToOwner').textContent=nyingi?'':(u.jina_muombaji||dots);
+  const rows=group.map((it,i)=>`<tr><td>${i+1}</td>${nyingi?kcTarehe(it.tarehe_kukabidhi||it.tarehe):''}<td>${it.jina}${it.jina_sw?' / '+it.jina_sw:''}</td>${nyingi?kcTawi(it.tawi_muombaji):''}<td>${it.kipimo||'pc'}</td><td class="num">${it.idadi}</td><td class="num">${pesa(it.bei_kuuzia)}</td><td class="num">${pesa(it.jumla)}</td>${nyingi?kcSeli(it.jina_dereva,it.namba_gari):''}</tr>`);
+  const blankRows=Array.from({length:Math.max(0,10-group.length)}).map((_,i)=>`<tr><td>${group.length+i+1}</td>${nyingi?'<td class="kc"></td>':''}<td></td>${nyingi?'<td class="kc"></td>':''}<td></td><td></td><td></td><td></td>${nyingi?'<td class="kc"></td><td class="kc"></td>':''}</tr>`);
+  $('tfOverlay').classList.toggle('kundi-sheet',nyingi);$('tfTotalAmount').previousElementSibling.colSpan=nyingi?7:5;
   $('tfItemsBody').innerHTML=rows.join('')+blankRows.join('');
   $('tfItemsBody').parentElement.classList.toggle('kundi',nyingi);
   const total=group.reduce((a,it)=>a+(it.jumla||0),0);
@@ -6025,9 +6037,10 @@ function chapishaReceivingKundi(group,kipindi){
   const jb=(a)=>a.map(t=>BRANCHES[t]||t).join(', ');
   $('rfStore').textContent=jb(mp);
   $('rfDate').textContent=nyingi?kipindi:(u.tarehe_kupokea||u.tarehe);
-  $('rfOwner').textContent=nyingi?dots:(u.jina_mpokeaji||dots);
-  const rows=group.map((it,i)=>{const m=uhamishoKwaMpokeaji(it);return `<tr><td>${i+1}</td><td>${it.jina}${it.jina_sw?' / '+it.jina_sw:''}${nyingi?`<div style="font-size:10px;color:#555;">← ${escH(BRANCHES[it.tawi_chanzo]||it.tawi_chanzo)}</div>`:''}</td><td>${m.badili?`${it.kipimo||'pc'} → ${m.kipimo}`:(it.kipimo||'pc')}</td><td class="num">${m.badili?`${it.idadi} → ${m.idadi}`:it.idadi}</td><td class="num">${Number(it.bei_kuuza_mpokeaji)>0?`${pesa2(it.bei_kuuza_mpokeaji)}<div style="font-size:10px;">kwa ${escH(m.kipimo)} 1</div>`:pesa(it.bei_kuuzia)}</td><td class="num">${thamaniKwaMpokeaji(it)!=null?pesa2(thamaniKwaMpokeaji(it)):pesa(it.jumla)}</td>${nyingi?kcSeli(it.tarehe_kupokea||it.tarehe,it.jina_dereva,it.namba_gari):''}</tr>`;});
-  const blankRows=Array.from({length:Math.max(0,10-group.length)}).map((_,i)=>`<tr><td>${group.length+i+1}</td><td></td><td></td><td></td><td></td><td></td>${nyingi?'<td class="kc"></td>':''}</tr>`);
+  $('rfOwner').textContent=nyingi?'':(u.jina_mpokeaji||dots);
+  const rows=group.map((it,i)=>{const m=uhamishoKwaMpokeaji(it);return `<tr><td>${i+1}</td>${nyingi?kcTarehe(it.tarehe_kupokea||it.tarehe):''}<td>${it.jina}${it.jina_sw?' / '+it.jina_sw:''}</td>${nyingi?kcTawi(it.tawi_chanzo):''}<td>${m.badili?`${it.kipimo||'pc'} → ${m.kipimo}`:(it.kipimo||'pc')}</td><td class="num">${m.badili?`${it.idadi} → ${m.idadi}`:it.idadi}</td><td class="num">${Number(it.bei_kuuza_mpokeaji)>0?`${pesa2(it.bei_kuuza_mpokeaji)}<div style="font-size:10px;">kwa ${escH(m.kipimo)} 1</div>`:pesa(it.bei_kuuzia)}</td><td class="num">${thamaniKwaMpokeaji(it)!=null?pesa2(thamaniKwaMpokeaji(it)):pesa(it.jumla)}</td>${nyingi?kcSeli(it.jina_dereva,it.namba_gari):''}</tr>`;});
+  const blankRows=Array.from({length:Math.max(0,10-group.length)}).map((_,i)=>`<tr><td>${group.length+i+1}</td>${nyingi?'<td class="kc"></td>':''}<td></td>${nyingi?'<td class="kc"></td>':''}<td></td><td></td><td></td><td></td>${nyingi?'<td class="kc"></td><td class="kc"></td>':''}</tr>`);
+  $('rfOverlay').classList.toggle('kundi-sheet',nyingi);$('rfTotalAmount').previousElementSibling.colSpan=nyingi?7:5;
   $('rfItemsBody').innerHTML=rows.join('')+blankRows.join('');
   $('rfItemsBody').parentElement.classList.toggle('kundi',nyingi);
   const total=group.reduce((a,it)=>a+(thamaniKwaMpokeaji(it)??(it.jumla||0)),0);      // at the receiving branch's own prices
@@ -8884,19 +8897,17 @@ function renderUhamishoSent(){
     if(userRole==='gm'&&myTawi==='yote')return true;
     return u.tawi_chanzo===myTawi;
   }).sort((a,b)=>(b.tarehe||'').localeCompare(a.tarehe||''));
-  const groupsMap={};
-  sent.forEach(u=>{const key=ufunguoWaOmbi(u);(groupsMap[key]=groupsMap[key]||[]).push(u);});
-  const groups=Object.values(groupsMap);
+  const groups=kundiLaSiku(sent,false);
   tbody.innerHTML=groups.length?groups.map(group=>{
     const u=group[0];
     const totalJumla=group.reduce((a,it)=>a+(it.jumla||0),0);
-    const label=group.length>1?`${u.jina} +${group.length-1} zaidi`:u.jina;
-    const cls=u.hali==='Imepokelewa'?'pill-blue':'pill-green';
+    const label=`${group.length} bidhaa: ${u.jina}${group.length>1?' +'+(group.length-1)+' zaidi':''}`;
+    const zote=group.every(x=>x.hali==='Imepokelewa'),baadhi=group.some(x=>x.hali==='Imepokelewa');const cls=zote?'pill-blue':'pill-green';const hali=zote?'Imepokelewa':baadhi?'Baadhi zimepokelewa':'Imethibitishwa';
     const buttons=`<div style="display:flex;gap:4px;flex-wrap:wrap;">
-      <button class="btn sm secondary" onclick="chapishaTransferForm('${u.id}')">🖨 Transfer</button>
-      ${u.hali==='Imepokelewa'?`<button class="btn sm secondary" onclick="chapishaReceivingForm('${u.id}')">🖨 Receiving</button>`:'<span style="font-size:11px;color:var(--a-muted);">Inasubiri kupokelewa</span>'}
+      <button class="btn sm secondary" onclick="chapishaSiku('transfer','${sikuYa(u,false)}','${u.tawi_chanzo}')">🖨 Transfer ya Siku</button>
+      ${baadhi?`<button class="btn sm secondary" onclick="chapishaSiku('pokea','${sikuYa(u,false)}','${u.tawi_muombaji}')">🖨 Receiving ya Siku</button>`:'<span style="font-size:11px;color:var(--a-muted);">Inasubiri kupokelewa</span>'}
     </div>`;
-    return`<tr><td>${u.tarehe}</td><td>${label}</td><td>${group.reduce((a,it)=>a+(it.idadi||0),0)}</td><td>${BRANCHES[u.tawi_muombaji]||u.tawi_muombaji}</td><td>${u.mteja}</td><td class="num">${pesa(totalJumla)}</td><td><span class="pill ${cls}">${u.hali}</span></td><td>${buttons}</td></tr>`;
+    return`<tr><td>${u.tarehe}</td><td>${label}</td><td>${group.reduce((a,it)=>a+(it.idadi||0),0)}</td><td>${[...new Set(group.map(x=>BRANCHES[x.tawi_muombaji]||x.tawi_muombaji))].join(', ')}</td><td>${[...new Set(group.map(x=>x.mteja))].join(', ')}</td><td class="num">${pesa(totalJumla)}</td><td><span class="pill ${cls}">${hali}</span></td><td>${buttons}</td></tr>`;
   }).join(''):safuTupu(8,'Bado hujatuma transfer yoyote kama tawi la chanzo.');
 }
 /* ═══════════════════════════════════════════════════════════════
@@ -12675,7 +12686,22 @@ function gmMadeniFungua(t){
   if(!el.classList.contains('gm-wazi')){gmOrodhaKamili('madeni');}
   else{jazaChaguoZaMadeni();if($('md-tawi'))$('md-tawi').value=t;madeniOnyeshaZote=false;renderWateja();el.scrollIntoView({block:'nearest',behavior:'smooth'});}
 }
-function gmMuhtasariYote(){try{gmOrderTawi();}catch(e){}try{gmMadeniTawi();}catch(e){}['mauzo','manunuzi','stock'].forEach(k=>{try{gmMuhtasari(k);}catch(e){}});}
+function gmUhamishoMuhtasari(kind){
+  const box=$('gmSum-'+kind);if(!box)return;
+  const pk=kind==='pokea',di=$('gmsum-'+kind+'-d');if(!di)return;if(!di.value)di.value=leoISO();
+  const siku=di.value,mwezi=siku.slice(0,7);
+  const g={};
+  allUhamisho.filter(u=>!u.deleted_at&&(pk?u.hali==='Imepokelewa':(u.hali==='Imethibitishwa'||u.hali==='Imepokelewa'))).forEach(u=>{
+    const d=sikuYa(u,pk);if(d.slice(0,7)!==mwezi)return;
+    const t=pk?u.tawi_muombaji:u.tawi_chanzo;if(!t)return;
+    const e=g[t]||(g[t]={n:0,v:0,m:0,w:new Set()});const v=Number(u.jumla)||0;e.m+=v;
+    if(d===siku){e.n++;e.v+=v;e.w.add(BRANCHES[pk?u.tawi_chanzo:u.tawi_muombaji]||(pk?u.tawi_chanzo:u.tawi_muombaji));}
+  });
+  const rows=Object.entries(g).sort((a,b)=>b[1].v-a[1].v||b[1].m-a[1].m);
+  let jn=0,jv=0,jm=0;rows.forEach(([t,e])=>{jn+=e.n;jv+=e.v;jm+=e.m;});
+  box.innerHTML=`<div class="table-wrap"><table class="inv-table stmt-tbl"><thead><tr><th>#</th><th>Tawi</th><th>${pk?'Kutoka':'Kwenda'}</th><th class="num">Bidhaa (siku)</th><th class="num">Siku</th><th class="num">Mwezi</th><th></th></tr></thead><tbody>${rows.length?rows.map(([t,e],i)=>`<tr><td>${i+1}</td><td>${escH(BRANCHES[t]||t)}</td><td>${escH([...e.w].join(', ')||'—')}</td><td class="num">${e.n||'—'}</td><td class="num"><b>${e.v?fmt0(e.v):'—'}</b></td><td class="num"><b>${fmt0(e.m)}</b></td><td>${e.n?`<button class="btn sm secondary" onclick="chapishaSiku('${pk?'pokea':'transfer'}','${siku}','${t}')">🖨 Fomu</button>`:''}</td></tr>`).join('')+`<tr class="stmt-tot"><td colspan="3">JUMLA</td><td class="num">${jn}</td><td class="num">${fmt0(jv)}</td><td class="num">${fmt0(jm)}</td><td></td></tr>`:'<tr><td colspan="7" style="text-align:center;color:#666;">Hakuna rekodi.</td></tr>'}</tbody></table></div>`;
+}
+function gmMuhtasariYote(){try{gmOrderTawi();}catch(e){}['uhamisho','pokea'].forEach(k=>{try{gmUhamishoMuhtasari(k);}catch(e){}});try{gmMadeniTawi();}catch(e){}['mauzo','manunuzi','stock'].forEach(k=>{try{gmMuhtasari(k);}catch(e){}});}
 document.addEventListener('DOMContentLoaded',()=>{['mauzo','manunuzi'].forEach(k=>{const m=$('gmsum-'+k+'-m');if(m&&!m.value)m.value=leoISO().slice(0,7);});});
 setInterval(()=>{if(document.body.classList.contains('gm-ripoti')){['mauzo','manunuzi'].forEach(k=>{const m=$('gmsum-'+k+'-m');if(m&&!m.value)m.value=leoISO().slice(0,7);});gmMuhtasariYote();gmJazaTawi();}},4000);
 function gmRipotiOtomatiki(kind){const k=$(`gmrp-${kind}-k`).value,h=$(`gmrp-${kind}-h`).value;if(k&&h)gmRipoti(kind);}
