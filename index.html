@@ -478,6 +478,7 @@ table.bin-mafuta tbody tr:not(.inv-total-row) td:nth-child(5){background:#CFE0F0
 table.bin-mafuta tbody tr:not(.inv-total-row) td:nth-child(7){background:#F7DCC8!important;}
 table.bin-mafuta tbody tr:not(.inv-total-row) td:nth-child(9){background:#F3CBA8!important;}
 table.bin-mafuta tr.inv-total-row td:first-child{background:#F3CBA8!important;}
+table.bin-mafuta{font-size:13.5px!important;}table.bin-mafuta th{font-size:12.5px!important;padding:5px 5px!important;}table.bin-mafuta td{padding:5px 6px!important;}
 table.bin-mafuta,table.bin-mafuta td,table.bin-mafuta th{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
 table.inv-table.mz-muhtasari td.num{white-space:nowrap;min-width:190px;overflow-wrap:normal;}
 table.inv-table.mz-muhtasari td:first-child{width:60%;}
@@ -3292,7 +3293,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       <div class="inv-field">Truck number: <span class="inv-dotline" id="rfTruckNo"></span></div>
     </div></div>
     <div class="inv-meta" style="margin-top:10px;">
-      ➜ FROM: <span class="inv-dotline" id="rfFrom"></span>
+      FROM: <span class="inv-dotline" id="rfFrom"></span>
     </div>
     <div class="inv-print-btn" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
       <button class="fomu-btn primary" onclick="chapishaFomu()">🖨 Chapisha / Print</button>
@@ -3342,7 +3343,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 
 <!-- MONTHLY CLOSING STOCK FORM PRINT SHEET -->
 <div class="inv-overlay" id="bcOverlay">
-  <div class="inv-sheet" style="width:900px;">
+  <div class="inv-sheet rp-sheet" style="width:1100px;max-width:100%;">
     <button class="inv-close" id="bcClose">&times;</button>
     <div class="inv-header"><div class="inv-logo"></div></div>
     <div class="inv-co">
@@ -6040,7 +6041,7 @@ function chapishaReceivingKundi(group,kipindi){
   $('rfStore').textContent=jb(mp);
   $('rfDate').textContent=nyingi?kipindi:(u.tarehe_kupokea||u.tarehe);
   $('rfOwner').textContent=nyingi?'':(u.jina_mpokeaji||dots);
-  const rows=group.map((it,i)=>{const m=uhamishoKwaMpokeaji(it);return `<tr><td>${i+1}</td>${nyingi?kcTarehe(it.tarehe_kupokea||it.tarehe):''}<td>${it.jina}${it.jina_sw?' / '+it.jina_sw:''}</td>${nyingi?kcTawi(it.tawi_chanzo):''}<td>${m.badili?`${it.kipimo||'pc'} → ${m.kipimo}`:(it.kipimo||'pc')}</td><td class="num">${m.badili?`${it.idadi} → ${m.idadi}`:it.idadi}</td><td class="num">${Number(it.bei_kuuza_mpokeaji)>0?`${pesa2(it.bei_kuuza_mpokeaji)}<div style="font-size:10px;">kwa ${escH(m.kipimo)} 1</div>`:pesa(it.bei_kuuzia)}</td><td class="num">${thamaniKwaMpokeaji(it)!=null?pesa2(thamaniKwaMpokeaji(it)):pesa(it.jumla)}</td>${nyingi?kcSeli(it.jina_dereva,it.namba_gari):''}</tr>`;});
+  const rows=group.map((it,i)=>{const m=uhamishoKwaMpokeaji(it);return `<tr><td>${i+1}</td>${nyingi?kcTarehe(it.tarehe_kupokea||it.tarehe):''}<td>${it.jina}${it.jina_sw?' / '+it.jina_sw:''}</td>${nyingi?kcTawi(it.tawi_chanzo):''}<td>${m.badili?`${it.kipimo||'pc'} → ${m.kipimo}`:(it.kipimo||'pc')}</td><td class="num">${m.badili?`${it.idadi} → ${m.idadi}`:it.idadi}</td><td class="num">${Number(it.bei_kuuza_mpokeaji)>0?pesa2(it.bei_kuuza_mpokeaji):pesa(it.bei_kuuzia)}</td><td class="num">${thamaniKwaMpokeaji(it)!=null?pesa2(thamaniKwaMpokeaji(it)):pesa(it.jumla)}</td>${nyingi?kcSeli(it.jina_dereva,it.namba_gari):''}</tr>`;});
   const blankRows=Array.from({length:Math.max(0,10-group.length)}).map((_,i)=>`<tr><td>${group.length+i+1}</td>${nyingi?'<td class="kc"></td>':''}<td></td>${nyingi?'<td class="kc"></td>':''}<td></td><td></td><td></td><td></td>${nyingi?'<td class="kc"></td><td class="kc"></td>':''}</tr>`);
   $('rfOverlay').classList.toggle('kundi-sheet',nyingi);$('rfTotalAmount').previousElementSibling.colSpan=nyingi?7:5;
   $('rfItemsBody').innerHTML=rows.join('')+blankRows.join('');
@@ -6721,7 +6722,7 @@ async function fomuKamataPicha(kimya,kwaChapa){
   try{
     await subiriPicha(andaaNembo(klon));
     const _w=klon.scrollWidth||794,_h=klon.scrollHeight||1123;
-    const _sc=Math.max(1,Math.min((kwaChapa?2000:1400)/_w,Math.sqrt(14e6/(_w*_h))));      // ~1400px across for sharing (small file), ~2000px for paper
+    const _sc=Math.max(1,Math.min((kwaChapa?2000:(pana?1900:1400))/_w,Math.sqrt(14e6/(_w*_h))));      // ~1400px across for sharing (small file), ~2000px for paper
     const kr=klon.getBoundingClientRect();
     const mapumziko=[...klon.querySelectorAll('tr')].map(e=>(e.getBoundingClientRect().bottom-kr.top)*_sc);      // where a tall form may be cut between pages (never through a row)
     canvas=await html2canvas(klon,{scale:_sc,backgroundColor:'#ffffff',useCORS:true,windowWidth:klon.scrollWidth});
@@ -6733,7 +6734,7 @@ async function fomuKamataPicha(kimya,kwaChapa){
 // A tall picture is cut into A4 pages, always between two rows
 function kurasaZaPicha(canvas){
   const pana=!!canvas.pana,W=canvas.width,pageH=Math.floor(W*(pana?210/297:297/210)),pad=Math.round(W*0.04),use=pageH-2*pad;
-  if(canvas.height<=pageH)return[canvas];
+  if(canvas.height<=pageH*1.25)return[canvas];      // (a little taller than a page: it is shrunk to fit ONE page)
   const br=(canvas.mapumziko||[]).slice().sort((a,b)=>a-b),out=[];
   for(let y=0;y<canvas.height-2;){
     let end=Math.min(canvas.height,y+use);
@@ -6747,23 +6748,19 @@ function kurasaZaPicha(canvas){
   }
   return out;
 }
-// What is sent: small JPEG pictures (one per A4 page) — like the cards — not a heavy PDF. Returns [{blob,ext,type}]
+// What is sent: ONE small JPEG of the whole form (like the cards) — never several pictures. Returns [{blob,ext,type}]
 async function fomuFaili(canvas){
-  const out=[];
-  for(const k of kurasaZaPicha(canvas)){
-    const c=document.createElement('canvas');c.width=k.width;c.height=k.height;
-    const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(k,0,0);
-    const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',0.85));
-    if(!blob)return null;out.push({blob,ext:'.jpg',type:'image/jpeg'});
-  }
-  return out.length?out:null;
+  const c=document.createElement('canvas');c.width=canvas.width;c.height=canvas.height;
+  const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(canvas,0,0);
+  const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',0.88));
+  return blob?[{blob,ext:'.jpg',type:'image/jpeg'}]:null;
 }
 // the pages become a PDF of A4 pages (only for "Pakua")
 function canvasKwaPdf(canvas){
   const {jsPDF}=window.jspdf,wide=!!canvas.pana;
   const pdf=new jsPDF({orientation:wide?'l':'p',unit:'mm',format:'a4'});
   const pw=pdf.internal.pageSize.getWidth();
-  kurasaZaPicha(canvas).forEach((k,i)=>{if(i)pdf.addPage();pdf.addImage(k.toDataURL('image/jpeg',0.9),'JPEG',0,0,pw,k.height*pw/k.width);});
+  kurasaZaPicha(canvas).forEach((k,i)=>{if(i)pdf.addPage();{const ph=pdf.internal.pageSize.getHeight();let w=pw,h=k.height*pw/k.width;if(h>ph){w=pw*ph/h;h=ph;}pdf.addImage(k.toDataURL('image/jpeg',0.9),'JPEG',(pw-w)/2,0,w,h);}});
   return pdf;
 }
 async function pakuaFomu(){
@@ -12120,7 +12117,7 @@ function tawiYaFomuMafuta(){
 }
 const jinaLaMwekaMafuta=(tawi)=>myOfficerName()||(($('fmf-jina')&&$('fmf-jina').value)||'').trim()||officerOf(tawi)||'';
 const kichwaChaFomuMafuta=(kichwa)=>`<div class="inv-header"><div class="inv-logo"></div></div><div class="inv-title">${kichwa}</div><div class="inv-co" style="text-align:center;"><b>NGARA HUDUMA COMPANY LIMITED</b><br>TIN NO. 147-228-198 · VRN NO. 40311079R<br>P.O. BOX 123 NGARA, KAGERA-TANZANIA<br>Email: ngarahudumacompanylimited@gmail.com &nbsp;·&nbsp; Tel: 0764 748 447</div>`;
-function onyeshaFomuMafuta(html,jina){$('stmtPrintBody').innerHTML=html;$('stmtOverlay').dataset.jina=jina;setWaPhone('stmtOverlay','');openSheet('stmtOverlay');}
+function onyeshaFomuMafuta(html,jina){$('stmtPrintBody').innerHTML=html;const _sh=document.querySelector('#stmtOverlay .inv-sheet');if(_sh){_sh.classList.toggle('rp-sheet',html.includes('bin-mafuta'));{const w=html.includes('bin-mafuta');_sh.style.maxWidth=w?'100%':'820px';_sh.style.width=w?'1100px':'';}}$('stmtOverlay').dataset.jina=jina;setWaPhone('stmtOverlay','');openSheet('stmtOverlay');}
 const tarehePangoMafuta=(iso)=>{const [y,m,d]=String(iso).split('-');return `${d}.${m}.${y}`;};
 const sikuKabla=(iso)=>{const [y,m,d]=iso.split('-').map(Number),t=new Date(y,m-1,d-1),z=(n)=>String(n).padStart(2,'0');return `${t.getFullYear()}-${z(t.getMonth()+1)}-${z(t.getDate())}`;};
 function anzaFomuMafuta(){
