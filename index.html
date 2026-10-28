@@ -1634,36 +1634,50 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 
     <!-- HIFADHI — merged with Manunuzi: purchases (stock-in) directly affect stock, so they live together -->
     <section id="zmapato" class="page">
-      <div class="topbar"><div class="topbar-left"><h2 class="zl" data-z="zmapato">Mapato</h2><p>Mauzo yote yaliyofanyika, kwa kipindi unachochagua — pamoja na matumizi na kilichobaki.</p></div></div>
+      <div class="topbar"><div class="topbar-left"><h2 class="zl" data-z="zmapato">Mapato</h2><p>Fedha zinazoingia — Cash, Lipa Namba, NMB na CRDB (kutoka kwenye mauzo yako).</p></div></div>
+      <div class="cards mz-cards">
+        <div class="card"><div class="c-label">Cash</div><div class="c-value" id="zmpCash">—</div></div>
+        <div class="card"><div class="c-label">Lipa Namba</div><div class="c-value" id="zmpLipa">—</div></div>
+        <div class="card"><div class="c-label">NMB</div><div class="c-value" id="zmpNmb">—</div></div>
+        <div class="card"><div class="c-label">CRDB</div><div class="c-value" id="zmpCrdb">—</div></div>
+        <div class="card" style="border-left:3px solid var(--a-rg)"><div class="c-label">Jumla Mapato (zote)</div><div class="c-value" id="zmpJumla" style="color:var(--a-rg)">—</div></div>
+      </div>
       <div class="section">
-        <div class="section-header"><h3>📆 Kipindi</h3>
+        <div class="section-header"><h3>📋 Orodha ya Mapato</h3>
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-            <label style="font-size:11px;color:var(--a-muted);display:flex;align-items:center;gap:4px;">Kuanzia <input type="date" id="zm-kuanzia" onchange="renderZMapato()" style="width:auto"/></label>
-            <label style="font-size:11px;color:var(--a-muted);display:flex;align-items:center;gap:4px;">Hadi <input type="date" id="zm-hadi" onchange="renderZMapato()" style="width:auto"/></label>
-            <button class="btn sm secondary" onclick="zmKipindi('leo')">Leo</button>
-            <button class="btn sm secondary" onclick="zmKipindi('wiki')">Siku 7</button>
-            <button class="btn sm secondary" onclick="zmKipindi('mwezi')">Mwezi huu</button>
+            <input type="search" id="zm-tafuta" autocomplete="off" placeholder="🔍 Tafuta mteja au bidhaa..." oninput="renderZMapato()" style="width:auto;min-width:210px;"/>
+            <input type="date" id="zm-kuanzia" onchange="renderZMapato()" style="width:auto"/>
+            <span style="color:var(--a-muted);font-size:12px;">hadi</span>
+            <input type="date" id="zm-hadi" onchange="renderZMapato()" style="width:auto"/>
+            <button class="btn sm secondary" onclick="zmKipindi('zote')">Onyesha Yote</button>
+            <button class="btn sm" onclick="zmChapisha('mapato')">🖨 Chapisha Ripoti ya Mapato</button>
           </div>
         </div>
-        <div class="section-body"><div id="zm-muhtasari"></div></div>
-      </div>
-      <div class="section">
-        <div class="section-header"><h3>📅 Mapato kwa Siku</h3></div>
-        <div class="section-body"><div class="table-wrap"><table>
-          <thead><tr><th>Tarehe</th><th class="num">Invoice</th><th class="num">Mauzo</th><th class="num">Punguzo</th><th class="num">Matumizi</th><th class="num">Kilichobaki</th></tr></thead>
-          <tbody id="tbody-zm-siku"><tr class="loading-row"><td colspan="6">Inapakia...</td></tr></tbody>
-        </table></div></div>
-      </div>
-      <div class="section">
-        <div class="section-header"><h3>🧾 Mauzo Yaliyofanyika</h3></div>
-        <div class="section-body"><div class="table-wrap"><table>
-          <thead><tr><th>Invoice</th><th>Tarehe</th><th>Mteja</th><th>Bidhaa</th><th class="num">QTY</th><th class="num">Bei</th><th class="num">Punguzo</th><th class="num">Jumla</th></tr></thead>
-          <tbody id="tbody-zm-mauzo"><tr class="loading-row"><td colspan="8">Inapakia...</td></tr></tbody>
+        <div class="section-body"><div id="zm-muhtasari" style="font-size:12.5px;color:var(--a-muted);margin-bottom:8px;"></div><div class="table-wrap"><table>
+          <thead><tr><th>#</th><th>Tarehe</th><th>Aliyekabidhi</th><th>Maelezo</th><th class="num">Cash</th><th class="num">Lipa Namba</th><th class="num">NMB</th><th class="num">CRDB</th><th class="num">Jumla</th></tr></thead>
+          <tbody id="tbody-zm-mapato"><tr class="loading-row"><td colspan="9">Inapakia...</td></tr></tbody>
         </table></div></div>
       </div>
     </section>
     <section id="zmatumizi" class="page">
-      <div class="topbar"><div class="topbar-left"><h2 class="zl" data-z="zmatumizi">Matumizi</h2><p>Weka matumizi yako — yanaonekana kwenye Mapato kama kinachopunguzwa kutoka mauzo.</p></div></div>
+      <div class="topbar"><div class="topbar-left"><h2 class="zl" data-z="zmatumizi">Matumizi</h2><p>Fedha zinazotoka — Cash Out.</p></div></div>
+      <div class="section" id="zmSikuSection">
+        <div class="section-header"><h3>📆 Matumizi na Salio la Siku</h3>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <input type="date" id="zm-siku" onchange="renderZMatumizi()" style="width:auto" title="Chagua tarehe"/>
+            <button class="btn sm secondary" onclick="$('zm-siku').value=sikuBaada(leoISO(),-1);renderZMatumizi()">Jana</button>
+            <button class="btn sm secondary" onclick="$('zm-siku').value=leoISO();renderZMatumizi()">Leo</button>
+          </div>
+        </div>
+        <div class="section-body">
+          <div class="cards mz-cards">
+            <div class="card"><div class="c-label">Mapato ya Siku <span style="font-weight:400;opacity:.7">(pamoja na Salio la Jana)</span></div><div class="c-value" id="zmMapatoSiku">—</div></div>
+            <div class="card"><div class="c-label">Jumla Matumizi ya Siku</div><div class="c-value" id="zmMatumiziSiku">—</div></div>
+            <div class="card" style="border-left:3px solid var(--a-rg)"><div class="c-label">Salio la Siku (Mapato − Matumizi)</div><div class="c-value" id="zmSalioSiku" style="color:var(--a-rg)">—</div></div>
+          </div>
+          <p id="zmMaelezoSiku" style="font-size:12px;color:var(--a-muted);margin:8px 0 0;"></p>
+        </div>
+      </div>
       <div class="section" id="zmEntrySection">
         <div class="section-header"><h3>➕ Ongeza Matumizi</h3></div>
         <div class="section-body">
@@ -1680,23 +1694,43 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
             <div id="zmGridJumla" style="font-size:13px;"></div>
           </div>
           <div id="zmGridErrors" class="grid-errors"></div>
-          <div class="controls"><button class="btn gold" id="zmt-btn" onclick="hifadhiZMatumizi()">💾 Hifadhi Matumizi Yote</button> <button class="btn secondary" onclick="jengaGridZm();onyeshaMakosaGrid('zmGridErrors','notifyZm',[])">🗑 Futa</button></div>
+          <div class="controls"><button class="btn gold" id="zmt-btn" onclick="hifadhiZMatumizi()">💾 Hifadhi Matumizi Yote</button> <button class="btn secondary" onclick="zmChapisha('siku')">🖨 Fomu ya Tarehe Hii</button> <button class="btn secondary" onclick="jengaGridZm();onyeshaMakosaGrid('zmGridErrors','notifyZm',[])">🗑 Futa</button></div>
         </div>
       </div>
       <div class="section">
-        <div class="section-header"><h3>📋 Rekodi za Matumizi</h3>
+        <div class="section-header"><h3>📋 Cash Expenditure Form</h3>
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-            <label style="font-size:11px;color:var(--a-muted);display:flex;align-items:center;gap:4px;">Kuanzia <input type="date" id="zmt-kuanzia" onchange="renderZMatumizi()" style="width:auto"/></label>
-            <label style="font-size:11px;color:var(--a-muted);display:flex;align-items:center;gap:4px;">Hadi <input type="date" id="zmt-hadi" onchange="renderZMatumizi()" style="width:auto"/></label>
+            <button class="btn sm secondary" onclick="badiliSehemu(this)">Onyesha Orodha</button>
+            <input type="date" id="zmt-kuanzia" onchange="renderZMatumizi()" style="width:auto"/>
+            <span style="color:var(--a-muted);font-size:12px;">hadi</span>
+            <input type="date" id="zmt-hadi" onchange="renderZMatumizi()" style="width:auto"/>
+            <button class="btn sm secondary" onclick="$('zmt-kuanzia').value='';$('zmt-hadi').value='';renderZMatumizi()">Onyesha Yote</button>
+            <button class="btn sm secondary" onclick="zmChapisha('matumizi')">🖨 Chapisha Ripoti</button>
           </div>
         </div>
-        <div class="section-body">
+        <div class="section-body" style="display:none;">
           <div id="zmt-muhtasari" style="font-size:12.5px;color:var(--a-muted);margin-bottom:8px;"></div>
           <div class="table-wrap"><table>
-            <thead><tr><th>Tarehe</th><th>Maelezo</th><th class="num">Kiasi</th><th>Kitendo</th></tr></thead>
-            <tbody id="tbody-zmt"><tr class="loading-row"><td colspan="4">Inapakia...</td></tr></tbody>
+            <thead><tr><th>#</th><th>Tarehe</th><th>Notes</th><th class="num">Kiasi</th><th>Kitendo</th></tr></thead>
+            <tbody id="tbody-zmt"><tr class="loading-row"><td colspan="5">Inapakia...</td></tr></tbody>
           </table></div>
         </div>
+      </div>
+      <div class="section">
+        <div class="section-header"><h3>📥 Mapato Form</h3>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <button class="btn sm secondary" onclick="badiliSehemu(this)">Onyesha Orodha</button>
+            <input type="date" id="zmm-kuanzia" onchange="renderZMatumizi()" style="width:auto"/>
+            <span style="color:var(--a-muted);font-size:12px;">hadi</span>
+            <input type="date" id="zmm-hadi" onchange="renderZMatumizi()" style="width:auto"/>
+            <button class="btn sm secondary" onclick="$('zmm-kuanzia').value='';$('zmm-hadi').value='';renderZMatumizi()">Onyesha Yote</button>
+            <button class="btn sm secondary" onclick="zmChapisha('mapatoform')">🖨 Chapisha Ripoti</button>
+          </div>
+        </div>
+        <div class="section-body" style="display:none;"><div class="table-wrap"><table>
+          <thead><tr><th>#</th><th>Tarehe</th><th>Aliyekabidhi</th><th>Maelezo</th><th class="num">Cash</th><th class="num">Lipa Namba</th><th class="num">NMB</th><th class="num">CRDB</th><th class="num">Jumla</th></tr></thead>
+          <tbody id="tbody-zmm"><tr class="loading-row"><td colspan="9">Inapakia...</td></tr></tbody>
+        </table></div></div>
       </div>
     </section>
     <section id="zorder" class="page">
@@ -2307,6 +2341,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
           </div>
         </div>
       </div>
+      <div class="section gm-kadi" id="gmKadi-mcyote"><div class="section-header"><h3>📅 Monthly Closing Stock — Matawi Yote</h3></div><div class="section-body"><div class="controls" style="align-items:flex-end;flex-wrap:wrap;gap:10px;"><div class="field" style="margin:0;"><label>Mwezi</label><select id="gmmc-mwezi" style="width:auto"><option value="1">Januari</option><option value="2">Februari</option><option value="3">Machi</option><option value="4">Aprili</option><option value="5">Mei</option><option value="6">Juni</option><option value="7">Julai</option><option value="8">Agosti</option><option value="9">Septemba</option><option value="10">Oktoba</option><option value="11">Novemba</option><option value="12">Desemba</option></select></div><div class="field" style="margin:0;"><label>Mwaka</label><input type="number" id="gmmc-mwaka" placeholder="2026" style="width:110px"/></div><button class="btn gold" onclick="gmMweziYote()">🖨 Tengeneza Fomu ya Matawi Yote</button></div><p style="font-size:12px;color:var(--a-muted);margin:8px 0 0;">Inaonyesha kila tawi kwa safu moja: Opening, Purchases, Received, Transferred, Discount, Bank, Lipa Namba, Cash, Order na Closing — pamoja na jumla ya kampuni. Opening inatoka kwenye salio la kufunga lililohifadhiwa la mwezi uliotangulia.</p></div></div>
       <div class="section">
         <div class="section-header"><h3>🧾 Fomu ya Manunuzi (Purchase Form)</h3><span style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:11px;color:var(--a-muted);">Kuanzia <input type="date" id="ft-mn-k" onchange="renderAllFomu()" style="width:auto"/> Hadi <input type="date" id="ft-mn-h" onchange="renderAllFomu()" style="width:auto"/></span></div>
         <div class="section-body"><div class="table-wrap"><table>
@@ -4880,6 +4915,8 @@ function setDefaultDates(){
   const now=new Date();
   if($('mc-mwezi'))$('mc-mwezi').value=String(now.getMonth()+1);
   if($('mc-mwaka')&&!$('mc-mwaka').value)$('mc-mwaka').value=now.getFullYear();
+  if($('gmmc-mwezi'))$('gmmc-mwezi').value=String(now.getMonth()+1);
+  if($('gmmc-mwaka')&&!$('gmmc-mwaka').value)$('gmmc-mwaka').value=now.getFullYear();
 }
 function wekaTariheLeo(){$('ks-tarehe').value=leoISO();renderKilaSiku();}
 
@@ -7558,52 +7595,104 @@ async function pakiaZMatumizi(){
 }
 function anzaZPage(page){
   const t=leoISO();
-  if($('zm-kuanzia')&&!$('zm-kuanzia').value){$('zm-kuanzia').value=t;$('zm-hadi').value=t;}
+  if($('zm-kuanzia')&&!$('zm-kuanzia').value){$('zm-kuanzia').value=t.slice(0,8)+'01';$('zm-hadi').value=t;}
   if($('zmt-tarehe')&&!$('zmt-tarehe').value)$('zmt-tarehe').value=tareheYaLeo();
   if($('zmGridBody')&&!$('zmGridBody').children.length)jengaGridZm();
   if($('zmt-kuanzia')&&!$('zmt-kuanzia').value){$('zmt-kuanzia').value=t.slice(0,8)+'01';$('zmt-hadi').value=t;}
+  if($('zm-siku')&&!$('zm-siku').value)$('zm-siku').value=t;
   pakiaZMatumizi();
 }
-function zmKipindi(aina){
-  const t=leoISO(),d=new Date();let k=t;
-  if(aina==='wiki'){const w=new Date(d);w.setDate(d.getDate()-6);k=isoYaMtaa(w);}
-  else if(aina==='mwezi')k=t.slice(0,8)+'01';
-  $('zm-kuanzia').value=k;$('zm-hadi').value=t;renderZMapato();
+const zmMauzo=()=>allMauzo.filter(s=>s.tawi===ZM_TAWI&&!s._pending&&!s.deleted_at&&s.hali_order!=='Inasubiri'&&s.hali_order!=='Imekataliwa');
+// Her mapato, shaped like Rose's ledger: one record per invoice, with the amount under the way it was paid (Cash / Lipa Namba / NMB / CRDB). Credit (Mkopo) sales are not money received, so they are left out.
+function zmMapatoRekodi(){
+  const g={};
+  zmMauzo().forEach(s=>{
+    const nj=njiaYaMauzoKikundi(s);if(nj==='Mkopo')return;
+    const kid=(s.invoice_no||s.id)+'|'+s.tarehe,r=g[kid]||(g[kid]={tarehe:s.tarehe,created_at:s.created_at||'',mkabidhi:s.mteja||'Mteja wa Kawaida',vitu:[],cash_in:0,lipa_in:0,nmb_in:0,crdb_in:0,bankNyingine:''});
+    const j=Number(s.jumla)||0;
+    if(nj==='Lipa Namba')r.lipa_in+=j;else if(nj==='NMB')r.nmb_in+=j;else if(nj==='CRDB'||nj==='CRDB 2')r.crdb_in+=j;else if(nj==='Bank'){r.nmb_in+=j;r.bankNyingine=s.benki||'';}else r.cash_in+=j;
+    r.vitu.push(`${s.jina} ×${s.idadi}`);
+  });
+  return Object.values(g).map(r=>Object.assign(r,{maelezo:(r.vitu.join(', '))+(r.bankNyingine?` (Bank: ${r.bankNyingine})`:'')})).sort((a,b)=>String(a.tarehe).localeCompare(String(b.tarehe))||String(a.created_at).localeCompare(String(b.created_at)));
 }
-const zmMauzo=()=>allMauzo.filter(s=>s.tawi===ZM_TAWI&&!s._pending&&s.hali_order!=='Inasubiri'&&s.hali_order!=='Imekataliwa');
+const zmSalioKabla=(t)=>round2(zmMapatoRekodi().filter(e=>e.tarehe<t).reduce((a,e)=>a+jumlaYaMapato(e),0)-allZMatumizi.filter(m=>!m.deleted_at&&m.tarehe<t).reduce((a,m)=>a+(Number(m.kiasi)||0),0));
+function zmNdani(k,h){if(k&&h&&k>h){const t=k;k=h;h=t;}return (t)=>(!k||String(t)>=k)&&(!h||String(t)<=h);}
+function zmSafuMapato(rows,i0,tafsiri){
+  const seli=(v)=>`<td class="num">${v?pesa2(v):'—'}</td>`,j={cash:0,lipa:0,nmb:0,crdb:0};
+  rows.forEach(e=>{j.cash+=e.cash_in;j.lipa+=e.lipa_in;j.nmb+=e.nmb_in;j.crdb+=e.crdb_in;});
+  const jt=n=>`<td class="num"><strong>${pesa2(round2(n))}</strong></td>`;
+  return rows.map((e,i)=>`<tr><td>${i+1}</td><td>${e.tarehe}</td><td><strong>${escH(e.mkabidhi)}</strong></td><td>${escH(e.maelezo)}</td>${seli(e.cash_in)}${seli(e.lipa_in)}${seli(e.nmb_in)}${seli(e.crdb_in)}<td class="num"><strong>${pesa2(jumlaYaMapato(e))}</strong></td></tr>`).join('')
+    +(rows.length?`<tr class="safu-jumla" style="background:rgba(255,255,255,0.07);border-top:2px solid var(--a-line);"><td colspan="4"><strong>JUMLA (${rows.length} rekodi)</strong></td>${jt(j.cash)}${jt(j.lipa)}${jt(j.nmb)}${jt(j.crdb)}${jt(j.cash+j.lipa+j.nmb+j.crdb)}</tr>`:safuTupu(9,tafsiri));
+}
 function renderZMapato(){
-  const tb=$('tbody-zm-siku');if(!tb)return;
-  let k=($('zm-kuanzia')||{}).value||'',h=($('zm-hadi')||{}).value||'';
-  if(k&&h&&k>h){[k,h]=[h,k];}
-  const ndani=(t)=>(!k||String(t)>=k)&&(!h||String(t)<=h);
-  const mauzo=zmMauzo().filter(s=>ndani(s.tarehe)),mat=allZMatumizi.filter(m=>ndani(m.tarehe));
-  const jM=mauzo.reduce((a,s)=>a+(Number(s.jumla)||0),0),jP=mauzo.reduce((a,s)=>a+(Number(s.punguzo)||0),0),jT=mat.reduce((a,m)=>a+(Number(m.kiasi)||0),0);
-  const inv=new Set(mauzo.map(s=>s.invoice_no||s.id));
-  const kadi=(l,v,r)=>`<div><span style="font-size:11px;color:var(--a-muted);text-transform:uppercase;">${l}</span><br><strong style="font-size:18px;${r?'color:'+r:''}">${v}</strong></div>`;
+  const tb=$('tbody-zm-mapato');if(!tb)return;
+  const nd=zmNdani(($('zm-kuanzia')||{}).value||'',($('zm-hadi')||{}).value||''),q=sawazishaUtafutaji((($('zm-tafuta')||{}).value||'').trim());
+  const zote=zmMapatoRekodi();
+  const rows=zote.filter(e=>nd(e.tarehe)&&(!q||q.split(' ').every(w=>sawazishaUtafutaji(e.mkabidhi+' '+e.maelezo).includes(w))));
+  tb.innerHTML=zmSafuMapato(rows,0,'Bado hakuna mapato.');
+  const t={cash:0,lipa:0,nmb:0,crdb:0};zote.forEach(e=>{t.cash+=e.cash_in;t.lipa+=e.lipa_in;t.nmb+=e.nmb_in;t.crdb+=e.crdb_in;});
+  [['zmpCash',t.cash],['zmpLipa',t.lipa],['zmpNmb',t.nmb],['zmpCrdb',t.crdb],['zmpJumla',t.cash+t.lipa+t.nmb+t.crdb]].forEach(([id,v])=>{const el=$(id);if(el)el.textContent=pesa2(v);});
   const m=$('zm-muhtasari');
-  if(m)m.innerHTML=(zmKosa?`<p style="color:var(--a-red);font-size:12.5px;margin:0 0 10px;">⚠ ${escH(zmKosa)}</p>`:'')+`<div style="display:flex;gap:28px;flex-wrap:wrap;">${kadi('Mauzo (mapato)',pesa(jM))}${kadi('Punguzo',pesa(jP))}${kadi('Matumizi',pesa2(jT),'var(--a-red,#f87171)')}${kadi('Kilichobaki',pesa2(jM-jT),'var(--a-green,#4ade80)')}${kadi('Invoice',inv.size)}</div>`;
-  const siku={};
-  mauzo.forEach(s=>{const d=siku[s.tarehe]||(siku[s.tarehe]={inv:new Set(),m:0,p:0,t:0});d.inv.add(s.invoice_no||s.id);d.m+=Number(s.jumla)||0;d.p+=Number(s.punguzo)||0;});
-  mat.forEach(x=>{const d=siku[x.tarehe]||(siku[x.tarehe]={inv:new Set(),m:0,p:0,t:0});d.t+=Number(x.kiasi)||0;});
-  const tarehe=Object.keys(siku).sort().reverse();
-  tb.innerHTML=tarehe.length?tarehe.map(t=>{const d=siku[t];return `<tr><td>${t}</td><td class="num">${d.inv.size}</td><td class="num">${pesa(d.m)}</td><td class="num">${pesa(d.p)}</td><td class="num">${pesa2(d.t)}</td><td class="num"><strong>${pesa2(d.m-d.t)}</strong></td></tr>`;}).join('')
-    +`<tr style="font-weight:700;background:rgba(255,138,87,0.10);"><td>JUMLA</td><td class="num">${inv.size}</td><td class="num">${pesa(jM)}</td><td class="num">${pesa(jP)}</td><td class="num">${pesa2(jT)}</td><td class="num">${pesa2(jM-jT)}</td></tr>`
-    :safuTupu(6,'Hakuna mauzo wala matumizi kwenye kipindi hiki.');
-  const tm=$('tbody-zm-mauzo');
-  if(tm){const orodha=[...mauzo].sort((a,b)=>String(b.tarehe).localeCompare(String(a.tarehe))||String(b.created_at||'').localeCompare(String(a.created_at||'')));
-    tm.innerHTML=orodha.length?orodha.map(s=>`<tr><td>${escH(s.invoice_no||'—')}</td><td>${s.tarehe}</td><td>${escH(s.mteja||'')}</td><td>${escH(s.jina)}</td><td class="num">${s.idadi} ${escH(s.kipimo||'pc')}</td><td class="num">${pesa(s.bei_kuuzia)}</td><td class="num">${pesa(s.punguzo||0)}</td><td class="num"><strong>${pesa(s.jumla)}</strong></td></tr>`).join(''):safuTupu(8,'Hakuna mauzo kwenye kipindi hiki.');}
+  if(m)m.innerHTML=zmKosa?`<span style="color:var(--a-red);">⚠ ${escH(zmKosa)}</span>`:'Mapato ni mauzo uliyopokea (Cash / Lipa Namba / NMB / CRDB). Mauzo ya mkopo (deni) hayahesabiwi hadi yalipwe.';
+}
+function zmKipindi(aina){
+  if(aina==='zote'){$('zm-kuanzia').value='';$('zm-hadi').value='';if($('zm-tafuta'))$('zm-tafuta').value='';}
+  else{const t=leoISO();let k=t;if(aina==='wiki'){const w=new Date();w.setDate(w.getDate()-6);k=isoYaMtaa(w);}else if(aina==='mwezi')k=t.slice(0,8)+'01';$('zm-kuanzia').value=k;$('zm-hadi').value=t;}
+  renderZMapato();
 }
 function renderZMatumizi(){
   const tb=$('tbody-zmt');if(!tb)return;
-  let k=($('zmt-kuanzia')||{}).value||'',h=($('zmt-hadi')||{}).value||'';
-  if(k&&h&&k>h){[k,h]=[h,k];}
-  const orodha=allZMatumizi.filter(m=>(!k||String(m.tarehe)>=k)&&(!h||String(m.tarehe)<=h));
+  const orodhaZote=allZMatumizi.filter(m=>!m.deleted_at);
+  const nd=zmNdani(($('zmt-kuanzia')||{}).value||'',($('zmt-hadi')||{}).value||'');
+  const orodha=orodhaZote.filter(m=>nd(m.tarehe)).sort((a,b)=>String(a.tarehe).localeCompare(String(b.tarehe))||String(a.created_at||'').localeCompare(String(b.created_at||'')));
   const jumla=orodha.reduce((a,m)=>a+(Number(m.kiasi)||0),0);
   const mu=$('zmt-muhtasari');if(mu)mu.innerHTML=zmKosa?`<span style="color:var(--a-red);">⚠ ${escH(zmKosa)}</span>`:(orodha.length?`Matumizi <b>${orodha.length}</b> · Jumla: <b style="color:var(--a-text);">${pesa2(jumla)}</b>`:'');
-  tb.innerHTML=orodha.length?orodha.map(m=>`<tr><td>${m.tarehe}</td><td>${escH(m.maelezo)}</td><td class="num"><strong>${pesa2(m.kiasi)}</strong></td><td>${userRole==='deski'?`<button class="btn sm danger" onclick="futaZMatumizi('${m.id}')">🗑 Futa</button>`:''}</td></tr>`).join('')
-    +`<tr style="font-weight:700;background:rgba(255,138,87,0.10);"><td colspan="2">JUMLA</td><td class="num">${pesa2(jumla)}</td><td></td></tr>`
-    :safuTupu(4,'Hakuna matumizi kwenye kipindi hiki.');
+  const futa=(m)=>userRole==='deski'?`<button class="btn sm danger" onclick="futaZMatumizi('${m.id}')">Futa</button>`:'—';
+  tb.innerHTML=orodha.length?orodha.map((m,i)=>`<tr><td>${i+1}</td><td>${m.tarehe}</td><td>${escH(m.maelezo)}</td><td class="num"><strong>${pesa2(m.kiasi)}</strong></td><td>${futa(m)}</td></tr>`).join('')
+    +`<tr class="safu-jumla" style="background:rgba(255,255,255,0.07);border-top:2px solid var(--a-line);"><td colspan="3"><strong>JUMLA</strong></td><td class="num"><strong>${pesa2(jumla)}</strong></td><td></td></tr>`
+    :safuTupu(5,'Bado hakuna matumizi.');
+  const tm=$('tbody-zmm');
+  if(tm){const n2=zmNdani(($('zmm-kuanzia')||{}).value||'',($('zmm-hadi')||{}).value||'');tm.innerHTML=zmSafuMapato(zmMapatoRekodi().filter(e=>n2(e.tarehe)),0,'Bado hakuna mapato.');}
+  // THE DAY: mapato of the day (+ yesterday's balance), matumizi of the day and what is left
+  if($('zm-siku')){
+    if(!$('zm-siku').value)$('zm-siku').value=leoISO();
+    const siku=$('zm-siku').value,sk=zmMapatoRekodi().filter(e=>e.tarehe===siku),s={cash:0,lipa:0,nmb:0,crdb:0};
+    sk.forEach(e=>{s.cash+=e.cash_in;s.lipa+=e.lipa_in;s.nmb+=e.nmb_in;s.crdb+=e.crdb_in;});
+    const nje=round2(orodhaZote.filter(m=>m.tarehe===siku).reduce((a,m)=>a+(Number(m.kiasi)||0),0)),jana=zmSalioKabla(siku);
+    const mapato=round2(jana+s.cash+s.lipa+s.nmb+s.crdb),salio=round2(mapato-nje);
+    $('zmMapatoSiku').textContent=pesa2(mapato);$('zmMatumiziSiku').textContent=pesa2(nje);
+    const se=$('zmSalioSiku');se.textContent=pesa2(salio);se.style.color=salio<0?'var(--a-red,#f87171)':'var(--a-rg)';
+    $('zmMaelezoSiku').textContent=`Mapato ya ${siku}: Salio la Jana ${pesa2(jana)} · Cash ${pesa2(round2(s.cash))} · Lipa Namba ${pesa2(round2(s.lipa))} · NMB ${pesa2(round2(s.nmb))} · CRDB ${pesa2(round2(s.crdb))}`;
+  }
   const ent=$('zmEntrySection');if(ent)ent.style.display=(userRole==='deski')?'':'none';      // the Director only looks
+}
+// Printable reports, in the same layout Rose's reports use
+function zmChapisha(kind){
+  const v=(n)=>n?pesa2(round2(n)):'—';let kichwa='',kipindi='',mwili='',jina='';
+  const jed=(hd,rows)=>`<div class="table-wrap"><table class="inv-table stmt-tbl"><thead><tr>${hd.map(x=>`<th${x[1]?' class="num"':''}>${x[0]}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
+  const mapatoJed=(rows)=>{const j={cash:0,lipa:0,nmb:0,crdb:0};rows.forEach(e=>{j.cash+=e.cash_in;j.lipa+=e.lipa_in;j.nmb+=e.nmb_in;j.crdb+=e.crdb_in;});
+    return jed([['#'],['Tarehe'],['Aliyekabidhi'],['Maelezo'],['Cash',1],['Lipa Namba',1],['NMB',1],['CRDB',1],['Jumla',1]],rows.map((e,i)=>`<tr><td>${i+1}</td><td style="white-space:nowrap;">${e.tarehe}</td><td>${escH(e.mkabidhi)}</td><td>${escH(e.maelezo)}</td><td class="num">${v(e.cash_in)}</td><td class="num">${v(e.lipa_in)}</td><td class="num">${v(e.nmb_in)}</td><td class="num">${v(e.crdb_in)}</td><td class="num">${v(jumlaYaMapato(e))}</td></tr>`).join('')+(rows.length?`<tr class="stmt-tot"><td colspan="4">JUMLA (rekodi ${rows.length})</td><td class="num">${v(j.cash)}</td><td class="num">${v(j.lipa)}</td><td class="num">${v(j.nmb)}</td><td class="num">${v(j.crdb)}</td><td class="num">${v(j.cash+j.lipa+j.nmb+j.crdb)}</td></tr>`:''));};
+  const mtJed=(l)=>jed([['#'],['Tarehe'],['Notes / Maelezo'],['Kiasi',1]],l.map((m,i)=>`<tr><td>${i+1}</td><td style="white-space:nowrap;">${m.tarehe}</td><td>${escH(m.maelezo)}</td><td class="num">${pesa2(m.kiasi)}</td></tr>`).join('')+(l.length?`<tr class="stmt-tot"><td colspan="3">JUMLA</td><td class="num">${pesa2(round2(l.reduce((a,m)=>a+(Number(m.kiasi)||0),0)))}</td></tr>`:''));
+  const mat=allZMatumizi.filter(m=>!m.deleted_at);
+  const eneo=(a,b)=>(a||b)?`Kipindi: ${a?maandishiYaTarehe(a):'Mwanzo'} — ${b?maandishiYaTarehe(b):maandishiYaTarehe(leoISO())}`:`Hali hadi ${maandishiYaTarehe(leoISO())}`;
+  if(kind==='mapato'||kind==='mapatoform'){
+    const p=kind==='mapato'?['zm-kuanzia','zm-hadi']:['zmm-kuanzia','zmm-hadi'],k=$(p[0]).value,h=$(p[1]).value,nd=zmNdani(k,h);
+    kichwa='INCOME REPORT — RIPOTI YA MAPATO';kipindi=eneo(k,h);mwili=mapatoJed(zmMapatoRekodi().filter(e=>nd(e.tarehe)));jina='ripoti-ya-mapato';
+  }else if(kind==='matumizi'){
+    const k=$('zmt-kuanzia').value,h=$('zmt-hadi').value,nd=zmNdani(k,h);
+    kichwa='CASH EXPENDITURE FORM';kipindi=eneo(k,h);mwili=mtJed(mat.filter(m=>nd(m.tarehe)).sort((a,b)=>String(a.tarehe).localeCompare(String(b.tarehe))));jina='cash-expenditure';
+  }else{
+    const siku=($('zm-siku')||{}).value||leoISO(),sk=zmMapatoRekodi().filter(e=>e.tarehe===siku),mt=mat.filter(m=>m.tarehe===siku);
+    const jana=zmSalioKabla(siku),jm=round2(sk.reduce((a,e)=>a+jumlaYaMapato(e),0)),jt=round2(mt.reduce((a,m)=>a+(Number(m.kiasi)||0),0));
+    kichwa='CASH EXPENDITURE FORM — FOMU YA SIKU';kipindi=`Tarehe: ${maandishiYaTarehe(siku)}`;jina='fomu-ya-siku';
+    mwili=`<div class="stmt-bill">MAPATO</div>${mapatoJed(sk)}<div class="stmt-bill" style="margin-top:14px;">MATUMIZI</div>${mtJed(mt)}
+      <div class="stmt-bill" style="margin-top:14px;">MUHTASARI</div>${jed([['Maelezo'],['Kiasi',1]],[['Salio la Jana',pesa2(jana)],['Mapato ya Siku',pesa2(jm)],['Mapato + Salio la Jana',pesa2(round2(jana+jm))],['Jumla Matumizi ya Siku',pesa2(jt)],['SALIO LA SIKU',pesa2(round2(jana+jm-jt))]].map(x=>`<tr${x[0]==='SALIO LA SIKU'?' class="stmt-tot"':''}><td>${x[0]}</td><td class="num">${x[1]}</td></tr>`).join(''))}`;
+  }
+  $('rpPrintBody').innerHTML=`<div class="inv-header" style="margin-bottom:6px;"><div class="inv-logo"></div></div>
+    <div class="stmt-co"><b>NGARA HUDUMA COMPANY LIMITED</b><br>TIN NO. 147-228-198 — VRN NO. 40311079R · P.O. BOX 123 NGARA, KAGERA-TANZANIA<br>${kichwa}<br>${kipindi}</div>${mwili}
+    <div class="inv-meta" style="margin-top:22px;">Imeandaliwa na: ${escH(userJina||'')} &nbsp;&nbsp; Sahihi: <span class="inv-dotline" style="min-width:160px;">&nbsp;</span></div>`;
+  $('rpOverlay').dataset.jina=`${jina}-${leoISO()}`;
+  openSheet('rpOverlay');
 }
 const ZM_SAFU_MWANZO=5;
 function safuZmMpya(){
@@ -8912,6 +9001,38 @@ async function generateMonthlyClosingForm(){
   setWaPhone('mcOverlay',ADMIN_PHONE);
   openSheet('mcOverlay');
   arifu('notifyMonthly','✅ Fomu imetengenezwa! Salio la kufunga limehifadhiwa kwa mwezi ujao.','success');
+}
+// General Monthly Closing Stock for ALL branches (General Manager / Director): one row per branch, same rule as each branch's own form
+async function gmMweziYote(){
+  const mwezi=parseInt($('gmmc-mwezi').value),mwaka=parseInt($('gmmc-mwaka').value);
+  if(!mwaka||!mwezi){toast('❌ Chagua mwezi na mwaka');return;}
+  const miezi=['Januari','Februari','Machi','Aprili','Mei','Juni','Julai','Agosti','Septemba','Oktoba','Novemba','Desemba'];
+  const makundi=[['HARDWARE',Object.keys(HARDWARE_BRANCHES).filter(t=>t!=='matumizibranch')],['PETROL STATIONS',Object.keys(PETROL_BRANCHES)]];
+  const v=(n)=>n?pesa(round2(n)):'—';
+  const z={opening:0,purchasing:0,totalReceived:0,combinedTotal:0,transferSales:0,totalDiscount:0,bankPayment:0,lipaPayment:0,cashSales:0,orderSales:0,salesTotal:0,closing:0};
+  let bilaHistoria=0,mwili='';
+  const jumlaSafu=(l,t,kali)=>`<tr class="stmt-tot"${kali?' style="background:#fde3d3"':''}><td>${l}</td>${['opening','purchasing','totalReceived','combinedTotal','transferSales','totalDiscount','bankPayment','lipaPayment','cashSales','orderSales','salesTotal','closing'].map(f=>`<td class="num">${pesa(round2(t[f]))}</td>`).join('')}</tr>`;
+  for(const [kundi,orodha] of makundi){
+    const kt=Object.assign({},z,Object.fromEntries(Object.keys(z).map(k=>[k,0]))),safu=[];
+    for(const tawi of orodha){
+      const o=await salioLaAwaliLaMwezi(tawi,mwaka,mwezi),M=mizaniYaMwezi(tawi,mwaka,mwezi,o||0);
+      const shughuli=M.purchasing||M.totalReceived||M.totalTransferred||M.salesTotal||o;
+      if(!shughuli)continue;
+      if(o==null)bilaHistoria++;
+      Object.keys(kt).forEach(k=>{kt[k]+=Number(M[k])||0;z[k]+=Number(M[k])||0;});
+      safu.push(`<tr><td>${escH(BRANCHES[tawi]||tawi)}${o==null?' *':''}</td><td class="num">${v(M.opening)}</td><td class="num">${v(M.purchasing)}</td><td class="num">${v(M.totalReceived)}</td><td class="num"><b>${v(M.combinedTotal)}</b></td><td class="num">${v(M.transferSales)}</td><td class="num">${v(M.totalDiscount)}</td><td class="num">${v(M.bankPayment)}</td><td class="num">${v(M.lipaPayment)}</td><td class="num">${v(M.cashSales)}</td><td class="num">${v(M.orderSales)}</td><td class="num"><b>${v(M.salesTotal)}</b></td><td class="num"><b>${pesa(round2(M.closing))}</b></td></tr>`);
+    }
+    if(safu.length)mwili+=`<tr><td colspan="13" style="background:#f3f3f3;font-weight:700;">${kundi}</td></tr>`+safu.join('')+jumlaSafu('Jumla ya '+kundi.toLowerCase(),kt,false);
+  }
+  if(!mwili){toast('ℹ Hakuna shughuli za stock kwa mwezi huo.');return;}
+  const hd=['Tawi / Branch','Opening','Purchases','Received','Total (A)','Transferred','Discount','Bank','Lipa Namba','Cash','Order','Total Out (B)','CLOSING (A−B)'];
+  $('rpPrintBody').innerHTML=`<div class="inv-header" style="margin-bottom:6px;"><div class="inv-logo"></div></div>
+    <div class="stmt-co"><b>NGARA HUDUMA COMPANY LIMITED</b><br>TIN NO. 147-228-198 — VRN NO. 40311079R · P.O. BOX 123 NGARA, KAGERA-TANZANIA<br>MONTHLY CLOSING STOCK — MATAWI YOTE (GENERAL)<br>Mwezi: ${miezi[mwezi-1]} ${mwaka}</div>
+    <div class="table-wrap"><table class="inv-table stmt-tbl" style="font-size:11.5px;"><thead><tr>${hd.map((x,i)=>`<th${i?' class="num"':''}>${x}</th>`).join('')}</tr></thead><tbody>${mwili}${jumlaSafu('JUMLA YA KAMPUNI',z,true)}</tbody></table></div>
+    <div style="font-size:11px;margin-top:8px;">Closing = (Opening + Purchases + Received) − (Transferred + Discount + Bank + Lipa Namba + Cash + Order).${bilaHistoria?` &nbsp; * Tawi hili halina salio la kufunga lililohifadhiwa la mwezi uliotangulia, kwa hiyo Opening imehesabiwa kama 0.`:''}</div>
+    <div class="inv-meta" style="margin-top:22px;">Imeandaliwa na: ${escH(userJina||'')} &nbsp;&nbsp; Sahihi: <span class="inv-dotline" style="min-width:160px;">&nbsp;</span></div>`;
+  $('rpOverlay').dataset.jina=`monthly-closing-matawi-yote-${mwaka}-${String(mwezi).padStart(2,'0')}`;
+  openSheet('rpOverlay');
 }
 async function generateDiscountForm(){
   const tawi=viewingTawi;
@@ -13180,7 +13301,7 @@ function htmlYaDailySales(d){
     if(n==='cash'||n==='mkono'||n==='taslimu'||(!n&&!b))return'';
     const t=b||n;if(t.includes('nmb'))return'NMB';if(/crdb\s*2/.test(t))return'CRDB2';if(t.includes('crdb'))return'CRDB';if(t.includes('lipa'))return'LIPA';
     return(n==='bank'||n==='benki'||b)?'NYINGINE':'';};
-  const jumlaBenki=(b)=>d.pesa.filter(s=>benkiYa(s)===b).reduce((x,s)=>x+(Number(s.jumla)||0)+(Number(s.punguzo)||0),0);
+  const jumlaBenki=(b)=>d.pesa.filter(s=>benkiYa(s)===b).reduce((x,s)=>x+(Number(s.jumla)||0),0);      // the money actually received through that bank (after discount) — not the pre-discount figure
   const bNMB=jumlaBenki('NMB'),bCRDB=jumlaBenki('CRDB'),bCRDB2=jumlaBenki('CRDB2'),bLipa=jumlaBenki('LIPA'),bNyingine=jumlaBenki('NYINGINE');      // TOTAL CASH AMOUNT = the sales paid in real cash: what went through NMB / CRDB / Lipa / another bank is shown on its own row below (the product rows above still list every item in full)
   const mauzoRows=pesaZ.map((s,i)=>`<tr><td class="sn">${i+1}</td><td>${escH(s.jina)}</td><td class="ds-mid">${escH(s.kipimo||'pc')}</td><td class="ds-mid">${s.idadi}</td><td class="num">${fmt0(Number(s.bei_kuuzia)||0)}</td><td class="num">${fmt0((Number(s.jumla)||0)+(Number(s.punguzo)||0))}</td></tr>`);   // the amount BEFORE any discount
   for(let i=pesaZ.length;i<MIN_MAUZO;i++)mauzoRows.push(`<tr><td class="sn">${i+1}</td><td></td><td></td><td></td><td></td><td></td></tr>`);
@@ -13199,7 +13320,7 @@ function htmlYaDailySales(d){
     <tr><td colspan="6" class="ds-kichwa">.....DAILY SALES REPORT FORM ......</td></tr>
     <tr><th>S/N</th><th>PARTICULAR</th><th>UNIT</th><th>QTY</th><th>RATE</th><th>AMOUNT</th></tr>
     ${mauzoRows.join('')}
-    <tr><td></td><td class="ds-jumla">TOTAL CASH AMOUNT</td><td></td><td></td><td colspan="2" class="num ds-jumla">${T(d.jumlaPesa-bNMB-bCRDB-bCRDB2-bLipa-bNyingine)}</td></tr>
+    <tr><td></td><td class="ds-jumla">TOTAL CASH AMOUNT</td><td></td><td></td><td colspan="2" class="num ds-jumla">${T(d.pesa.reduce((x,s)=>x+(Number(s.jumla)||0),0)-bNMB-bCRDB-bCRDB2-bLipa-bNyingine)}</td></tr>
     <tr><td></td><td colspan="3" style="font-weight:700;">NMB</td><td colspan="2" class="num" style="font-weight:700;">${T(bNMB)}</td></tr>
     <tr><td></td><td colspan="3" style="font-weight:700;">CRDB</td><td colspan="2" class="num" style="font-weight:700;">${T(bCRDB)}</td></tr>
     ${bCRDB2>0?`<tr><td></td><td colspan="3" style="font-weight:700;">CRDB 2</td><td colspan="2" class="num" style="font-weight:700;">${T(bCRDB2)}</td></tr>`:''}
