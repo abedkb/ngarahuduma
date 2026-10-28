@@ -481,6 +481,7 @@ table.bin-mafuta tr.inv-total-row td:first-child{background:#F3CBA8!important;}
 table.bin-mafuta,table.bin-mafuta td,table.bin-mafuta th{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
 table.inv-table.mz-muhtasari td.num{white-space:nowrap;min-width:190px;overflow-wrap:normal;}
 table.inv-table.mz-muhtasari td:first-child{width:60%;}
+#mcOverlay table.inv-table td.num{white-space:nowrap;min-width:190px;overflow-wrap:normal;}      /* big money amounts stay on ONE line (never spill into the next row) */
 /* forms: numbers use the form's own font (the app's mono font is much wider), long text wraps, and wide tables (7+ columns) are compacted so nothing runs off the sheet */
 table.inv-table td.num,table.inv-table th.num{font-family:"Times New Roman",Times,serif;font-variant-numeric:tabular-nums;}
 table.inv-table th,table.inv-table td{overflow-wrap:anywhere;}
@@ -3396,10 +3397,11 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       <tr><td style="text-align:right;font-weight:700;">TOTAL OF OPENING STOCK, PURCHASING AMOUNT AND RECEIVED PRODUCT</td><td class="num" id="mcCombinedTotal"></td></tr>
       <tr><td style="text-align:right;">TOTAL DISCOUNTED AMOUNT</td><td class="num" id="mcDiscount"></td></tr>
       <tr><td style="text-align:right;">PAYMENT THROUGH BANKS</td><td class="num" id="mcBankPayment"></td></tr>
+      <tr><td style="text-align:right;">PAYMENT THROUGH LIPA NAMBA</td><td class="num" id="mcLipaPayment"></td></tr>
       <tr><td style="text-align:right;">TOTAL CASH SALES</td><td class="num" id="mcCashSales"></td></tr>
       <tr><td style="text-align:right;">TOTAL ORDER SALES</td><td class="num" id="mcOrderSales"></td></tr>
       <tr><td style="text-align:right;">TOTAL TRANSFERRED SALES</td><td class="num" id="mcTransferSales"></td></tr>
-      <tr><td style="text-align:right;font-weight:700;">TOTAL CASH SALES, ORDER SALES AND TRANSFER SALES</td><td class="num" id="mcSalesTotal"></td></tr>
+      <tr><td style="text-align:right;font-weight:700;">TOTAL DISCOUNT, BANK, LIPA NAMBA, CASH, ORDER AND TRANSFER SALES</td><td class="num" id="mcSalesTotal"></td></tr>
       <tr class="inv-total-row"><td style="text-align:right;">CLOSING BALANCE STOCK</td><td class="num" id="mcClosing"></td></tr>
     </table>
     <div class="inv-print-btn" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
@@ -4066,7 +4068,7 @@ function andaaFomuKwaWhatsApp(el){
     if(kt!==_andaaKitambulisho||!el.classList.contains('open')||typeof fomuKamataPicha!=='function')return;
     try{const f0=jinaLaFomuLiloWazi();if(_fomuTayari&&_fomuTayari.filename===f0&&Date.now()-_fomuTayari.at<600000)return;
       const canvas=await fomuKamataPicha(true);if(!canvas||kt!==_andaaKitambulisho||!el.classList.contains('open'))return;
-      const f=await fomuFaili(canvas);if(f)_fomuTayari={blob:f.blob,ext:f.ext,type:f.type,filename:f0,at:Date.now()};}catch(_e){}
+      const f=await fomuFaili(canvas);if(f)_fomuTayari={faili:f,filename:f0,at:Date.now()};}catch(_e){}
   },1500);
 }
 function closeSheet(id){const el=$(id);if(el)el.classList.remove('open');}
@@ -6672,61 +6674,100 @@ function andaaNembo(sheet){
   return picha;
 }
 const subiriPicha=(picha)=>Promise.all(picha.map(im=>im.decode?im.decode().catch(()=>{}):Promise.resolve()));
-// PRINT: same document as the one on the screen — logo, colours, no buttons
+// PRINT: the form is printed from the SAME picture that is shared, so the paper always shows the whole form exactly as on the screen
+// (printing the live page depends on the browser and printer margins and could cut the left/right edges).
 async function chapishaFomu(){
   const sheet=document.querySelector('.inv-overlay.open .inv-sheet');
   if(sheet)await subiriPicha(andaaNembo(sheet));
-  const kichwaAwali=document.title;document.title=jinaLaFomuLiloWazi();             // "Save as PDF" then suggests a sensible file name
-  const rudisha=()=>{document.title=kichwaAwali;window.removeEventListener('afterprint',rudisha);};
-  window.addEventListener('afterprint',rudisha);
-  window.print();
+  const kichwaAwali=document.title,jina=jinaLaFomuLiloWazi();
+  const asili=()=>{      // fallback: the browser's own printing of the page
+    document.title=jina;
+    const rudisha=()=>{document.title=kichwaAwali;window.removeEventListener('afterprint',rudisha);};
+    window.addEventListener('afterprint',rudisha);window.print();
+  };
+  if(!sheet||sheet.querySelector('.ds-tbl')){asili();return;}      // the one-page daily sales form keeps its own fitting
+  toast('⏳ Inaandaa fomu ya kuchapisha...');
+  let kurasa=null,pana=false;
+  try{const canvas=await fomuKamataPicha(true,true);if(canvas){kurasa=kurasaZaPicha(canvas);pana=!!canvas.pana;}}catch(_e){}
+  if(!kurasa){asili();return;}
+  const fr=document.createElement('iframe');fr.style.cssText='position:fixed;right:0;bottom:0;width:0;height:0;border:0;';
+  document.body.appendChild(fr);
+  const d=fr.contentDocument;
+  d.open();
+  d.write(`<!doctype html><html><head><meta charset="utf-8"><title>${escH(jina)}</title><style>@page{size:A4 ${pana?'landscape':'portrait'};margin:0}html,body{margin:0;padding:0;background:#fff}img{display:block;width:${pana?297:210}mm;height:auto;max-height:${pana?209:296}mm;object-fit:contain;object-position:top;page-break-after:always;break-after:page}img:last-child{page-break-after:auto;break-after:auto}</style></head><body>${kurasa.map(k=>`<img src="${k.toDataURL('image/jpeg',0.92)}">`).join('')}</body></html>`);
+  d.close();
+  try{await Promise.all([...d.images].map(im=>im.decode?im.decode().catch(()=>{}):null));}catch(_e){}
+  document.title=jina;
+  try{fr.contentWindow.focus();fr.contentWindow.print();}catch(_e){fr.remove();document.title=kichwaAwali;asili();return;}
+  setTimeout(()=>{document.title=kichwaAwali;fr.remove();},120000);
 }
-// DOWNLOAD / SHARE: the document is copied off-screen at the same width as the printed page, WITHOUT the buttons, then photographed
-async function fomuKamataPicha(kimya){
+// DOWNLOAD / SHARE / PRINT: the document is copied off-screen at the same width as the printed page, WITHOUT the buttons, then photographed
+async function fomuKamataPicha(kimya,kwaChapa){
   const sheet=document.querySelector('.inv-overlay.open .inv-sheet');
   if(!sheet){if(!kimya)toast('❌ Hakuna fomu iliyo wazi');return null;}
   if(typeof html2canvas==='undefined'){
     if(!kimya)toast('⏳ Inapakia zana ya kupakua...');
     try{await pakiaMaktaba('html2canvas');}catch(e){if(!kimya)toast('❌ Zana ya kupakua haijapakiwa — angalia mtandao wako.');return null;}
   }
+  const overlay=sheet.closest('.inv-overlay'),pana=sheet.classList.contains('rp-sheet');
   const klon=sheet.cloneNode(true);
   klon.querySelectorAll('.inv-close,.inv-print-btn,.fomu-btn').forEach(e=>e.remove());      // the buttons are not part of the document
-  klon.style.cssText=`position:fixed;left:-12000px;top:0;width:${sheet.classList.contains('rp-sheet')?'297mm':'210mm'};max-width:none;margin:0;padding:${sheet.classList.contains('has-dn')?'9mm':'12mm'} 14mm;box-shadow:none;border-radius:0;background:#fff;`;
-  document.body.appendChild(klon);
+  klon.style.cssText=`position:static;width:${pana?'297mm':'210mm'};max-width:none;margin:0;padding:${sheet.classList.contains('has-dn')?'9mm':'12mm'} 14mm;box-shadow:none;border-radius:0;background:#fff;box-sizing:border-box;`;
+  const wrap=document.createElement('div');      // keeps the overlay's own style rules (the merged form hides its footer, etc.)
+  wrap.className=overlay?overlay.className.replace(/\binv-overlay\b|\bopen\b/g,'').trim():'';
+  wrap.style.cssText='position:fixed;left:-12000px;top:0;';
+  wrap.appendChild(klon);document.body.appendChild(wrap);
   let canvas=null;
   try{
     await subiriPicha(andaaNembo(klon));
-    const _w=klon.scrollWidth||794,_h=klon.scrollHeight||1123,_sc=Math.min(3,Math.max(1.5,Math.sqrt(14e6/(_w*_h))));      // as sharp as the phone's memory allows (a very long form gets a little less)
+    const _w=klon.scrollWidth||794,_h=klon.scrollHeight||1123;
+    const _sc=Math.max(1,Math.min((kwaChapa?2000:1400)/_w,Math.sqrt(14e6/(_w*_h))));      // ~1400px across for sharing (small file), ~2000px for paper
+    const kr=klon.getBoundingClientRect();
+    const mapumziko=[...klon.querySelectorAll('tr')].map(e=>(e.getBoundingClientRect().bottom-kr.top)*_sc);      // where a tall form may be cut between pages (never through a row)
     canvas=await html2canvas(klon,{scale:_sc,backgroundColor:'#ffffff',useCORS:true,windowWidth:klon.scrollWidth});
-    canvas.pana=sheet.classList.contains('rp-sheet');        // the wide debt report is landscape; every form and invoice is portrait
+    canvas.pana=pana;canvas.mapumziko=mapumziko;        // the wide debt report is landscape; every form and invoice is portrait
   }catch(e){toast('❌ Imeshindikana kunasa fomu: '+e.message);}
-  klon.remove();
+  wrap.remove();
   return canvas;
 }
-// What is sent: a long form (the bin card, a statement) goes as a PDF — WhatsApp squeezes a tall picture until the numbers blur, but never touches a PDF.
-async function fomuFaili(canvas){
-  if(canvas.height/canvas.width>1.45){
-    try{if(!(window.jspdf&&window.jspdf.jsPDF))await pakiaMaktaba('jspdf');
-      const blob=canvasKwaPdf(canvas).output('blob');if(blob&&blob.size)return{blob,ext:'.pdf',type:'application/pdf'};}catch(_e){}
+// A tall picture is cut into A4 pages, always between two rows
+function kurasaZaPicha(canvas){
+  const pana=!!canvas.pana,W=canvas.width,pageH=Math.floor(W*(pana?210/297:297/210)),pad=Math.round(W*0.04),use=pageH-2*pad;
+  if(canvas.height<=pageH)return[canvas];
+  const br=(canvas.mapumziko||[]).slice().sort((a,b)=>a-b),out=[];
+  for(let y=0;y<canvas.height-2;){
+    let end=Math.min(canvas.height,y+use);
+    if(end<canvas.height){const c=br.filter(b=>b>y+use*0.5&&b<=end);if(c.length)end=Math.floor(c[c.length-1]);}
+    if(end<=y)end=Math.min(canvas.height,y+use);
+    const juu=y>0?pad:0,chini=end<canvas.height?pad:0,k=document.createElement('canvas');
+    k.width=W;k.height=(end-y)+juu+chini;
+    const x=k.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,k.width,k.height);
+    x.drawImage(canvas,0,y,W,end-y,0,juu,W,end-y);
+    out.push(k);y=end;
   }
-  const blob=await new Promise(r=>canvas.toBlob(r,'image/png'));
-  return blob?{blob,ext:'.png',type:'image/png'}:null;
+  return out;
 }
-// a tall canvas becomes a PDF of A4 pages
+// What is sent: small JPEG pictures (one per A4 page) — like the cards — not a heavy PDF. Returns [{blob,ext,type}]
+async function fomuFaili(canvas){
+  const out=[];
+  for(const k of kurasaZaPicha(canvas)){
+    const c=document.createElement('canvas');c.width=k.width;c.height=k.height;
+    const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(k,0,0);
+    const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',0.85));
+    if(!blob)return null;out.push({blob,ext:'.jpg',type:'image/jpeg'});
+  }
+  return out.length?out:null;
+}
+// the pages become a PDF of A4 pages (only for "Pakua")
 function canvasKwaPdf(canvas){
   const {jsPDF}=window.jspdf,wide=!!canvas.pana;
   const pdf=new jsPDF({orientation:wide?'l':'p',unit:'mm',format:'a4'});
-  const pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight(),mmKwaPx=pw/canvas.width,pxKwaUkurasa=Math.floor(ph/mmKwaPx);
-  for(let y=0,kwanza=true;y<canvas.height;y+=pxKwaUkurasa){
-    const h=Math.min(pxKwaUkurasa,canvas.height-y),kipande=document.createElement('canvas');
-    kipande.width=canvas.width;kipande.height=h;kipande.getContext('2d').drawImage(canvas,0,y,canvas.width,h,0,0,canvas.width,h);
-    if(!kwanza)pdf.addPage();kwanza=false;
-    pdf.addImage(kipande.toDataURL('image/png'),'PNG',0,0,pw,h*mmKwaPx);
-  }
+  const pw=pdf.internal.pageSize.getWidth();
+  kurasaZaPicha(canvas).forEach((k,i)=>{if(i)pdf.addPage();pdf.addImage(k.toDataURL('image/jpeg',0.9),'JPEG',0,0,pw,k.height*pw/k.width);});
   return pdf;
 }
 async function pakuaFomu(){
-  const canvas=await fomuKamataPicha();if(!canvas)return;
+  const canvas=await fomuKamataPicha(false,true);if(!canvas)return;
   const filename=jinaLaFomuLiloWazi();
   try{                                              // best: a PDF of the exact document (A4)
     if(!(window.jspdf&&window.jspdf.jsPDF)){toast('⏳ Inapakia zana ya PDF...');await pakiaMaktaba('jspdf');}
@@ -6734,7 +6775,7 @@ async function pakuaFomu(){
     toast('✅ Fomu (PDF) imepakuliwa!');return;
   }catch(e){/* no PDF tool (no internet?) — give the picture instead */}
   const a=document.createElement('a');
-  a.href=canvas.toDataURL('image/png');a.download=filename+'.png';
+  a.href=kurasaZaPicha(canvas)[0].toDataURL('image/jpeg',0.9);a.download=filename+'.jpg';
   document.body.appendChild(a);a.click();document.body.removeChild(a);
   toast('✅ Fomu imepakuliwa (picha) — PDF haikupatikana.');
 }
@@ -6747,68 +6788,66 @@ function waIntlPhone(phone){
 // "Shiriki (WhatsApp)". On a PHONE the share sheet is the dependable way: it hands the picture straight to WhatsApp.
 // The browser only allows the share sheet right after a tap, but making the picture takes a few seconds — so when the phone
 // refuses, the picture is kept ready and the next tap on Shiriki sends it at once.
-let _fomuTayari=null;      // {blob,filename,at}
+let _fomuTayari=null;      // {faili:[{blob,ext,type}],filename,at}
 const niSimu=()=>/Android|iPhone|iPad|iPod/i.test(navigator.userAgent||'')||(navigator.maxTouchPoints>1&&/Macintosh/.test(navigator.userAgent||''));
 async function shirikiFomu(){
   const sheet=document.querySelector('.inv-overlay.open .inv-sheet');
   const waPhone=sheet?sheet.dataset.waPhone:'';
   const waKiungo=waPhone?`https://wa.me/${waIntlPhone(waPhone)}`:'https://api.whatsapp.com/send';
-  const openWaChat=()=>{
-    const w=window.open(waKiungo,'_blank');
-    return !!w;
-  };
-  const pakua=(blob,filename,ext)=>{
-    const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename+(ext||'.png');
-    document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),4000);
-  };
-  const filename0=jinaLaFomuLiloWazi();
-  let blob,filename=filename0,tayariSasa=false,ext='.png',aina='image/png';
-  if(_fomuTayari&&_fomuTayari.filename===filename0&&Date.now()-_fomuTayari.at<600000){blob=_fomuTayari.blob;ext=_fomuTayari.ext||'.png';aina=_fomuTayari.type||'image/png';tayariSasa=true;}      // second tap: the picture is already made
+  const openWaChat=()=>{const w=window.open(waKiungo,'_blank');return !!w;};
+  const filename0=jinaLaFomuLiloWazi(),filename=filename0;
+  let faili,tayariSasa=false;
+  if(_fomuTayari&&_fomuTayari.filename===filename0&&Date.now()-_fomuTayari.at<600000){faili=_fomuTayari.faili;tayariSasa=true;}      // second tap: the picture is already made
   else{
     const canvas=await fomuKamataPicha();if(!canvas)return;
-    const f=await fomuFaili(canvas);blob=f&&f.blob;if(f){ext=f.ext;aina=f.type;}
-    if(!blob){toast('❌ Picha ya fomu haikutengenezwa (simu haina nafasi ya kutosha?). Jaribu tena au tumia "Pakua".');return;}
+    faili=await fomuFaili(canvas);
+    if(!faili){toast('❌ Picha ya fomu haikutengenezwa (simu haina nafasi ya kutosha?). Jaribu tena au tumia "Pakua".');return;}
   }
-  const file=new File([blob],filename+ext,{type:aina});
+  const jinaYa=(i)=>filename+(faili.length>1?'-ukurasa'+(i+1):'')+faili[i].ext;
+  const files=faili.map((f,i)=>new File([f.blob],jinaYa(i),{type:f.type}));
   const simu=niSimu();
+  const hifadhi=()=>{_fomuTayari={faili,filename:filename0,at:Date.now()};};
 
   // 1) Phone: the native share sheet — the form goes straight into WhatsApp.
-  const shareInawezekana=!!(navigator.canShare&&navigator.share&&navigator.canShare({files:[file]}));
+  const shareInawezekana=!!(navigator.canShare&&navigator.share&&navigator.canShare({files}));
   if(simu&&shareInawezekana){
-    try{await navigator.share({files:[file],title:filename});_fomuTayari=null;return;}
+    try{await navigator.share({files,title:filename});_fomuTayari=null;return;}
     catch(e){
-      if(e.name==='AbortError'){_fomuTayari={blob,ext,type:aina,filename:filename0,at:Date.now()};return;}      // the person closed the sheet
+      if(e.name==='AbortError'){hifadhi();return;}      // the person closed the sheet
       if(!tayariSasa){      // the phone wants a fresh tap: keep the picture and ask for one more tap
-        _fomuTayari={blob,ext,type:aina,filename:filename0,at:Date.now()};
+        hifadhi();
         toast('✅ Fomu iko tayari — bonyeza "Shiriki (WhatsApp)" mara moja zaidi ili kuituma.');return;
       }
     }
   }
-  // 2) Computer (or a phone without a share sheet): copy the picture, open WhatsApp, paste.
-  if(!simu&&navigator.clipboard&&window.ClipboardItem){
+  // 2) Computer: copy the picture, open WhatsApp, paste (a one-page form; the clipboard only takes PNG).
+  if(!simu&&faili.length===1&&navigator.clipboard&&window.ClipboardItem){
     try{
-      if(ext!=='.png')throw new Error('pdf');await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
+      const bm=await createImageBitmap(faili[0].blob),c=document.createElement('canvas');c.width=bm.width;c.height=bm.height;c.getContext('2d').drawImage(bm,0,0);
+      const png=await new Promise(r=>c.toBlob(r,'image/png'));
+      await navigator.clipboard.write([new ClipboardItem({'image/png':png})]);
       openWaChat();
       toast(waPhone?'✅ Fomu imenakiliwa na WhatsApp imefunguliwa — bandika (Ctrl+V) kwenye ujumbe kisha "Tuma".':'✅ Fomu imenakiliwa — fungua mazungumzo unayotaka na ubandike (Ctrl+V) kisha "Tuma".');
       return;
     }catch(e){/* this browser does not allow copying a picture — carry on */}
   }
   // 3) Last resort — works on every device: a small window with two buttons, each pressed by the person (a phone never blocks a tap):
-  //    save the picture, then open WhatsApp and attach it (paperclip → Gallery/Files).
-  waMbadala(blob,filename+ext,waKiungo);
+  //    save the picture(s), then open WhatsApp and attach them (paperclip → Gallery/Files).
+  waMbadala(faili.map((f,i)=>({blob:f.blob,name:jinaYa(i)})),waKiungo);
 }
-function waMbadala(blob,filename,kiungo){
+function waMbadala(mafaili,kiungo){
   let m=$('waMbadala');if(m)m.remove();
+  const wengi=mafaili.length>1;
   m=document.createElement('div');m.id='waMbadala';
   m.style.cssText='position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;padding:16px;';
   m.innerHTML=`<div style="background:#fff;color:#1d2733;border-radius:12px;max-width:380px;width:100%;padding:18px;font-family:inherit;box-shadow:0 10px 40px rgba(0,0,0,.4);">
     <div style="font-weight:700;font-size:16px;margin-bottom:6px;">📤 Tuma kwa WhatsApp</div>
-    <div style="font-size:13px;line-height:1.5;margin-bottom:14px;">Simu hii haifungui WhatsApp moja kwa moja. Fanya hatua mbili:<br><b>1.</b> Bonyeza "Pakua picha".<br><b>2.</b> Bonyeza "Fungua WhatsApp", kisha 📎 → Picha/Faili → chagua fomu.</div>
-    <button id="waPakua" style="width:100%;padding:12px;margin-bottom:8px;border:0;border-radius:8px;background:#E8590C;color:#fff;font-weight:700;font-size:14px;">📥 1. Pakua picha</button>
+    <div style="font-size:13px;line-height:1.5;margin-bottom:14px;">Simu hii haifungui WhatsApp moja kwa moja. Fanya hatua mbili:<br><b>1.</b> Bonyeza "Pakua ${wengi?'picha ('+mafaili.length+')':'picha'}".<br><b>2.</b> Bonyeza "Fungua WhatsApp", kisha 📎 → Picha/Faili → chagua ${wengi?'picha zote':'fomu'}.</div>
+    <button id="waPakua" style="width:100%;padding:12px;margin-bottom:8px;border:0;border-radius:8px;background:#E8590C;color:#fff;font-weight:700;font-size:14px;">📥 1. Pakua ${wengi?'picha ('+mafaili.length+')':'picha'}</button>
     <a id="waFungua" href="${kiungo}" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none;padding:12px;margin-bottom:8px;border-radius:8px;background:#25D366;color:#fff;font-weight:700;font-size:14px;">💬 2. Fungua WhatsApp</a>
     <button id="waFunga" style="width:100%;padding:10px;border:1px solid #c9d2de;border-radius:8px;background:#fff;color:#1d2733;font-size:13px;">Funga</button></div>`;
   document.body.appendChild(m);
-  $('waPakua').onclick=()=>{const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),4000);$('waPakua').textContent='✅ Imepakuliwa';};
+  $('waPakua').onclick=()=>{mafaili.forEach((f,i)=>setTimeout(()=>{const url=URL.createObjectURL(f.blob),a=document.createElement('a');a.href=url;a.download=f.name;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),4000);},i*400));$('waPakua').textContent='✅ Imepakuliwa';};
   $('waFunga').onclick=()=>m.remove();
 }
 $('tfClose') && $('tfClose').addEventListener('click',()=>closeSheet('tfOverlay'));
@@ -8724,14 +8763,20 @@ function mizaniYaMwezi(tawi,mwaka,mwezi,opening){
   const transferredByOfficer={};transferred.forEach(u=>{const n=u.jina_mpokeaji||u.jina_muombaji||(BRANCHES[u.tawi_muombaji]||u.tawi_muombaji)||'(Haijulikani)';transferredByOfficer[n]=(transferredByOfficer[n]||0)+(Number(u.jumla)||0);});
   const totalTransferred=transferred.reduce((a,u)=>a+(Number(u.jumla)||0),0);
   const combinedTotal=opening+purchasing+totalReceived;
-  const monthMauzo=allMauzo.filter(s=>s.tawi===tawi&&inMonth(s.tarehe));
+  const monthMauzo=allMauzo.filter(s=>s.tawi===tawi&&!s.deleted_at&&!s._pending&&inMonth(s.tarehe));
   const totalDiscount=monthMauzo.reduce((a,s)=>a+(Number(s.punguzo)||0),0);
-  const bankPayment=monthMauzo.filter(s=>s.njia_ya_malipo==='Bank').reduce((a,s)=>a+(Number(s.jumla)||0),0);
-  const cashSales=monthMauzo.filter(s=>['Mkono','Duka'].includes(s.chanzo)&&s.njia_ya_malipo==='Cash').reduce((a,s)=>a+(Number(s.jumla)||0),0);
-  const orderSales=monthMauzo.filter(s=>s.chanzo==='Serikali').reduce((a,s)=>a+(Number(s.jumla)||0),0);      // ORDER = government / company sales
+  // every sale lands in exactly ONE line: Order (government) / Lipa Namba / a bank (NMB, CRDB…) / cash — tolerant of the older ways the method was saved
+  const njiaYa=(s)=>{
+    if(s.chanzo==='Serikali')return'order';
+    const n=String(s.njia_ya_malipo||'').trim().toLowerCase(),b=String(s.benki||'').trim().toLowerCase();
+    if(n==='cash'||n==='mkono'||n==='taslimu'||(!n&&!b))return'cash';
+    return(b||n).includes('lipa')?'lipa':'bank';
+  };
+  const jumlaYa=(k)=>monthMauzo.filter(s=>njiaYa(s)===k).reduce((a,s)=>a+(Number(s.jumla)||0),0);
+  const bankPayment=jumlaYa('bank'),lipaPayment=jumlaYa('lipa'),cashSales=jumlaYa('cash'),orderSales=jumlaYa('order');      // ORDER = government / company sales
   const transferSales=totalTransferred;      // goods handed to other branches leave this stock — exactly like the paper form
-  const salesTotal=totalDiscount+bankPayment+cashSales+orderSales+transferSales;
-  return{opening,purchasing,totalReceived,receivedByOfficer,totalTransferred,transferredByOfficer,combinedTotal,totalDiscount,bankPayment,cashSales,orderSales,transferSales,salesTotal,closing:combinedTotal-salesTotal,nReceived:received.length,nTransferred:transferred.length};
+  const salesTotal=totalDiscount+bankPayment+lipaPayment+cashSales+orderSales+transferSales;
+  return{opening,purchasing,totalReceived,receivedByOfficer,totalTransferred,transferredByOfficer,combinedTotal,totalDiscount,bankPayment,lipaPayment,cashSales,orderSales,transferSales,salesTotal,closing:combinedTotal-salesTotal,nReceived:received.length,nTransferred:transferred.length};
 }
 async function generateMonthlyClosingForm(){
   const tawi=viewingTawi;
@@ -8757,7 +8802,7 @@ async function generateMonthlyClosingForm(){
   }catch(e){opening=parseFloat($('mc-salio-mwenyewe').value)||0;}
 
   const M=mizaniYaMwezi(tawi,mwaka,mwezi,opening);
-  const {purchasing,receivedByOfficer,transferredByOfficer,combinedTotal,totalDiscount,bankPayment,cashSales,orderSales,transferSales,salesTotal,closing}=M;
+  const {purchasing,receivedByOfficer,transferredByOfficer,combinedTotal,totalDiscount,bankPayment,lipaPayment,cashSales,orderSales,transferSales,salesTotal,closing}=M;
 
   try{
     const existingRow=await DB.get('stock_closing_balance',`tawi=eq.${tawi}&mwaka=eq.${mwaka}&mwezi=eq.${mwezi}`);
@@ -8777,7 +8822,7 @@ async function generateMonthlyClosingForm(){
   ).join(''):'<tr><td>—</td><td>—</td></tr>';
   $('mcCombinedTotal').textContent=pesa(combinedTotal);
   $('mcDiscount').textContent=pesa(totalDiscount);
-  $('mcBankPayment').textContent=pesa(bankPayment);
+  $('mcBankPayment').textContent=pesa(bankPayment);$('mcLipaPayment').textContent=pesa(lipaPayment);
   $('mcCashSales').textContent=pesa(cashSales);
   $('mcOrderSales').textContent=pesa(orderSales);
   $('mcTransferSales').textContent=pesa(transferSales);
