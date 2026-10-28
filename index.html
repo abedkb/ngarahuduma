@@ -6695,7 +6695,7 @@ async function chapishaFomu(){
   document.body.appendChild(fr);
   const d=fr.contentDocument;
   d.open();
-  d.write(`<!doctype html><html><head><meta charset="utf-8"><title>${escH(jina)}</title><style>@page{size:A4 ${pana?'landscape':'portrait'};margin:0}html,body{margin:0;padding:0;background:#fff}img{display:block;width:${pana?297:210}mm;height:auto;max-height:${pana?209:296}mm;object-fit:contain;object-position:top;page-break-after:always;break-after:page}img:last-child{page-break-after:auto;break-after:auto}</style></head><body>${kurasa.map(k=>`<img src="${k.toDataURL('image/jpeg',0.92)}">`).join('')}</body></html>`);
+  d.write(`<!doctype html><html><head><meta charset="utf-8"><title>${escH(jina)}</title><style>@page{size:A4 ${pana?'landscape':'portrait'};margin:8mm}html,body{margin:0;padding:0;background:#fff}img{display:block;width:100%;height:auto;max-height:${pana?193:279}mm;object-fit:contain;object-position:top center;page-break-after:always;break-after:page}img:last-child{page-break-after:auto;break-after:auto}</style></head><body>${kurasa.map(k=>`<img src="${k.toDataURL('image/jpeg',0.92)}">`).join('')}</body></html>`);
   d.close();
   try{await Promise.all([...d.images].map(im=>im.decode?im.decode().catch(()=>{}):null));}catch(_e){}
   document.title=jina;
@@ -6748,8 +6748,17 @@ function kurasaZaPicha(canvas){
   }
   return out;
 }
+// A form that fits on one page is shared on a full A4-shaped sheet (white below the form), so printing the picture from the phone/Photos
+// ("Full page", Portrait) fills the paper exactly instead of being stretched or cropped.
+function kwaUkubwaWaA4(canvas){
+  const W=canvas.width,H=Math.round(W*(canvas.pana?210/297:297/210));
+  if(canvas.height>=H)return canvas;
+  const c=document.createElement('canvas');c.width=W;c.height=H;
+  const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,W,H);x.drawImage(canvas,0,0);c.pana=canvas.pana;return c;
+}
 // What is sent: ONE small JPEG of the whole form (like the cards) — never several pictures. Returns [{blob,ext,type}]
 async function fomuFaili(canvas){
+  canvas=kwaUkubwaWaA4(canvas);
   const c=document.createElement('canvas');c.width=canvas.width;c.height=canvas.height;
   const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(canvas,0,0);
   const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',0.88));
@@ -6801,7 +6810,7 @@ async function shirikiFomu(){
   // 1) Computer: the WHOLE form is copied as ONE picture the moment the button is pressed, then WhatsApp opens — just paste (Ctrl+V) and send.
   if(!simu&&navigator.clipboard&&window.ClipboardItem){
     toast('⏳ Inaandaa picha ya fomu...');
-    const pngP=(async()=>{const canvas=await fomuKamataPicha(true);if(!canvas)throw new Error('picha');const b=await new Promise(r=>canvas.toBlob(r,'image/png'));if(!b)throw new Error('picha');return b;})();
+    const pngP=(async()=>{const canvas=await fomuKamataPicha(true);if(!canvas)throw new Error('picha');const b=await new Promise(r=>kwaUkubwaWaA4(canvas).toBlob(r,'image/png'));if(!b)throw new Error('picha');return b;})();
     try{      // handed over as a promise so the copy still counts as the button press while the picture is being made
       await navigator.clipboard.write([new ClipboardItem({'image/png':pngP})]);
       toast(waPhone?'✅ Fomu imenakiliwa — WhatsApp inafunguka. Bandika (Ctrl+V) kwenye ujumbe kisha "Tuma".':'✅ Fomu imenakiliwa — WhatsApp inafunguka. Fungua mazungumzo, bandika (Ctrl+V) kisha "Tuma".');
