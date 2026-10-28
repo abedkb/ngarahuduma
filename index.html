@@ -484,6 +484,7 @@ table.inv-table.mz-muhtasari td.num{white-space:nowrap;min-width:190px;overflow-
 table.inv-table.mz-muhtasari td:first-child{width:60%;}
 table.inv-table.mm-tbl td,table.inv-table.mm-tbl th{height:6.2mm;padding:3px 8px;font-size:13px;}table.inv-table.mm-tbl td.num{white-space:nowrap;}
 table.inv-table.mm-sum td.num{white-space:nowrap;min-width:190px;}
+#ofOverlay table.inv-table td.num,#ofOverlay table.inv-table th{white-space:nowrap;overflow-wrap:normal;}
 #mcOverlay table.inv-table td.num{white-space:nowrap;min-width:190px;overflow-wrap:normal;}      /* big money amounts stay on ONE line (never spill into the next row) */
 /* forms: numbers use the form's own font (the app's mono font is much wider), long text wraps, and wide tables (7+ columns) are compacted so nothing runs off the sheet */
 table.inv-table td.num,table.inv-table th.num{font-family:"Times New Roman",Times,serif;font-variant-numeric:tabular-nums;}
@@ -3521,9 +3522,9 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
     </div>
     <div class="inv-field">Store name: <span class="inv-dotline" id="ofStore"></span></div>
     <table class="inv-table">
-      <thead><tr><th>S/N</th><th>Item</th><th>Description</th><th class="num">Rate</th><th class="num">Amount</th></tr></thead>
+      <thead><tr><th>S/N</th><th class="kc">Customer / Project</th><th>Item</th><th>Description</th><th class="num">Rate</th><th class="num">Amount</th></tr></thead>
       <tbody id="ofItemsBody"></tbody>
-      <tr class="inv-total-row"><td colspan="4" style="text-align:right;">TOTAL AMOUNT</td><td class="num" id="ofTotal"></td></tr>
+      <tr class="inv-total-row"><td colspan="4" style="text-align:right;" id="ofTotalLabel">TOTAL AMOUNT</td><td class="num" id="ofTotal"></td></tr>
     </table>
     <div class="inv-meta" style="margin-top:22px;">
       Procurement Officer: <span class="inv-dotline" contenteditable="true" style="min-width:200px;"></span>
@@ -5584,31 +5585,41 @@ function renderFomuOrder(){
   const tbody=$('tbody-fomu-order');if(!tbody)return;
   const ft=fomuTarehe('ft-or');if(!ft.ok){tbody.innerHTML=safuTupu(5,'Chagua tarehe ya kuanzia na ya mwisho ili kuona orodha.');return;}
   const orodha=filterByTawi(allMaombiStock).filter(m=>m.aina_chanzo==='Bidhaa'&&m.hali==='Imethibitishwa'&&!String(m.invoice_no||'').startsWith('ZG-')&&fomuNdani(skSiku(m),ft));
-  const vikundi={};orodha.forEach(m=>{(vikundi[_orderKundi(m)]=vikundi[_orderKundi(m)]||[]).push(m);});
+  const vikundi={};orodha.forEach(m=>{const k=skSiku(m)+'|'+m.tawi;(vikundi[k]=vikundi[k]||[]).push(m);});
   const safu=Object.entries(vikundi).sort((a,b)=>skSiku(b[1][0]).localeCompare(skSiku(a[1][0]))||String(b[1][0].created_at||'').localeCompare(String(a[1][0].created_at||''))).slice(0,100);
   tbody.innerHTML=safu.length?safu.map(([k,l])=>{
     const m=l[0],jumla=l.reduce((a,x)=>a+(Number(x.jumla_stoo)||(Number(x.idadi)||0)*(Number(x.bei_stoo)||0)),0);
-    const vitu=l.length===1?escH(m.jina):`${escH(m.jina)} +${l.length-1} zaidi`;
-    return`<tr><td>${skSiku(m)}</td><td>${escH(m.mteja||'')}${m.mradi?' — '+escH(m.mradi):''}</td><td>${vitu}</td><td class="num">${pesa(jumla)}</td><td><button class="btn sm secondary" onclick="chapishaOrderForm('${k}')">🖨 Fomu</button></td></tr>`;
+    const vitu=l.length===1?escH(m.jina):`${escH(m.jina)} +${l.length-1} zaidi`,wt=[...new Set(l.map(x=>[x.mteja,x.mradi].filter(Boolean).join(' — ')))],mt=wt.length===1?escH(wt[0]):`${escH(wt[0])} +${wt.length-1} zaidi`;
+    return`<tr><td>${skSiku(m)}</td><td>${mt}</td><td>${vitu}</td><td class="num">${pesa(jumla)}</td><td><button class="btn sm secondary" onclick="chapishaOrderSiku('${m.tawi}','${skSiku(m)}')">🖨 Fomu ya Siku</button></td></tr>`;
   }).join(''):safuTupu(5,'Bado hakuna order zilizothibitishwa.');
 }
-function chapishaOrderForm(kundi){
-  const l=_orderLines(kundi);if(!l.length){toast('❌ Order haikupatikana');return;}
-  const m=l[0];
-  $('ofNo').textContent=m.namba_agizo||'';
+function chapishaOrderForm(kundi){chapishaOrderKundi(_orderLines(kundi));}
+// ONE daily order form: every order a branch gave out on that date, each line with its customer / project
+function chapishaOrderSiku(tawi,siku){
+  chapishaOrderKundi(filterByTawi(allMaombiStock).filter(m=>m.aina_chanzo==='Bidhaa'&&m.hali==='Imethibitishwa'&&!String(m.invoice_no||'').startsWith('ZG-')&&m.tawi===tawi&&skSiku(m)===siku)
+    .sort((a,b)=>String(_orderKundi(a)).localeCompare(String(_orderKundi(b)))||String(a.created_at||'').localeCompare(String(b.created_at||''))),true);
+}
+function chapishaOrderKundi(l,siku){
+  if(!l.length){toast('❌ Order haikupatikana');return;}
+  const m=l[0],wateja=[...new Set(l.map(x=>[x.mteja,x.mradi].filter(Boolean).join(' ')))],nyingi=!!siku&&(wateja.length>1||new Set(l.map(_orderKundi)).size>1);
+  const namba=[...new Set(l.map(x=>x.namba_agizo).filter(Boolean))];
+  $('ofNo').textContent=nyingi?'':(namba.length===1?namba[0]:namba.join(', '));
   $('ofDate').textContent=skSiku(m).split('-').reverse().join('/');
-  $('ofTo').textContent=[m.mteja,m.mradi].filter(Boolean).join(' ');
-  $('ofAddress').textContent='';$('ofTin').textContent='';$('ofPhone').textContent=m.simu_mteja||'';
+  $('ofTo').textContent=wateja.length===1?wateja[0]:'Various customers (see table)';
+  $('ofAddress').textContent='';$('ofTin').textContent='';$('ofPhone').textContent=wateja.length===1?(m.simu_mteja||''):'';
   $('ofStore').textContent=BRANCHES[m.tawi]||m.tawi;
-  let jumla=0;
+  $('ofItemsBody').parentElement.classList.toggle('kundi',nyingi);
+  $('ofTotalLabel').colSpan=nyingi?5:4;
+  let jumla=0,prev=null;
   const safu=l.map((x,i)=>{
     const a=(Number(x.jumla_stoo)||(Number(x.idadi)||0)*(Number(x.bei_stoo)||0));jumla+=a;
-    return`<tr><td>${i+1}</td><td>${escH(x.kipimo_mteja||x.kipimo||'pc')} ${x.idadi}</td><td>${escH(x.jina)}</td><td class="num">${pesa(x.bei_stoo)}</td><td class="num">${pesa(a)}</td></tr>`;
+    const mt=[x.mteja,x.mradi].filter(Boolean).join(' — ')+(x.namba_agizo?' (No. '+x.namba_agizo+')':''),onyesha=mt!==prev;prev=mt;
+    return`<tr><td>${i+1}</td><td class="kc">${onyesha?escH(mt):'″'}</td><td>${escH(x.kipimo_mteja||x.kipimo||'pc')} ${x.idadi}</td><td>${escH(x.jina)}</td><td class="num">${pesa(x.bei_stoo)}</td><td class="num">${pesa(a)}</td></tr>`;
   });
-  for(let i=l.length;i<Math.max(20,l.length);i++)safu.push(`<tr><td>${i+1}</td><td>&nbsp;</td><td></td><td></td><td></td></tr>`);   // blank lines like the paper form (20 lines)
+  for(let i=l.length;i<Math.max(20,l.length);i++)safu.push(`<tr><td>${i+1}</td><td class="kc"></td><td>&nbsp;</td><td></td><td></td><td></td></tr>`);   // blank lines like the paper form (20 lines)
   $('ofItemsBody').innerHTML=safu.join('');
   $('ofTotal').textContent=pesa(jumla);
-  const ov=$('ofOverlay');ov.dataset.jina='order-form-'+String(m.mteja||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'-'+skSiku(m);
+  const ov=$('ofOverlay');ov.dataset.jina=siku?`order-form-${m.tawi}-${skSiku(m)}`:'order-form-'+String(m.mteja||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'-'+skSiku(m);
   setWaPhone('ofOverlay',ADMIN_PHONE);
   openSheet('ofOverlay');
 }
