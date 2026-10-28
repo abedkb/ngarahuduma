@@ -482,6 +482,8 @@ table.bin-mafuta{font-size:13.5px!important;}table.bin-mafuta th{font-size:12.5p
 table.bin-mafuta,table.bin-mafuta td,table.bin-mafuta th{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
 table.inv-table.mz-muhtasari td.num{white-space:nowrap;min-width:190px;overflow-wrap:normal;}
 table.inv-table.mz-muhtasari td:first-child{width:60%;}
+table.inv-table.mm-tbl td,table.inv-table.mm-tbl th{height:6.2mm;padding:3px 8px;font-size:13px;}table.inv-table.mm-tbl td.num{white-space:nowrap;}
+table.inv-table.mm-sum td.num{white-space:nowrap;min-width:190px;}
 #mcOverlay table.inv-table td.num{white-space:nowrap;min-width:190px;overflow-wrap:normal;}      /* big money amounts stay on ONE line (never spill into the next row) */
 /* forms: numbers use the form's own font (the app's mono font is much wider), long text wraps, and wide tables (7+ columns) are compacted so nothing runs off the sheet */
 table.inv-table td.num,table.inv-table th.num{font-family:"Times New Roman",Times,serif;font-variant-numeric:tabular-nums;}
@@ -2283,7 +2285,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
           <tbody id="tbody-fomu-receiving"><tr class="loading-row"><td colspan="6">Inapakia...</td></tr></tbody>
         </table></div></div>
       </div>
-      <div class="section"><div class="section-header"><h3>📝 Fomu ya Order (Order Form)</h3><span style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:11px;color:var(--a-muted);">Kuanzia <input type="date" id="ft-or-k" onchange="renderAllFomu()" style="width:auto"/> Hadi <input type="date" id="ft-or-h" onchange="renderAllFomu()" style="width:auto"/></span></div>
+      <div class="section"><div class="section-header"><h3>📝 Fomu ya Order (Order Form)</h3><span style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:11px;color:var(--a-muted);">Kuanzia <input type="date" id="ft-or-k" onchange="renderAllFomu()" style="width:auto"/> Hadi <input type="date" id="ft-or-h" onchange="renderAllFomu()" style="width:auto"/> <button class="btn sm gold" onclick="fomuChapishaOrderZote()">🖨 Chapisha Zote</button></span></div>
         <div class="section-body"><div class="table-wrap"><table>
           <thead><tr><th>Tarehe</th><th>Mteja / Mradi</th><th>Bidhaa</th><th class="num">Jumla</th><th>Fomu</th></tr></thead>
           <tbody id="tbody-fomu-order"><tr class="loading-row"><td colspan="5">Inapakia...</td></tr></tbody>
@@ -2360,6 +2362,15 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
           <div class="field"><label>Hadi</label><input type="date" id="fm-mz-hadi"/></div>
         </div>
         <div class="controls"><button class="btn gold" onclick="fungaCashExpFomu()">🖨 Tengeneza Fomu</button></div>
+      </div>
+    </div>
+      <div class="section" id="fomuMweziMmSection" style="margin-top:16px;display:none;"><div class="section-header"><h3>📅 Monthly Mapato &amp; Matumizi</h3></div>
+      <div class="section-body">
+        <p style="font-size:12.5px;color:var(--a-muted);margin-bottom:10px;">Muhtasari wa mwezi mzima: kwa kila siku — jumla ya Mapato, jumla ya Matumizi na Balance, pamoja na jumla za mwezi.</p>
+        <div class="form-grid">
+          <div class="field"><label>Mwezi</label><input type="month" id="fm-mm-mwezi"/></div>
+        </div>
+        <div class="controls"><button class="btn gold" onclick="tengenezaFomuMwezi()">🖨 Fomu ya Kila Siku</button> <button class="btn gold" onclick="tengenezaFomuMweziFunga()">🖨 Fomu ya Kufunga Mwezi (Muhtasari)</button></div>
       </div>
     </div>
   </section>
@@ -2507,6 +2518,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
           </div>
         </div>
       </div>
+      <div class="section gm-kadi" id="gmKadi-ordertoa"><div class="section-header"><h3>📤 Order Zilizotolewa (kwa Matawi)</h3></div><div class="section-body"><div class="controls" style="align-items:flex-end;flex-wrap:wrap;gap:10px;"><div class="field" style="margin:0;"><label>Kuanzia</label><input type="date" id="gmrp-ordertoa-k" onchange="gmRipotiOtomatiki('ordertoa')"/></div><div class="field" style="margin:0;"><label>Hadi</label><input type="date" id="gmrp-ordertoa-h" onchange="gmRipotiOtomatiki('ordertoa')"/></div><div class="field" style="margin:0;"><label>Chagua tawi</label><select id="gmrp-ordertoa-t" style="width:auto;min-width:170px"><option value="">— Chagua tawi —</option></select></div><button class="btn gold" onclick="gmRipoti('ordertoa')">🖨 Tengeneza Fomu</button><button class="btn sm secondary" onclick="gmOrdertoaMwezi()">📅 Mwezi huu</button></div><p style="font-size:12px;color:var(--a-muted);margin:8px 0 0;">Order zote zilizothibitishwa na matawi kwa kipindi ulichochagua — chagua "Matawi yote" kuona zote kwa pamoja.</p></div></div>
       <div class="section gm-kadi" id="gmKadi-ordertawi"><div class="section-header"><h3>🏬 Muhtasari wa Order kwa Kila Tawi</h3><input type="month" id="gmsum-ordertawi-m" onchange="gmOrderTawi()" style="width:auto"/></div><div class="section-body" id="gmSum-ordertawi"></div></div>
       <div class="section gm-jed" id="skTrackerSection">
         <div class="section-header"><h3>⏳ Order Zangu — Hali ya Kila Order</h3></div>
@@ -3202,6 +3214,74 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       <tr><td><b>Jumla ya Mapato</b></td><td class="num" id="mzTotalIn"></td></tr>
       <tr><td>Matumizi</td><td class="num" id="mzTotalOut"></td></tr>
       <tr class="inv-total-row"><td>Balance</td><td class="num" id="mzFinalBalance"></td></tr>
+    </table>
+    <div class="inv-print-btn" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="fomu-btn primary" onclick="chapishaFomu()">🖨 Chapisha / Print</button>
+      <button class="fomu-btn secondary" onclick="pakuaFomu()">⬇️ Pakua</button>
+      <button class="fomu-btn secondary" onclick="shirikiFomu()">📤 Shiriki (WhatsApp)</button>
+    </div>
+  </div>
+</div>
+
+<!-- MONTHLY MAPATO & MATUMIZI SUMMARY -->
+<div class="inv-overlay" id="mmOverlay">
+  <div class="inv-sheet">
+    <button class="inv-close" onclick="closeSheet('mmOverlay')">&times;</button>
+    <div class="inv-header"><div class="inv-logo"></div></div>
+    <div class="inv-co" style="text-align:center;"><b>NGARA HUDUMA COMPANY LIMITED</b></div>
+    <div class="inv-title" style="margin-top:8px;">......MONTHLY MAPATO &amp; MATUMIZI SUMMARY......</div>
+    <div class="inv-row2" style="margin-top:6px;">
+      <div class="inv-field">Month: <b id="mmMwezi"></b></div>
+      <div class="inv-field">Prepared by: <b id="mmNa"></b></div>
+    </div>
+    <table class="inv-table mm-tbl">
+      <thead><tr><th>S/N</th><th>Date</th><th class="num">Mapato (TZS)</th><th class="num">Matumizi (TZS)</th><th class="num">Balance (TZS)</th></tr></thead>
+      <tbody id="mmBody"></tbody>
+    </table>
+    <table class="inv-table mz-muhtasari mm-sum" style="margin-top:14px;width:100%;max-width:560px;margin-left:auto;">
+      <tr><td>Balance Brought Forward (B/F)</td><td class="num" id="mmBf"></td></tr>
+      <tr><td>Total Mapato of the Month</td><td class="num" id="mmMapato"></td></tr>
+      <tr><td><b>Total Mapato (B/F + Month)</b></td><td class="num" id="mmJumlaMapato"></td></tr>
+      <tr><td>Total Matumizi of the Month</td><td class="num" id="mmMatumizi"></td></tr>
+      <tr class="inv-total-row"><td>Closing Balance</td><td class="num" id="mmClosing"></td></tr>
+    </table>
+    <div class="inv-print-btn" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="fomu-btn primary" onclick="chapishaFomu()">🖨 Chapisha / Print</button>
+      <button class="fomu-btn secondary" onclick="pakuaFomu()">⬇️ Pakua</button>
+      <button class="fomu-btn secondary" onclick="shirikiFomu()">📤 Shiriki (WhatsApp)</button>
+    </div>
+  </div>
+</div>
+
+<!-- MONTHLY MAPATO & MATUMIZI CLOSING FORM (same design as the Monthly Closing Stock Form) -->
+<div class="inv-overlay" id="mmcOverlay">
+  <div class="inv-sheet" style="width:760px;">
+    <button class="inv-close" onclick="closeSheet('mmcOverlay')">&times;</button>
+    <div class="inv-header"><div class="inv-logo"></div></div>
+    <div class="inv-co">
+      <b>NGARA HUDUMA COMPANY LIMITED</b><br>
+      P.O. BOX 123 NGARA, KAGERA-TANZANIA<br>
+      Email: ngarahudumacompanylimited@gmail.com &nbsp;·&nbsp; Tel: 0764 748 447
+    </div>
+    <div class="inv-meta" style="border:1px solid #222;padding:8px 12px;margin-top:10px;">
+      NAME OF OFFICER: <span id="mmcKeeper"></span><br>
+      SIGNATURE: .....................................................<br>
+      MONTH: <span id="mmcMonth"></span>
+    </div>
+    <div class="inv-title" style="margin-top:10px;">......MONTHLY MAPATO &amp; MATUMIZI CLOSING FORM......</div>
+    <table class="inv-table mm-sum">
+      <tr><td style="text-align:right;font-weight:700;">OPENING BALANCE</td><td class="num" id="mmcOpening"></td></tr>
+    </table>
+    <table class="inv-table mm-sum" style="margin-top:10px;">
+      <thead><tr><th style="text-align:center;" colspan="2">MAPATO BREAKDOWN (BY SOURCE)</th></tr></thead>
+      <tbody id="mmcVyanzo"></tbody>
+      <tr class="inv-total-row"><td style="text-align:right;">TOTAL MAPATO</td><td class="num" id="mmcMapato"></td></tr>
+    </table>
+    <table class="inv-table mm-sum" style="margin-top:10px;">
+      <tr><td style="text-align:right;">TOTAL MATUMIZI</td><td class="num" id="mmcMatumizi"></td></tr>
+      <tr><td style="text-align:right;font-weight:700;">TOTAL MAPATO MINUS TOTAL MATUMIZI</td><td class="num" id="mmcNet"></td></tr>
+      <tr><td style="text-align:right;">OPENING BALANCE</td><td class="num" id="mmcOpening2"></td></tr>
+      <tr class="inv-total-row"><td style="text-align:right;">CLOSING BALANCE (COMBINED)</td><td class="num" id="mmcClosing"></td></tr>
     </table>
     <div class="inv-print-btn" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
       <button class="fomu-btn primary" onclick="chapishaFomu()">🖨 Chapisha / Print</button>
@@ -4494,6 +4574,7 @@ function applyRoleUI(){
     if(userRole==='matumizi'&&$('uh-lengo'))$('uh-lengo').value='Stock'; }
   { const be=$('bankSlipEntry');if(be)be.style.display=userRole==='cashier'?'':'none'; }
   { const ce=$('fomuCashExpSection');if(ce)ce.style.display=(userRole==='matumizi'||userRole==='gm')?'':'none'; }
+  { const mm=$('fomuMweziMmSection');if(mm){mm.style.display=(userRole==='matumizi'||userRole==='gm')?'':'none';const mi=$('fm-mm-mwezi');if(mi&&!mi.value)mi.value=leoISO().slice(0,7);} }
   { const nb=document.querySelector('#adminApp .nav-btn[data-page="serikali"]');if(nb&&nb.lastChild&&nb.lastChild.nodeType===3)nb.lastChild.textContent=(userRole==='serikali_mauzo')?'Order':'Order za Serikali'; }      // the Mauzo ya Serikali officer's own menu says just "Order"
   { // Rose (Matumizi Branch): no invoices at all, and transfers are only tyres from Abel — so the invoice question is hidden and answered "no"
     const q=document.querySelector('input[name=m-invoice-choice]'),f=q&&q.closest('.field');
@@ -12738,6 +12819,16 @@ function gmUhamishoMuhtasari(kind){
 function gmMuhtasariYote(){try{gmOrderTawi();}catch(e){}['uhamisho','pokea'].forEach(k=>{try{gmUhamishoMuhtasari(k);}catch(e){}});try{gmMadeniTawi();}catch(e){}['mauzo','manunuzi','stock'].forEach(k=>{try{gmMuhtasari(k);}catch(e){}});}
 document.addEventListener('DOMContentLoaded',()=>{['mauzo','manunuzi'].forEach(k=>{const m=$('gmsum-'+k+'-m');if(m&&!m.value)m.value=leoISO().slice(0,7);});});
 setInterval(()=>{if(document.body.classList.contains('gm-ripoti')){['mauzo','manunuzi'].forEach(k=>{const m=$('gmsum-'+k+'-m');if(m&&!m.value)m.value=leoISO().slice(0,7);});gmMuhtasariYote();gmJazaTawi();}},4000);
+function gmOrdertoaMwezi(){const t=leoISO(),[y,m]=t.split('-').map(Number);$('gmrp-ordertoa-k').value=`${y}-${String(m).padStart(2,'0')}-01`;$('gmrp-ordertoa-h').value=`${y}-${String(m).padStart(2,'0')}-${String(new Date(y,m,0).getDate()).padStart(2,'0')}`;if($('gmrp-ordertoa-t').value)gmRipoti('ordertoa');else toast('Chagua tawi kisha bonyeza "Tengeneza Fomu"');}
+// Fomu tab → Order section: ONE report of every order the branch gave out in the chosen dates
+function fomuChapishaOrderZote(){
+  const ft=fomuTarehe('ft-or');if(!ft.ok){toast('❌ Chagua tarehe ya kuanzia na ya mwisho');return;}
+  if(ft.k>ft.h){toast('❌ Tarehe ya kuanzia iko baada ya ya mwisho');return;}
+  const myTawi=ninaTawiLaKazi()?userTawi:viewingTawi;if(!myTawi){toast('❌ Chagua tawi kwanza (juu kushoto)');return;}
+  $('gmrp-ordertoa-k').value=ft.k;$('gmrp-ordertoa-h').value=ft.h;
+  const sel=$('gmrp-ordertoa-t');if(!sel.querySelector(`option[value="${myTawi}"]`))sel.insertAdjacentHTML('beforeend',`<option value="${escH(myTawi)}">${escH(myTawi==='yote'?'Matawi yote':(BRANCHES[myTawi]||myTawi))}</option>`);
+  sel.value=myTawi;gmRipoti('ordertoa');
+}
 function gmRipotiOtomatiki(kind){const k=$(`gmrp-${kind}-k`).value,h=$(`gmrp-${kind}-h`).value;if(k&&h)gmRipoti(kind);}
 function gmOrodhaKamili(kind){
   const el=$('gmOr-'+kind);if(!el)return;
@@ -12754,15 +12845,15 @@ function gmOrodhaKamili(kind){
 function gmWazi(id,c,kind){const el=$(id);if(!el)return;if(el.classList.toggle('gm-wazi')){if(c&&kind&&$('sk-'+c+'-kuanzia')){$('sk-'+c+'-kuanzia').value=$('gmrp-'+kind+'-k').value;$('sk-'+c+'-hadi').value=$('gmrp-'+kind+'-h').value;}try{renderSerikali();}catch(e){}el.scrollIntoView({block:'nearest',behavior:'smooth'});}}
 function gmJazaTawi(){
   const kutumwa=allUhamisho.filter(u=>u.hali==='Imethibitishwa'||u.hali==='Imepokelewa');
-  const src={mauzo:allMauzo,manunuzi:allManunuzi,stock:allBidhaa,mafuta:allSerikaliMafuta,madeni:watejaKawaida(),uhamisho:kutumwa,pokea:kutumwa},fld={uhamisho:'tawi_chanzo',pokea:'tawi_muombaji'};
+  const src={mauzo:allMauzo,manunuzi:allManunuzi,stock:allBidhaa,mafuta:allSerikaliMafuta,madeni:watejaKawaida(),uhamisho:kutumwa,pokea:kutumwa,ordertoa:allMaombiStock.filter(x=>x.aina_chanzo==='Bidhaa'&&x.hali==='Imethibitishwa')},fld={uhamisho:'tawi_chanzo',pokea:'tawi_muombaji'};
   Object.keys(src).forEach(k=>{const sel=$('gmrp-'+k+'-t');if(!sel)return;const f=fld[k]||'tawi';
     const t=[...new Set((src[k]||[]).filter(x=>!x.deleted_at&&x[f]).map(x=>x[f]).concat(k==='madeni'?Object.keys(HARDWARE_BRANCHES):[]))].sort((a,b)=>String(BRANCHES[a]||a).localeCompare(String(BRANCHES[b]||b)));
     const sig=t.join('|');if(sel.dataset.sig===sig)return;const cur=sel.value;sel.dataset.sig=sig;
-    sel.innerHTML='<option value="">— Chagua tawi —</option>'+(k==='madeni'?'<option value="yote">Matawi yote</option>':'')+t.map(x=>`<option value="${escH(x)}">${escH(BRANCHES[x]||x)}</option>`).join('');if(t.includes(cur)||(k==='madeni'&&cur==='yote'))sel.value=cur;});
+    sel.innerHTML='<option value="">— Chagua tawi —</option>'+((k==='madeni'||k==='ordertoa')?'<option value="yote">Matawi yote</option>':'')+t.map(x=>`<option value="${escH(x)}">${escH(BRANCHES[x]||x)}</option>`).join('');if(t.includes(cur)||(k==='madeni'&&cur==='yote'))sel.value=cur;});
 }
 function gmRipoti(kind){
   const tawiChaguliwa=($('gmrp-'+kind+'-t')||{}).value||'';
-  if(['mauzo','manunuzi','stock','mafuta','uhamisho','pokea','madeni'].includes(kind)&&!tawiChaguliwa){toast('❌ Chagua tawi kwanza');return;}
+  if(['mauzo','manunuzi','stock','mafuta','uhamisho','pokea','madeni','ordertoa'].includes(kind)&&!tawiChaguliwa){toast('❌ Chagua tawi kwanza');return;}
   const tawiJina=tawiChaguliwa==='yote'?'Matawi Yote':tawiChaguliwa?(BRANCHES[tawiChaguliwa]||tawiChaguliwa):(viewingTawi==='yote'?'Matawi Yote':(BRANCHES[viewingTawi]||viewingTawi)),yote=false;
   const fT=(a)=>filterByTawi(a).filter(x=>x.tawi===tawiChaguliwa);
   let k='',h='';
@@ -12846,6 +12937,19 @@ function gmRipoti(kind){
       l.map((u,i)=>`<tr><td>${i+1}</td><td style="white-space:nowrap;">${siku(u)}</td><td>${escH(u.ombi_no||'')}</td><td>${escH(u.jina||'')}</td><td class="num">${fmtIdadi(u.idadi)} ${escH(u.kipimo||'')}</td><td class="num">${fmt0(Number(u.bei_kuuzia)||0)}</td><td class="num">${fmt0(jm(u))}</td><td>${escH(BRANCHES[pk?u.tawi_chanzo:u.tawi_muombaji]||(pk?u.tawi_chanzo:u.tawi_muombaji)||'')}</td><td>${pk?escH(u.jina_mpokeaji||'—'):(u.aina==='Stock'?'Stock':'Mteja')}</td><td>${u.hali==='Imepokelewa'?'✓ Imepokelewa':'⏳ Haijapokelewa'}</td></tr>`).join(''),
       l.length?`<tr class="stmt-tot"><td colspan="6">JUMLA (mistari ${l.length})</td><td class="num">${fmt0(jj)}</td><td colspan="3"></td></tr>`:'')
       +(l.length?`<div class="stmt-bill" style="margin-top:14px;">MUHTASARI</div>`+jed([['Maelezo'],['Kiasi',1]],`<tr><td>Imepokelewa</td><td class="num">${fmt0(jp)}</td></tr><tr><td>Haijapokelewa</td><td class="num">${fmt0(jj-jp)}</td></tr>`,`<tr class="stmt-tot"><td>JUMLA</td><td class="num">${fmt0(jj)}</td></tr>`):'');
+  }else if(kind==='ordertoa'){
+    kichwa='ORDERS ISSUED — ORDER ZILIZOTOLEWA';
+    const l=allMaombiStock.filter(x=>x.aina_chanzo==='Bidhaa'&&x.hali==='Imethibitishwa'&&!String(x.invoice_no||'').startsWith('ZG-')&&(tawiChaguliwa==='yote'||x.tawi===tawiChaguliwa)&&skSiku(x)>=k&&skSiku(x)<=h)
+      .sort((a,b)=>skSiku(a).localeCompare(skSiku(b))||String(_orderKundi(a)).localeCompare(String(_orderKundi(b)))||String(a.created_at||'').localeCompare(String(b.created_at||'')));
+    const th=(x)=>Number(x.jumla_stoo)||((Number(x.idadi)||0)*(Number(x.bei_stoo)||0));
+    const jj=l.reduce((a,x)=>a+th(x),0),kundiZote=new Set(l.map(_orderKundi));
+    let _kt=null,_no=0;
+    const rows=l.map((x,i)=>{const kn=_orderKundi(x)+'|'+x.tawi,mpya=kn!==_kt;_kt=kn;if(mpya)_no++;
+      return`<tr><td>${mpya?_no:''}</td><td style="white-space:nowrap;">${mpya?skSiku(x):''}</td><td>${mpya?`<b>${escH(x.mteja||'')}</b>${x.mradi?'<br><span style="font-size:11px;">'+escH(x.mradi)+'</span>':''}${x.namba_agizo?'<br><span style="font-size:11px;">No: '+escH(x.namba_agizo)+'</span>':''}`:''}</td><td>${escH(x.jina||'')}</td><td class="num">${fmtIdadi(x.idadi)} ${escH(x.kipimo_mteja||x.kipimo||'')}</td><td class="num">${fmt0(Number(x.bei_stoo)||0)}</td><td class="num">${fmt0(th(x))}</td>${tawiChaguliwa==='yote'?`<td>${escH(BRANCHES[x.tawi]||x.tawi||'')}</td>`:''}</tr>`;});
+    mwili=jed([['#'],['Tarehe'],['Mteja / Mradi'],['Particulars'],['QTY',1],['Rate',1],['Jumla',1],...(tawiChaguliwa==='yote'?[['Tawi']]:[])],rows.join(''),
+      l.length?`<tr class="stmt-tot"><td colspan="6">JUMLA YA ORDER ZOTE (order ${kundiZote.size}, mistari ${l.length})</td><td class="num">${fmt0(jj)}</td>${tawiChaguliwa==='yote'?'<td></td>':''}</tr>`:'');
+    if(tawiChaguliwa==='yote'&&l.length){const kt={};l.forEach(x=>{const e=kt[x.tawi]||(kt[x.tawi]={j:0,n:0});e.j+=th(x);e.n++;});
+      mwili+=`<div class="stmt-bill" style="margin-top:14px;">ORDER KWA TAWI</div>`+jed([['Tawi'],['Mistari',1],['Jumla',1]],Object.entries(kt).sort((a,b)=>b[1].j-a[1].j).map(([t,e])=>`<tr><td>${escH(BRANCHES[t]||t)}</td><td class="num">${e.n}</td><td class="num">${fmt0(e.j)}</td></tr>`).join(''),`<tr class="stmt-tot"><td>JUMLA</td><td class="num">${l.length}</td><td class="num">${fmt0(jj)}</td></tr>`);}
   }else if(kind==='madeni'){
     kichwa='DEBTORS LIST — ORODHA YA MADENI';
     const mwisho=new Map();_madeniCtx.malipo.forEach(m=>{const t=mwisho.get(m.mteja_id);if(!t||m.tarehe>t)mwisho.set(m.mteja_id,m.tarehe);});
@@ -12885,7 +12989,7 @@ function gmRipoti(kind){
     <div class="stmt-co"><b>NGARA HUDUMA COMPANY LIMITED</b><br>TIN NO. 147-228-198 — VRN NO. 40311079R · P.O. BOX 123 NGARA, KAGERA-TANZANIA<br>${kichwa}<br>Tawi: ${escH(tawiJina)} · ${kipindi}</div>
     ${mwili}
     <div class="inv-meta" style="margin-top:22px;">Imeandaliwa na: ${escH(userJina||'Meneja Mkuu')} &nbsp;&nbsp; Sahihi: <span class="inv-dotline" style="min-width:160px;">&nbsp;</span></div>`;
-  $('rpOverlay').dataset.jina=`${kind==='uhamisho'?'transfer':kind==='pokea'?'received':kind==='madeni'?'orodha-ya-madeni':kind==='wateja'?'wateja-wa-order':kind==='watejamf'?'wateja-wa-order-mafuta':kind==='invsk'?'invoice-za-serikali':kind==='order'?'order-zinazosubiri-invoice':kind==='mafuta'?'invoice-za-mafuta':kind==='mauzo'?'ripoti-ya-mauzo':kind==='manunuzi'?'ripoti-ya-manunuzi':kind==='stock'?'orodha-ya-stock':'ripoti-ya-mapato'}-${k||leoISO()}${h?'-'+h:''}`;
+  $('rpOverlay').dataset.jina=`${kind==='uhamisho'?'transfer':kind==='pokea'?'received':kind==='madeni'?'orodha-ya-madeni':kind==='wateja'?'wateja-wa-order':kind==='watejamf'?'wateja-wa-order-mafuta':kind==='invsk'?'invoice-za-serikali':kind==='ordertoa'?'order-zilizotolewa':kind==='order'?'order-zinazosubiri-invoice':kind==='mafuta'?'invoice-za-mafuta':kind==='mauzo'?'ripoti-ya-mauzo':kind==='manunuzi'?'ripoti-ya-manunuzi':kind==='stock'?'orodha-ya-stock':'ripoti-ya-mapato'}-${k||leoISO()}${h?'-'+h:''}`;
   openSheet('rpOverlay');
 }
 // ── print view ──
@@ -12991,6 +13095,54 @@ async function pakuaRipotiMadeniExcel(){
   }
 }
 // The Cash Expenditure Form from the Fomu tab: uses the dates chosen there, and leaves the Matumizi tab's own filters as they were
+// MONTHLY MAPATO & MATUMIZI SUMMARY (Rose / General Manager): one row per day of the month — that day's total Mapato, total Matumizi and the running Balance
+function tengenezaFomuMwezi(){
+  const mw=($('fm-mm-mwezi')||{}).value||leoISO().slice(0,7);
+  const [y,m]=mw.split('-').map(Number);if(!y||!m){toast('❌ Chagua mwezi');return;}
+  const z=(n)=>String(n).padStart(2,'0'),siku=new Date(y,m,0).getDate(),mwanzo=`${y}-${z(m)}-01`;
+  const mapato={},matumizi={},f=(n)=>{const v=round2(n);return v.toLocaleString('en-US',{minimumFractionDigits:Number.isInteger(v)?0:2,maximumFractionDigits:2});};
+  allGharama.forEach(e=>{
+    if(e.deleted_at||!e.tarehe||String(e.tarehe).slice(0,7)!==mw)return;
+    mapato[e.tarehe]=(mapato[e.tarehe]||0)+jumlaYaMapato(e);matumizi[e.tarehe]=(matumizi[e.tarehe]||0)+(Number(e.cash_out)||0);
+  });
+  let bf=salioKabla(mwanzo);
+  if(salioAwali&&salioAwali.tarehe&&String(salioAwali.tarehe).slice(0,7)===mw)mapato[salioAwali.tarehe]=(mapato[salioAwali.tarehe]||0)+(parseFloat(salioAwali.salio)||0);      // an opening balance dated inside the month counts as Mapato of that day
+  let bal=bf,jM=0,jT=0,rows=`<tr><td></td><td><b>B/F</b></td><td></td><td></td><td class="num"><b>${f(bf)}</b></td></tr>`;
+  for(let d=1;d<=siku;d++){
+    const t=`${y}-${z(m)}-${z(d)}`,a=round2(mapato[t]||0),b=round2(matumizi[t]||0);
+    bal=round2(bal+a-b);jM=round2(jM+a);jT=round2(jT+b);
+    rows+=`<tr><td>${d}</td><td>${z(d)} / ${z(m)} / ${y}</td><td class="num">${a?f(a):''}</td><td class="num">${b?f(b):''}</td><td class="num">${(a||b)?'<b>'+f(bal)+'</b>':f(bal)}</td></tr>`;
+  }
+  rows+=`<tr class="inv-total-row"><td colspan="2" style="text-align:right;">TOTAL</td><td class="num">${f(jM)}</td><td class="num">${f(jT)}</td><td class="num">${f(bal)}</td></tr>`;
+  $('mmBody').innerHTML=rows;
+  $('mmMwezi').textContent=`${MIEZI_KAMILI[m-1]} ${y}`;$('mmNa').textContent=userJina||'';
+  $('mmBf').textContent=pesa2(bf);$('mmMapato').textContent=pesa2(jM);$('mmJumlaMapato').textContent=pesa2(round2(bf+jM));$('mmMatumizi').textContent=pesa2(jT);$('mmClosing').textContent=pesa2(bal);
+  $('mmOverlay').dataset.jina=`monthly-mapato-matumizi-${mw}`;
+  setWaPhone('mmOverlay',ADMIN_PHONE);
+  openSheet('mmOverlay');
+}
+function tengenezaFomuMweziFunga(){
+  const mw=($('fm-mm-mwezi')||{}).value||leoISO().slice(0,7);
+  const [y,m]=mw.split('-').map(Number);if(!y||!m){toast('❌ Chagua mwezi');return;}
+  const mwanzo=`${y}-${String(m).padStart(2,'0')}-01`,vyanzo=new Map();let matumizi=0;
+  allGharama.forEach(e=>{
+    if(e.deleted_at||!e.tarehe||String(e.tarehe).slice(0,7)!==mw)return;
+    const a=jumlaYaMapato(e);matumizi+=Number(e.cash_out)||0;
+    if(a>0){const jina=String(e.mkabidhi||'').trim().replace(/\s+/g,' ').toLowerCase().replace(/(^|\s)\S/g,c=>c.toUpperCase())||'Other / Haijasemwa',k=jina.toLowerCase().replace(/\s+/g,' ');const v=vyanzo.get(k)||{jina,j:0};v.j+=a;vyanzo.set(k,v);}
+  });
+  const opening=salioKabla(mwanzo);
+  let ziada=0;if(salioAwali&&salioAwali.tarehe&&String(salioAwali.tarehe).slice(0,7)===mw)ziada=parseFloat(salioAwali.salio)||0;      // an opening balance dated inside the month is shown as its own source
+  const orodha=[...vyanzo.values()].sort((a,b)=>b.j-a.j);if(ziada>0)orodha.unshift({jina:'Opening balance (dated in this month)',j:ziada});
+  const mapato=round2(orodha.reduce((t,v)=>t+v.j,0));matumizi=round2(matumizi);
+  const net=round2(mapato-matumizi),closing=round2(opening+net);
+  $('mmcKeeper').textContent=userJina||'';$('mmcMonth').textContent=`${MIEZI_KAMILI[m-1]} ${y}`;
+  $('mmcOpening').textContent=pesa2(opening);$('mmcOpening2').textContent=pesa2(opening);
+  $('mmcVyanzo').innerHTML=orodha.length?orodha.map(v=>`<tr><td>${escH(v.jina)}</td><td class="num">${pesa2(round2(v.j))}</td></tr>`).join(''):'<tr><td colspan="2" style="text-align:center;color:#888;">—</td></tr>';
+  $('mmcMapato').textContent=pesa2(mapato);$('mmcMatumizi').textContent=pesa2(matumizi);$('mmcNet').textContent=pesa2(net);$('mmcClosing').textContent=pesa2(closing);
+  $('mmcOverlay').dataset.jina=`monthly-mapato-matumizi-closing-${mw}`;
+  setWaPhone('mmcOverlay',ADMIN_PHONE);
+  openSheet('mmcOverlay');
+}
 function fungaCashExpFomu(){
   const k=$('fm-mz-kuanzia').value,h=$('fm-mz-hadi').value,k0=$('mz-kuanzia').value,h0=$('mz-hadi').value;
   $('mz-kuanzia').value=k;$('mz-hadi').value=h;
