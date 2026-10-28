@@ -6794,8 +6794,27 @@ async function shirikiFomu(){
   const sheet=document.querySelector('.inv-overlay.open .inv-sheet');
   const waPhone=sheet?sheet.dataset.waPhone:'';
   const waKiungo=waPhone?`https://wa.me/${waIntlPhone(waPhone)}`:'https://api.whatsapp.com/send';
-  const openWaChat=()=>{const w=window.open(waKiungo,'_blank');return !!w;};
-  const filename0=jinaLaFomuLiloWazi(),filename=filename0;
+  const fungaWa=()=>{if(!window.open(waKiungo,'_blank'))location.href=waKiungo;};
+  const filename0=jinaLaFomuLiloWazi(),filename=filename0,simu=niSimu();
+  const pakuaFaili=(faili)=>{      // last resort: save the picture(s) and open WhatsApp — attach with 📎
+    faili.forEach((f,i)=>setTimeout(()=>{const url=URL.createObjectURL(f.blob),a=document.createElement('a');a.href=url;a.download=filename+(faili.length>1?'-ukurasa'+(i+1):'')+f.ext;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),4000);},i*400));
+    toast('📥 Picha imepakuliwa — kwenye WhatsApp bonyeza 📎 kisha chagua picha.');fungaWa();
+  };
+
+  // 1) Computer: the WHOLE form is copied as ONE picture the moment the button is pressed, then WhatsApp opens — just paste (Ctrl+V) and send.
+  if(!simu&&navigator.clipboard&&window.ClipboardItem){
+    toast('⏳ Inaandaa picha ya fomu...');
+    const pngP=(async()=>{const canvas=await fomuKamataPicha(true);if(!canvas)throw new Error('picha');const b=await new Promise(r=>canvas.toBlob(r,'image/png'));if(!b)throw new Error('picha');return b;})();
+    try{      // handed over as a promise so the copy still counts as the button press while the picture is being made
+      await navigator.clipboard.write([new ClipboardItem({'image/png':pngP})]);
+      toast(waPhone?'✅ Fomu imenakiliwa — WhatsApp inafunguka. Bandika (Ctrl+V) kwenye ujumbe kisha "Tuma".':'✅ Fomu imenakiliwa — WhatsApp inafunguka. Fungua mazungumzo, bandika (Ctrl+V) kisha "Tuma".');
+      fungaWa();return;
+    }catch(e){
+      try{const b=await pngP;pakuaFaili([{blob:b,ext:'.png'}]);return;}catch(_e){toast('❌ Picha ya fomu haikutengenezwa. Jaribu tena au tumia "Pakua".');return;}
+    }
+  }
+
+  // 2) Phone: the native share sheet — the form goes straight into WhatsApp.
   let faili,tayariSasa=false;
   if(_fomuTayari&&_fomuTayari.filename===filename0&&Date.now()-_fomuTayari.at<600000){faili=_fomuTayari.faili;tayariSasa=true;}      // second tap: the picture is already made
   else{
@@ -6803,52 +6822,16 @@ async function shirikiFomu(){
     faili=await fomuFaili(canvas);
     if(!faili){toast('❌ Picha ya fomu haikutengenezwa (simu haina nafasi ya kutosha?). Jaribu tena au tumia "Pakua".');return;}
   }
-  const jinaYa=(i)=>filename+(faili.length>1?'-ukurasa'+(i+1):'')+faili[i].ext;
-  const files=faili.map((f,i)=>new File([f.blob],jinaYa(i),{type:f.type}));
-  const simu=niSimu();
+  const files=faili.map((f,i)=>new File([f.blob],filename+(faili.length>1?'-ukurasa'+(i+1):'')+f.ext,{type:f.type}));
   const hifadhi=()=>{_fomuTayari={faili,filename:filename0,at:Date.now()};};
-
-  // 1) Phone: the native share sheet — the form goes straight into WhatsApp.
-  const shareInawezekana=!!(navigator.canShare&&navigator.share&&navigator.canShare({files}));
-  if(simu&&shareInawezekana){
+  if(navigator.canShare&&navigator.share&&navigator.canShare({files})){
     try{await navigator.share({files,title:filename});_fomuTayari=null;return;}
     catch(e){
-      if(e.name==='AbortError'){hifadhi();return;}      // the person closed the sheet
-      if(!tayariSasa){      // the phone wants a fresh tap: keep the picture and ask for one more tap
-        hifadhi();
-        toast('✅ Fomu iko tayari — bonyeza "Shiriki (WhatsApp)" mara moja zaidi ili kuituma.');return;
-      }
+      if(e.name==='AbortError'){hifadhi();return;}
+      if(!tayariSasa){hifadhi();toast('✅ Fomu iko tayari — bonyeza "Shiriki (WhatsApp)" mara moja zaidi ili kuituma.');return;}
     }
   }
-  // 2) Computer: copy the picture, open WhatsApp, paste (a one-page form; the clipboard only takes PNG).
-  if(!simu&&faili.length===1&&navigator.clipboard&&window.ClipboardItem){
-    try{
-      const bm=await createImageBitmap(faili[0].blob),c=document.createElement('canvas');c.width=bm.width;c.height=bm.height;c.getContext('2d').drawImage(bm,0,0);
-      const png=await new Promise(r=>c.toBlob(r,'image/png'));
-      await navigator.clipboard.write([new ClipboardItem({'image/png':png})]);
-      openWaChat();
-      toast(waPhone?'✅ Fomu imenakiliwa na WhatsApp imefunguliwa — bandika (Ctrl+V) kwenye ujumbe kisha "Tuma".':'✅ Fomu imenakiliwa — fungua mazungumzo unayotaka na ubandike (Ctrl+V) kisha "Tuma".');
-      return;
-    }catch(e){/* this browser does not allow copying a picture — carry on */}
-  }
-  // 3) Last resort — works on every device: a small window with two buttons, each pressed by the person (a phone never blocks a tap):
-  //    save the picture(s), then open WhatsApp and attach them (paperclip → Gallery/Files).
-  waMbadala(faili.map((f,i)=>({blob:f.blob,name:jinaYa(i)})),waKiungo);
-}
-function waMbadala(mafaili,kiungo){
-  let m=$('waMbadala');if(m)m.remove();
-  const wengi=mafaili.length>1;
-  m=document.createElement('div');m.id='waMbadala';
-  m.style.cssText='position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;padding:16px;';
-  m.innerHTML=`<div style="background:#fff;color:#1d2733;border-radius:12px;max-width:380px;width:100%;padding:18px;font-family:inherit;box-shadow:0 10px 40px rgba(0,0,0,.4);">
-    <div style="font-weight:700;font-size:16px;margin-bottom:6px;">📤 Tuma kwa WhatsApp</div>
-    <div style="font-size:13px;line-height:1.5;margin-bottom:14px;">Simu hii haifungui WhatsApp moja kwa moja. Fanya hatua mbili:<br><b>1.</b> Bonyeza "Pakua ${wengi?'picha ('+mafaili.length+')':'picha'}".<br><b>2.</b> Bonyeza "Fungua WhatsApp", kisha 📎 → Picha/Faili → chagua ${wengi?'picha zote':'fomu'}.</div>
-    <button id="waPakua" style="width:100%;padding:12px;margin-bottom:8px;border:0;border-radius:8px;background:#E8590C;color:#fff;font-weight:700;font-size:14px;">📥 1. Pakua ${wengi?'picha ('+mafaili.length+')':'picha'}</button>
-    <a id="waFungua" href="${kiungo}" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none;padding:12px;margin-bottom:8px;border-radius:8px;background:#25D366;color:#fff;font-weight:700;font-size:14px;">💬 2. Fungua WhatsApp</a>
-    <button id="waFunga" style="width:100%;padding:10px;border:1px solid #c9d2de;border-radius:8px;background:#fff;color:#1d2733;font-size:13px;">Funga</button></div>`;
-  document.body.appendChild(m);
-  $('waPakua').onclick=()=>{mafaili.forEach((f,i)=>setTimeout(()=>{const url=URL.createObjectURL(f.blob),a=document.createElement('a');a.href=url;a.download=f.name;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),4000);},i*400));$('waPakua').textContent='✅ Imepakuliwa';};
-  $('waFunga').onclick=()=>m.remove();
+  pakuaFaili(faili);
 }
 $('tfClose') && $('tfClose').addEventListener('click',()=>closeSheet('tfOverlay'));
 $('rfClose') && $('rfClose').addEventListener('click',()=>closeSheet('rfOverlay'));
