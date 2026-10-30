@@ -12455,20 +12455,20 @@ function tengenezaFomuBenkiMafuta(){
   const k=$('fmf-b-kuanzia').value,h=$('fmf-b-hadi').value,jina=jinaLaMwekaMafuta(tawi);
   if(!k||!h){arifu('notifyFmfBenki','⚠ Chagua kipindi (kuanzia na hadi).','error');return;}
   if(!jina){arifu('notifyFmfBenki','⚠ Weka jina la store keeper.','error');return;}
+  // one row per day and person; CRDB, NMB and LIPA NAMBA each have their own column, with a total at the bottom of each
   const kundi=new Map();
   allMafutaMauzo.filter(r=>r.tawi===tawi&&!r._pending&&r.tarehe>=k&&r.tarehe<=h).forEach(r=>{
-    [['NMB',r.njia_nmb],['CRDB',r.njia_crdb],['LIPA NAMBA',r.njia_lipa]].forEach(([benki,v])=>{
-      const kiasi=Number(v)||0;if(kiasi<=0)return;
-      const jinaLaSafu=(r.zamu?r.zamu+' — ':'')+(r.muuzaji||'-'),key=[r.tarehe,jinaLaSafu,benki].join('|'),g=kundi.get(key)||{tarehe:r.tarehe,jina:jinaLaSafu,kiasi:0,benki,bidhaa:new Set()};
-      g.kiasi+=kiasi;g.bidhaa.add(KODI_YA_MAFUTA[r.aina]||r.aina);kundi.set(key,g);
-    });
+    const nmb=Number(r.njia_nmb)||0,crdb=Number(r.njia_crdb)||0,lipa=Number(r.njia_lipa)||0;if(nmb+crdb+lipa<=0)return;
+    const jinaLaSafu=(r.zamu?r.zamu+' — ':'')+(r.muuzaji||'-'),key=[r.tarehe,jinaLaSafu].join('|'),g=kundi.get(key)||{tarehe:r.tarehe,jina:jinaLaSafu,nmb:0,crdb:0,lipa:0,bidhaa:new Set()};
+    g.nmb+=nmb;g.crdb+=crdb;g.lipa+=lipa;g.bidhaa.add(KODI_YA_MAFUTA[r.aina]||r.aina);kundi.set(key,g);
   });
-  const orodha=[...kundi.values()].sort((a,b)=>a.tarehe.localeCompare(b.tarehe)||a.jina.localeCompare(b.jina)||a.benki.localeCompare(b.benki));
-  const jumla=orodha.reduce((a,g)=>a+g.kiasi,0);
+  const orodha=[...kundi.values()].sort((a,b)=>a.tarehe.localeCompare(b.tarehe)||a.jina.localeCompare(b.jina));
+  const T={crdb:0,nmb:0,lipa:0};orodha.forEach(g=>{T.crdb+=g.crdb;T.nmb+=g.nmb;T.lipa+=g.lipa;});
+  const dash=(n)=>n>0?fmt0(n):'—';
   onyeshaFomuMafuta(kichwaChaFomuMafuta('PAYMENT RECEIVED<br>THROUGH BANKS')+`<div class="inv-meta">Name of store keeper: <b>${escH(jina)}</b><br>Office location: <b>${escH(BRANCHES[tawi]||tawi)}</b><br>Period: ${tarehePangoMafuta(k)} – ${tarehePangoMafuta(h)}</div>
-    <table class="inv-table"><thead><tr><th>S/N</th><th>Date</th><th>Name of Customer</th><th class="num">Amount Payed</th><th>Bank Name</th><th>Product Purchased</th></tr></thead><tbody>${
-      orodha.length?orodha.map((g,i)=>`<tr><td>${i+1}</td><td>${tarehePangoMafuta(g.tarehe)}</td><td>${escH(g.jina)}</td><td class="num">${fmt0(g.kiasi)}</td><td>${g.benki}</td><td>${[...g.bidhaa].join(' / ')}</td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:#999;">Hakuna malipo ya benki katika kipindi hiki.</td></tr>'}
-      <tr class="inv-total-row"><td colspan="3" style="text-align:right;">TOTAL</td><td class="num">${fmt0(jumla)}</td><td colspan="2"></td></tr></tbody></table>
+    <table class="inv-table"><thead><tr><th>S/N</th><th>Date</th><th>Name of Customer</th><th class="num">CRDB</th><th class="num">NMB</th><th class="num">Lipa Namba</th><th class="num">Total</th><th>Product Purchased</th></tr></thead><tbody>${
+      orodha.length?orodha.map((g,i)=>`<tr><td>${i+1}</td><td>${tarehePangoMafuta(g.tarehe)}</td><td>${escH(g.jina)}</td><td class="num">${dash(g.crdb)}</td><td class="num">${dash(g.nmb)}</td><td class="num">${dash(g.lipa)}</td><td class="num"><b>${fmt0(g.crdb+g.nmb+g.lipa)}</b></td><td>${[...g.bidhaa].join(' / ')}</td></tr>`).join(''):'<tr><td colspan="8" style="text-align:center;color:#999;">Hakuna malipo ya benki katika kipindi hiki.</td></tr>'}
+      <tr class="inv-total-row"><td colspan="3" style="text-align:right;">TOTAL</td><td class="num">${fmt0(T.crdb)}</td><td class="num">${fmt0(T.nmb)}</td><td class="num">${fmt0(T.lipa)}</td><td class="num">${fmt0(T.crdb+T.nmb+T.lipa)}</td><td></td></tr></tbody></table>
     <div class="inv-meta" style="margin-top:22px;">Signature: ............................................</div>`,`payment-received-through-banks-${tawi}-${k}-${h}`);
 }
 
