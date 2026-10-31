@@ -1322,11 +1322,12 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
             <label style="font-size:11px;color:var(--a-muted);display:flex;align-items:center;gap:4px;">Kuanzia <input type="date" id="mauzo-kuanzia" onchange="renderMauzo()" style="width:auto"/></label>
             <label style="font-size:11px;color:var(--a-muted);display:flex;align-items:center;gap:4px;">Hadi <input type="date" id="mauzo-hadi" onchange="renderMauzo()" style="width:auto"/></label>
             <button class="btn sm secondary" onclick="onyeshaMauzoYote()">Onyesha Yote</button>
+            <button class="btn sm gold" id="btn-fomu-mauzo-afisa" style="display:none;" onclick="fomuYaMauzoAfisa()">🖨 Fomu ya Mauzo</button>
             <input type="text" id="search-mauzo" placeholder="Tafuta..." oninput="renderMauzo()" style="width:180px"/>
             <select id="filter-mauzo" onchange="renderMauzo()" style="width:auto"><option value="zote">Yote</option><option value="Taslimu">Taslimu (zote)</option><option value="Cash">Cash tu</option><option value="NMB">NMB</option><option value="CRDB">CRDB</option><option value="Lipa Namba">Lipa Namba</option><option value="Mkopo">Madeni</option></select>
           </div>
         </div>
-        <div class="section-body"><div class="table-wrap"><table>
+        <div class="section-body"><div id="mauzo-muhtasari"></div><div class="table-wrap"><table>
           <thead><tr><th>Invoice</th><th>Tarehe</th><th>Mteja</th><th>Particulars</th><th class="num">QTY</th><th class="num">Unit Price</th><th class="num">Jumla</th><th>Kilicholipwa</th><th>Baki</th><th>Aina ya Mauzo</th><th>Status</th><th>Chanzo</th><th>Kitendo</th></tr></thead>
           <tbody id="tbody-mauzo"><tr class="loading-row"><td colspan="13">Inapakia...</td></tr></tbody>
         </table></div></div>
@@ -2733,6 +2734,14 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
             <button class="btn secondary" onclick="pakuaStatementExcel(false)">⬇ Excel — Mteja Huyu</button>
             <button class="btn gold" onclick="pakuaStatementExcel(true)">⬇ Excel — Wateja Wote wa Mwezi (karatasi moja kwa kila mteja)</button>
           </div>
+          <div class="controls" style="margin-top:8px;">
+            <button class="btn secondary" onclick="fomuHatua('stmt','chapa')">🖨 Chapisha</button>
+            <button class="btn secondary" onclick="fomuHatua('stmt','pdf')">⬇ PDF</button>
+            <button class="btn secondary" onclick="fomuHatua('stmt','picha')">🖼 Picha</button>
+            <button class="btn secondary" onclick="fomuHatua('stmt','shiriki')">📤 Shiriki (Picha)</button>
+            <button class="btn secondary" onclick="fomuHatua('stmt','shirikipdf')">📤 Shiriki (PDF)</button>
+            <button class="btn gold" onclick="pakuaStatementPdfWote()">⬇ PDF — Wateja Wote wa Mwezi (ukurasa kwa kila mteja)</button>
+          </div>
           <div id="stmtPreview" style="margin-top:14px;"></div>
         </div>
       </div>
@@ -3231,7 +3240,9 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
     <div class="inv-print-btn" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px;">
       <button class="fomu-btn primary" onclick="chapishaFomu()">🖨 Chapisha / Print</button>
       <button class="fomu-btn secondary" onclick="pakuaFomu()">⬇️ Pakua (PDF)</button>
-      <button class="fomu-btn secondary" onclick="shirikiFomu()">📤 Shiriki (WhatsApp)</button>
+      <button class="fomu-btn secondary" onclick="pakuaFomuPicha()">🖼 Pakua (Picha)</button>
+      <button class="fomu-btn secondary" onclick="shirikiFomu()">📤 Shiriki (Picha)</button>
+      <button class="fomu-btn secondary" onclick="shirikiFomuPdf()">📤 Shiriki (PDF)</button>
     </div>
   </div>
 </div>
@@ -4502,6 +4513,13 @@ async function doLogin(){
 // only when first needed instead of before the system can start.
 const MAKTABA={chart:'https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js',xlsx:'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',html2canvas:'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',jspdf:'https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js',exceljs:'https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js'};
 const _maktabaInayopakiwa={};
+// The picture and PDF tools (about 600 KB) are fetched quietly in the background once a fuel page has loaded, so the
+// first "Pakua PDF" does not have to wait for the download.
+let _maktabaMapema=false;
+function pakiaMaktabaMapema(){
+  if(_maktabaMapema)return;_maktabaMapema=true;
+  setTimeout(()=>{pakiaMaktaba('html2canvas').catch(()=>{});pakiaMaktaba('jspdf').catch(()=>{});},2500);
+}
 function pakiaMaktaba(jina){
   const tayari={chart:()=>typeof Chart!=='undefined',xlsx:()=>typeof XLSX!=='undefined',html2canvas:()=>typeof html2canvas!=='undefined',exceljs:()=>typeof ExcelJS!=='undefined',jspdf:()=>!!(window.jspdf&&window.jspdf.jsPDF)}[jina];
   if(tayari&&tayari())return Promise.resolve();
@@ -6758,15 +6776,46 @@ function renderMauzo(){
   if(mK&&mH&&mK>mH){[mK,mH]=[mH,mK];}      // dates typed the wrong way round still work
   const list=filterByTawi(allMauzo).filter(s=>s.hali_order!=='Inasubiri'&&`${s.mteja} ${s.jina} ${s.invoice_no||''}`.toLowerCase().includes(tafuta)&&(filterV==='zote'||(filterV==='Taslimu'?s.aina==='Taslimu':njiaYaMauzoKikundi(s)===filterV))&&(!mK||s.tarehe>=mK)&&(!mH||s.tarehe<=mH));
   list.sort((a,b)=>(b.tarehe||'').localeCompare(a.tarehe||''));
-  $('tbody-mauzo').innerHTML=list.length?list.map(s=>{
+  const safu=(s)=>{
     const statusCls=s.bakaa===0?'pill-green':s.kilicholipwa>0?'pill-amber':'pill-red';
     const statusLbl=s.bakaa===0?'Amelipa':s.kilicholipwa>0?'Sehemu':'Hajalipa';
     const invNoCell=s._pending?`<span class="pill pill-amber">⏳ Inasubiri</span>`:(s.invoice_no||'—');
     const actions=s._pending?'<span style="color:var(--a-muted);font-size:11px;">Itatumwa hivi karibuni</span>':`<button class="btn sm secondary" onclick="showInvoiceFromInvoiceNo('${s.invoice_no}')">🖨</button>${kitufeMarekebisho('mauzo',s.id)}`;
     const chanzoCell=s.tawi_chanzo_stock?`<span class="pill pill-blue">🔄 ${BRANCHES[s.tawi_chanzo_stock]||s.tawi_chanzo_stock}</span>`:'—';
     return`<tr><td>${invNoCell}</td><td>${s.tarehe}</td><td>${s.mteja}</td><td>${s.jina}</td><td class="num">${s.idadi} ${s.kipimo||'pc'}</td><td class="num">${pesa(s.bei_kuuzia)}</td><td class="num"><strong>${pesa(s.jumla)}</strong></td><td>${pesa(s.kilicholipwa)}</td><td>${pesa(s.bakaa)}</td><td>${njiaYaMauzoMaelezo(s)}</td><td><span class="pill ${statusCls}">${statusLbl}</span></td><td>${chanzoCell}</td><td style="display:flex;gap:4px;flex-wrap:wrap;">${actions}</td></tr>`;
-  }).join(''):safuTupu(13,'Bado hakuna mauzo.');
+  };
+  const muh=$('mauzo-muhtasari'),bf=$('btn-fomu-mauzo-afisa');if(bf)bf.style.display=userRole==='deski'?'':'none';
+  if(userRole!=='deski'){if(muh)muh.innerHTML='';$('tbody-mauzo').innerHTML=list.length?list.map(safu).join(''):safuTupu(13,'Bado hakuna mauzo.');return;}
+  // SALES OFFICER: the records are shown DAY BY DAY, each day with its total and how it was paid (like the GM's sales report)
+  const kwaSiku=new Map();
+  list.forEach(s=>{const d=String(s.tarehe||'').slice(0,10);let a=kwaSiku.get(d);if(!a){a=[];kwaSiku.set(d,a);}a.push(s);});
+  const siku=[...kwaSiku.entries()].sort((a,b)=>a[0].localeCompare(b[0]));      // from the earliest date to the latest (like the GM's report)
+  const yote=jumlaZaVikundiVyaMauzo(list);
+  if(muh)muh.innerHTML=list.length?`<div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:14px;"><div><span style="font-size:11px;color:var(--a-muted);text-transform:uppercase;">Jumla ya Mauzo — bila Order (siku ${siku.length})</span><br><strong style="font-size:20px;">${pesa(yote.j)}</strong></div>${VIKUNDI_VYA_MAUZO.filter(([k])=>yote.t[k]>0.004).map(([k,l])=>`<div><span style="font-size:11px;color:var(--a-muted);text-transform:uppercase;">${k==='order'?'Order (nje ya jumla)':l}</span><br><strong style="font-size:16px;">${pesa(yote.t[k])}</strong></div>`).join('')}${yote.p>0.004?`<div><span style="font-size:11px;color:var(--a-muted);text-transform:uppercase;">Punguzo</span><br><strong style="font-size:16px;">${pesa(yote.p)}</strong></div>`:''}</div>`:'';
+  $('tbody-mauzo').innerHTML=siku.length?siku.map(([d,l])=>{
+    l.sort((a,b)=>String(a.created_at||'').localeCompare(String(b.created_at||'')));      // inside a day: in the order they were entered
+    const t=jumlaZaVikundiVyaMauzo(l);
+    return `<tr class="siku-kichwa"><td colspan="13" style="background:var(--a-bg,#eef2f7);font-weight:700;">📅 ${d?maandishiYaTarehe(d):'—'} <span style="font-weight:400;font-size:12px;">· mistari ${l.length}</span></td></tr>`
+      +l.map(safu).join('')
+      +`<tr class="stmt-tot siku-jumla"><td colspan="6">JUMLA YA SIKU — ${d?maandishiYaTarehe(d):'—'} (bila Order)</td><td class="num"><b>${pesa(t.j)}</b></td><td colspan="6" style="font-size:12px;">${chipsZaVikundiVyaMauzo(t.t)}${t.p>0.004?` · Punguzo <b>${fmt0(t.p)}</b>`:''}</td></tr>`;
+  }).join('')+`<tr class="stmt-tot"><td colspan="6">JUMLA YOTE (bila Order) · mistari ${list.length}</td><td class="num"><b>${pesa(yote.j)}</b></td><td colspan="6" style="font-size:12px;">${chipsZaVikundiVyaMauzo(yote.t)}</td></tr>`:safuTupu(13,'Bado hakuna mauzo.');
 }
+// How a sale was paid, for the daily totals: Cash · NMB · CRDB · Lipa Namba · another bank · Madeni (credit) · Order
+const VIKUNDI_VYA_MAUZO=[['cash','Cash'],['nmb','NMB'],['crdb','CRDB'],['lipa','Lipa Namba'],['bank','Benki (nyingine)'],['madeni','Madeni'],['order','Order']];
+function kikundiChaMauzo(s){
+  if(s.chanzo==='Serikali')return 'order';
+  if(s.aina==='Mkopo')return 'madeni';
+  const n=String(s.njia_ya_malipo||'').trim().toLowerCase(),b=String(s.benki||'').trim().toLowerCase();
+  if(n==='cash'||n==='mkono'||n==='taslimu'||(!n&&!b))return 'cash';
+  const t=b||n;if(t.includes('nmb'))return 'nmb';if(t.includes('crdb'))return 'crdb';if(t.includes('lipa'))return 'lipa';
+  return (n==='bank'||n==='benki'||b)?'bank':'cash';
+}
+function jumlaZaVikundiVyaMauzo(a){      // j / p = the officer's own sales (Order is NOT included); o = Order, shown apart
+  const t={},kl={},bk={};VIKUNDI_VYA_MAUZO.forEach(([k])=>{t[k]=0;kl[k]=0;bk[k]=0;});let j=0,p=0;
+  a.forEach(s=>{const k=kikundiChaMauzo(s),v=Number(s.jumla)||0;t[k]+=v;kl[k]+=Number(s.kilicholipwa)||0;bk[k]+=Number(s.bakaa)||0;if(k!=='order'){j+=v;p+=Number(s.punguzo)||0;}});
+  return{t,kl,bk,j,p,o:t.order};
+}
+const chipsZaVikundiVyaMauzo=(t)=>VIKUNDI_VYA_MAUZO.filter(([k])=>t[k]>0.004).map(([k,l])=>k==='order'?`Order <b>${fmt0(t[k])}</b> (nje ya jumla)`:`${l} <b>${fmt0(t[k])}</b>`).join(' · ')||'—';
 
 /* ─── INVOICE PRINT ─── */
 function showInvoiceFromInvoiceNo(invoiceNo){
@@ -6937,18 +6986,24 @@ function canvasKwaPdf(canvas){
   kurasaZaPicha(canvas).forEach((k,i)=>{if(i)pdf.addPage();{const ph=pdf.internal.pageSize.getHeight();let w=pw,h=k.height*pw/k.width;if(h>ph){w=pw*ph/h;h=ph;}pdf.addImage(k.toDataURL('image/jpeg',0.9),'JPEG',(pw-w)/2,0,w,h);}});
   return pdf;
 }
+let _pakuaInaendelea=false;      // a second tap while the first is still working would only make it slower
 async function pakuaFomu(){
-  const canvas=await fomuKamataPicha(false,true);if(!canvas)return;
-  const filename=jinaLaFomuLiloWazi();
-  try{                                              // best: a PDF of the exact document (A4)
-    if(!(window.jspdf&&window.jspdf.jsPDF)){toast('⏳ Inapakia zana ya PDF...');await pakiaMaktaba('jspdf');}
-    canvasKwaPdf(canvas).save(filename+'.pdf');
-    toast('✅ Fomu (PDF) imepakuliwa!');return;
-  }catch(e){/* no PDF tool (no internet?) — give the picture instead */}
-  const a=document.createElement('a');
-  a.href=kurasaZaPicha(canvas)[0].toDataURL('image/jpeg',0.9);a.download=filename+'.jpg';
-  document.body.appendChild(a);a.click();document.body.removeChild(a);
-  toast('✅ Fomu imepakuliwa (picha) — PDF haikupatikana.');
+  if(_pakuaInaendelea)return;_pakuaInaendelea=true;
+  try{
+    toast('⏳ Inaandaa PDF...');
+    try{await Promise.all([pakiaMaktaba('html2canvas'),pakiaMaktaba('jspdf')]);}catch(e){}      // both tools together, not one after the other
+    const canvas=await fomuKamataPicha(false,false);if(!canvas)return;      // 1400px across is sharp on A4 and ~40% quicker than the print size
+    const filename=jinaLaFomuLiloWazi();
+    try{                                              // best: a PDF of the exact document (A4)
+      if(!(window.jspdf&&window.jspdf.jsPDF)){toast('⏳ Inapakia zana ya PDF...');await pakiaMaktaba('jspdf');}
+      canvasKwaPdf(canvas).save(filename+'.pdf');
+      toast('✅ Fomu (PDF) imepakuliwa!');return;
+    }catch(e){/* no PDF tool (no internet?) — give the picture instead */}
+    const a=document.createElement('a');
+    a.href=kurasaZaPicha(canvas)[0].toDataURL('image/jpeg',0.9);a.download=filename+'.jpg';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    toast('✅ Fomu imepakuliwa (picha) — PDF haikupatikana.');
+  }finally{_pakuaInaendelea=false;}
 }
 function waIntlPhone(phone){
   let p=String(phone).replace(/\s+/g,'').replace(/^\+/,'');
@@ -7003,6 +7058,46 @@ async function shirikiFomu(){
     }
   }
   pakuaFaili(faili);
+}
+// IMAGE: the whole form as ONE picture (PNG), for saving or sending by any app
+async function pakuaFomuPicha(){
+  const canvas=await fomuKamataPicha(false,true);if(!canvas)return;
+  const filename=jinaLaFomuLiloWazi();
+  const blob=await new Promise(r=>kwaUkubwaWaA4(canvas).toBlob(r,'image/png'));
+  if(!blob){toast('❌ Picha ya fomu haikutengenezwa. Jaribu tena.');return;}
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=filename+'.png';document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),4000);
+  toast('✅ Fomu (Picha) imepakuliwa!');
+}
+// SHARE AS PDF: the phone's share sheet hands the PDF to WhatsApp / Email / any app; on a computer the PDF is saved and WhatsApp opens (attach with 📎)
+let _pdfTayari=null;      // {file,filename,at} — kept when the phone asks for a second tap
+async function shirikiFomuPdf(){
+  const sheet=document.querySelector('.inv-overlay.open .inv-sheet');
+  const waPhone=sheet?sheet.dataset.waPhone:'';
+  const waKiungo=waPhone?`https://wa.me/${waIntlPhone(waPhone)}`:'https://api.whatsapp.com/send';
+  const filename=jinaLaFomuLiloWazi();
+  const shiriki=async(file)=>navigator.canShare&&navigator.share&&navigator.canShare({files:[file]})?(await navigator.share({files:[file],title:filename}),true):false;
+  let file=null,tayariSasa=false;
+  if(_pdfTayari&&_pdfTayari.filename===filename&&Date.now()-_pdfTayari.at<600000){file=_pdfTayari.file;tayariSasa=true;}
+  else{
+    toast('⏳ Inaandaa PDF...');
+    try{await Promise.all([pakiaMaktaba('html2canvas'),pakiaMaktaba('jspdf')]);}catch(e){}
+    const canvas=await fomuKamataPicha(true,false);if(!canvas){toast('❌ PDF haikutengenezwa. Jaribu tena.');return;}
+    try{if(!(window.jspdf&&window.jspdf.jsPDF))await pakiaMaktaba('jspdf');}catch(e){toast('❌ Zana ya PDF haijapakiwa — angalia mtandao wako.');return;}
+    file=new File([canvasKwaPdf(canvas).output('blob')],filename+'.pdf',{type:'application/pdf'});
+  }
+  try{
+    if(await shiriki(file)){_pdfTayari=null;return;}
+  }catch(e){
+    if(e.name==='AbortError')return;
+    if(!tayariSasa){_pdfTayari={file,filename,at:Date.now()};toast('✅ PDF iko tayari — bonyeza "Shiriki (PDF)" mara moja zaidi ili kuituma.');return;}
+  }
+  const url=URL.createObjectURL(file),a=document.createElement('a');
+  a.href=url;a.download=filename+'.pdf';document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),4000);
+  toast('📥 PDF imepakuliwa — kwenye WhatsApp bonyeza 📎 kisha chagua PDF.');
+  if(!window.open(waKiungo,'_blank'))location.href=waKiungo;
 }
 $('tfClose') && $('tfClose').addEventListener('click',()=>closeSheet('tfOverlay'));
 $('rfClose') && $('rfClose').addEventListener('click',()=>closeSheet('rfOverlay'));
@@ -9912,43 +10007,103 @@ function onyeshaInvoiceSerikaliMafutaNo(inv){
   const r0=rows[0];
   const mistari=rows.map(r=>({tarehe:r.tarehe,agizo:r.namba_agizo||'',gari:r.gari||'',fuel:KODI_YA_MAFUTA[r.aina]||r.aina,qty:Number(r.lita)||0,price:Number(r.bei_kwa_lita_serikali)||0}));
   const lita=mistari.reduce((a,r)=>a+r.qty,0),kiasi=mistari.reduce((a,r)=>a+r.qty*r.price,0);
-  const zilizolipwa=rows.filter(r=>r.hali_malipo==='Imelipwa').length,hali=zilizolipwa===rows.length?'PAID':(zilizolipwa?'PARTLY PAID':'NOT PAID');
+  const lipwaInv=lipwaYaInvoiceMafuta(rows),hali=lipwaInv>=kiasi-0.5?'PAID':(lipwaInv>0.5?'PARTLY PAID':'NOT PAID');
   const vituo=[...new Set(rows.map(r=>BRANCHES[r.tawi]||r.tawi))];
   const mstari=(r)=>`<tr><td>${tareheFupi(r.tarehe)}</td><td>${escH(r.agizo)}</td><td class="pt-gari">${escH(r.gari)}</td><td>${escH(r.fuel)}</td><td class="num">${fmtQ2(r.qty)}</td><td class="num">${fmt0(r.price)}</td><td class="num">${fmt0(r.qty*r.price)}</td></tr>`;
   $('stmtPrintBody').innerHTML=`${kichwaChaPetroli(r0.tarehe,inv,vituo.join(', '),true)}
     <div class="stmt-bill">BILL TO: ${escH(String(r0.mteja||'').toUpperCase())} INVOICE</div>${r0.mradi?`<div class="stmt-co">Project / Mradi: ${escH(r0.mradi)}</div>`:''}
     <div class="table-wrap"><table class="inv-table stmt-tbl"><thead><tr><th>Date</th><th>Jina la Dreva</th><th>Truck</th><th>Fuel</th><th class="num">Qty</th><th class="num">Price</th><th class="num">Amount</th></tr></thead><tbody>${mistari.map(mstari).join('')}
       <tr class="stmt-tot"><td></td><td>TOTAL</td><td></td><td>${kodiYaJumla(mistari)}</td><td class="num">${fmtQ2(lita)}</td><td></td><td class="num">${fmt0(kiasi)}</td></tr>
-      <tr class="pt-hali"><td></td><td></td><td colspan="4">PAYMENT STATUS</td><td class="num">${hali}</td></tr></tbody></table></div>${htmlYaBenki()}`;
+      <tr class="pt-hali"><td></td><td></td><td colspan="4">PAYMENT STATUS</td><td class="num">${hali}</td></tr>${hali==='PARTLY PAID'?`<tr class="pt-hali"><td></td><td></td><td colspan="4">AMOUNT PAID</td><td class="num">${fmt0(lipwaInv)}</td></tr><tr class="pt-hali"><td></td><td></td><td colspan="4">BALANCE DUE</td><td class="num">${fmt0(kiasi-lipwaInv)}</td></tr>`:''}</tbody></table></div>${htmlYaBenki()}`;
   $('stmtOverlay').dataset.jina='invoice-'+String(inv).toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-'+r0.tarehe;
   setWaPhone('stmtOverlay',r0.simu_mteja);
   openSheet('stmtOverlay');
 }
-function onyeshaFomuMtejaMafuta(key){
+async function onyeshaFomuMtejaMafuta(key){
   const rows=allSerikaliMafuta.filter(x=>jinaKey(x.mteja)===key).sort((x,y)=>String(x.tarehe).localeCompare(String(y.tarehe))||String(x.invoice_no).localeCompare(String(y.invoice_no)));
   if(!rows.length){toast('Hakuna invoice za mteja huyu');return;}
+  // the payments this customer has made (listed on the form so they are visible)
+  let malipo=[];
+  try{
+    const ids=allWateja.filter(w=>w.chanzo==='Mafuta'&&!w.deleted_at&&jinaKey(w.jina)===key).map(w=>encodeURIComponent(w.id));
+    if(ids.length&&navigator.onLine){
+      const r=await Promise.race([DB.get('malipo_madeni',`mteja_id=in.(${ids.join(',')})&order=tarehe.asc,created_at.asc&select=tarehe,kiasi,maelezo`),new Promise(res=>setTimeout(()=>res(null),6000))]);
+      if(Array.isArray(r))malipo=r.filter(x=>Number(x.kiasi)>0);
+    }
+  }catch(_e){}
   const r0=rows[0],last=rows[rows.length-1];
-  const mistari=rows.map(r=>({tarehe:r.tarehe,inv:r.invoice_no,agizo:r.namba_agizo||'',gari:r.gari||'',fuel:KODI_YA_MAFUTA[r.aina]||r.aina,qty:Number(r.lita)||0,price:Number(r.bei_kwa_lita_serikali)||0,paid:r.hali_malipo==='Imelipwa'}));
-  const lita=mistari.reduce((a,r)=>a+r.qty,0),kiasi=mistari.reduce((a,r)=>a+r.qty*r.price,0),lipwa=mistari.filter(r=>r.paid).reduce((a,r)=>a+r.qty*r.price,0);
+  const ramaniF=ramaniMalipoMafuta();
+  const mistari=rows.map(r=>({tarehe:r.tarehe,inv:r.invoice_no,agizo:r.namba_agizo||'',gari:r.gari||'',fuel:KODI_YA_MAFUTA[r.aina]||r.aina,qty:Number(r.lita)||0,price:Number(r.bei_kwa_lita_serikali)||0,hali:haliYaInvoiceMafuta(r,rows,ramaniF)}));
+  const lita=mistari.reduce((a,r)=>a+r.qty,0),kiasi=mistari.reduce((a,r)=>a+r.qty*r.price,0),jumlaMalipo=malipo.reduce((a,x)=>a+(Number(x.kiasi)||0),0);
+  const lipwa=Math.min(kiasi,Math.max(lipwaYaOrodhaMafuta(rows,ramaniF),jumlaMalipo));      // what was really paid, including part-payments
   const vituo=[...new Set(rows.map(r=>BRANCHES[r.tawi]||r.tawi))];
   const mr=[...new Set(rows.map(r=>(r.mradi||'').trim()).filter(Boolean))];
-  const mstari=(r)=>`<tr><td>${tareheFupi(r.tarehe)}</td><td>${escH(r.inv)}</td><td>${escH(r.agizo)}</td><td class="pt-gari">${escH(r.gari)}</td><td>${escH(r.fuel)}</td><td class="num">${fmtQ2(r.qty)}</td><td class="num">${fmt0(r.price)}</td><td class="num">${fmt0(r.qty*r.price)}</td><td>${r.paid?'PAID':'NOT PAID'}</td></tr>`;
-  $('stmtPrintBody').innerHTML=`${kichwaChaPetroli(last.tarehe,[...new Set(rows.map(r=>r.invoice_no))].join(', '),vituo.join(', '),true)}
+  // The invoices are ONE combined bill: what the customer paid is taken off the TOTAL (not marked against single rows or invoices)
+  const mstari=(r)=>`<tr><td>${tareheFupi(r.tarehe)}</td><td>${escH(r.inv)}</td><td>${escH(r.agizo)}</td><td class="pt-gari">${escH(r.gari)}</td><td>${escH(r.fuel)}</td><td class="num">${fmtQ2(r.qty)}</td><td class="num">${fmt0(r.price)}</td><td class="num">${fmt0(r.qty*r.price)}</td></tr>`;
+  $('stmtPrintBody').innerHTML=`${kichwaChaPetroli(last.tarehe,'',vituo.join(', '),true)}
     <div class="stmt-bill">BILL TO: ${escH(String(r0.mteja||'').toUpperCase())} — ALL INVOICES</div>${mr.length?`<div class="stmt-co">Project / Mradi: ${escH(mr.join(', '))}</div>`:''}
-    <div class="table-wrap"><table class="inv-table stmt-tbl"><thead><tr><th>Date</th><th>Invoice</th><th>Jina la Dreva</th><th>Truck</th><th>Fuel</th><th class="num">Qty</th><th class="num">Price</th><th class="num">Amount</th><th>Status</th></tr></thead><tbody>${mistari.map(mstari).join('')}
-      <tr class="stmt-tot"><td></td><td>TOTAL</td><td></td><td></td><td>${kodiYaJumla(mistari)}</td><td class="num">${fmtQ2(lita)}</td><td></td><td class="num">${fmt0(kiasi)}</td><td></td></tr>
-      <tr class="pt-hali"><td colspan="7">AMOUNT PAID</td><td class="num">${fmt0(lipwa)}</td><td></td></tr>
-      <tr class="pt-hali"><td colspan="7">BALANCE DUE</td><td class="num">${fmt0(kiasi-lipwa)}</td><td></td></tr></tbody></table></div>${htmlYaBenki()}`;
+    <div class="table-wrap"><table class="inv-table stmt-tbl"><thead><tr><th>Date</th><th>Invoice</th><th>Jina la Dreva</th><th>Truck</th><th>Fuel</th><th class="num">Qty</th><th class="num">Price</th><th class="num">Amount</th></tr></thead><tbody>${mistari.map(mstari).join('')}
+      <tr class="stmt-tot"><td></td><td>TOTAL</td><td></td><td></td><td>${kodiYaJumla(mistari)}</td><td class="num">${fmtQ2(lita)}</td><td></td><td class="num">${fmt0(kiasi)}</td></tr>
+      <tr class="pt-hali"><td colspan="7">AMOUNT PAID</td><td class="num">${fmt0(lipwa)}</td></tr>
+      <tr class="pt-hali"><td colspan="7">BALANCE DUE</td><td class="num">${fmt0(kiasi-lipwa)}</td></tr></tbody></table></div>${htmlYaBenki()}`;
   $('stmtOverlay').dataset.jina='invoices-'+String(key).replace(/[^a-z0-9]+/gi,'-');
   setWaPhone('stmtOverlay',r0.simu_mteja);
   openSheet('stmtOverlay');
 }
+// WHAT HAS REALLY BEEN PAID on fuel invoices. A part-payment is recorded on the customer's debt record (wateja, by invoice number) —
+// the invoice line itself only says "Imelipwa" once EVERYTHING is paid. Every fuel list/form below reads the amount from here, so
+// what the fuel officer records shows the same in the GM's account.
+function ramaniMalipoMafuta(){
+  const m=new Map(),wm=allWateja.filter(w=>w.chanzo==='Mafuta'&&!w.deleted_at);
+  // 1) the debt record of each invoice (matched by invoice number)
+  const exact=new Map();
+  wm.forEach(w=>{if(!w.invoice_no)return;const e=exact.get(w.invoice_no)||{bakaa:0,lipwa:0};e.bakaa+=Number(w.bakaa)||0;e.lipwa+=Number(w.kilicholipwa)||0;exact.set(w.invoice_no,e);});
+  // 2) what a customer has paid in total, by name — it covers invoices whose debt record is not matched by number (paid oldest first)
+  const pool=new Map();wm.forEach(w=>{const k=jinaKey(w.jina);pool.set(k,(pool.get(k)||0)+(Number(w.kilicholipwa)||0));});
+  const kwaMteja=new Map();
+  allSerikaliMafuta.filter(s=>!String(s.id).startsWith('tmp-')&&!s.deleted_at).forEach(s=>{
+    const k=jinaKey(s.mteja);let a=kwaMteja.get(k);if(!a){a=new Map();kwaMteja.set(k,a);}
+    let g=a.get(s.invoice_no);if(!g){g={inv:s.invoice_no,tarehe:s.tarehe,jumla:0,imelipwa:true};a.set(s.invoice_no,g);}
+    g.jumla+=Number(s.jumla)||0;if(s.tarehe<g.tarehe)g.tarehe=s.tarehe;if(s.hali_malipo!=='Imelipwa')g.imelipwa=false;
+  });
+  kwaMteja.forEach((a,k)=>{
+    const list=[...a.values()];let baki=pool.get(k)||0;
+    list.forEach(g=>{const e=exact.get(g.inv);if(e){m.set(g.inv,{bakaa:e.bakaa,lipwa:e.lipwa});baki-=e.lipwa;}});
+    if(!pool.has(k))return;
+    baki=Math.max(0,baki);
+    list.filter(g=>!exact.has(g.inv)&&!g.imelipwa).sort((x,y)=>String(x.tarehe).localeCompare(String(y.tarehe))||String(x.inv).localeCompare(String(y.inv)))
+      .forEach(g=>{const p=Math.min(g.jumla,baki);baki-=p;m.set(g.inv,{bakaa:g.jumla-p,lipwa:p});});
+  });
+  return m;
+}
+// the amount paid on ONE invoice (all its lines)
+function lipwaYaInvoiceMafuta(lines,ramani){
+  const jumla=lines.reduce((a,s)=>a+(Number(s.jumla)||0),0),w=(ramani||ramaniMalipoMafuta()).get(lines[0].invoice_no);
+  if(w)return Math.max(0,Math.min(jumla,w.bakaa<=0.004?jumla:jumla-w.bakaa));
+  return lines.every(s=>s.hali_malipo==='Imelipwa')?jumla:0;
+}
+// total paid over any list of fuel lines (grouped by invoice)
+function lipwaYaOrodhaMafuta(rows,ramani){
+  ramani=ramani||ramaniMalipoMafuta();const g=new Map();
+  rows.forEach(s=>{let a=g.get(s.invoice_no);if(!a){a=[];g.set(s.invoice_no,a);}a.push(s);});
+  let t=0;g.forEach(l=>{t+=lipwaYaInvoiceMafuta(l,ramani);});return t;
+}
+// 'kamili' | 'sehemu' | 'hapana' for the invoice this line belongs to
+function haliYaInvoiceMafuta(s,rows,ramani){
+  const l=rows.filter(x=>x.invoice_no===s.invoice_no),j=l.reduce((a,x)=>a+(Number(x.jumla)||0),0),p=lipwaYaInvoiceMafuta(l,ramani);
+  return p>=j-0.5?'kamili':(p>0.5?'sehemu':'hapana');
+}
+const mtejaMafutaWazi=new Set();      // the customers Fuad has opened in the list
+function badilishaMtejaMafuta(k){if(mtejaMafutaWazi.has(k))mtejaMafutaWazi.delete(k);else mtejaMafutaWazi.add(k);renderSerikaliMafuta();}
+function mtejaMafutaZote(fungua){mtejaMafutaWazi.clear();if(fungua)allSerikaliMafuta.forEach(s=>mtejaMafutaWazi.add(jinaKey(s.mteja)||'?'));renderSerikaliMafuta();}
 function renderSerikaliMafuta(){
   const tb=$('tbody-serikali-mafuta');if(!tb)return;
+  pakiaMaktabaMapema();
   renderOdaMafuta();renderStatementUI();
   const orodha=(userRole==='petroli'||(userRole==='gm'&&viewingTawi!=='yote'&&!PETROL_BRANCHES[viewingTawi]))?allSerikaliMafuta:filterByTawi(allSerikaliMafuta);      // a hardware branch picked at the top has no fuel orders — the GM then still sees every station's orders      // Fuad's station picker narrows the list
   const jumla=orodha.reduce((a,s)=>a+Number(s.jumla||0),0);
-  const imelipwa=orodha.filter(s=>s.hali_malipo==='Imelipwa').reduce((a,s)=>a+Number(s.jumla||0),0);
+  const ramaniM=ramaniMalipoMafuta();
+  const imelipwa=lipwaYaOrodhaMafuta(orodha,ramaniM);
   const litaPetroli=orodha.filter(s=>s.aina==='Petroli').reduce((a,s)=>a+Number(s.lita||0),0);
   const litaDizeli=orodha.filter(s=>s.aina==='Dizeli').reduce((a,s)=>a+Number(s.lita||0),0);
   const sm=$('skm-summary');
@@ -9968,18 +10123,47 @@ function renderSerikaliMafuta(){
   }
   if(userRole==='gm'&&orodha.length){
     const gm={};orodha.forEach(s=>{const k=jinaKey(s.mteja);(gm[k]=gm[k]||{jina:s.mteja,l:[]}).l.push(s);});
-    const rw=Object.values(gm).map(e=>({...e,j:e.l.reduce((a,x)=>a+Number(x.jumla||0),0),lt:e.l.reduce((a,x)=>a+Number(x.lita||0),0),lp:e.l.filter(x=>x.hali_malipo==='Imelipwa').reduce((a,x)=>a+Number(x.jumla||0),0),inv:[...new Set(e.l.map(x=>x.invoice_no))],mx:e.l.reduce((a,x)=>String(x.tarehe)>a?String(x.tarehe):a,'')})).sort((a,b)=>b.mx.localeCompare(a.mx));
-    const th=tb.closest('table').querySelector('thead');if(th){if(!th.dataset.gm)th.dataset.gm=th.innerHTML;th.innerHTML='<tr><th>#</th><th>Mteja / Mradi</th><th>Kituo</th><th class="num">Lita</th><th class="num">Jumla</th><th class="num">Haijalipwa</th><th>Kitendo</th></tr>';}
+    const rw=Object.values(gm).map(e=>({...e,j:e.l.reduce((a,x)=>a+Number(x.jumla||0),0),lt:e.l.reduce((a,x)=>a+Number(x.lita||0),0),lp:lipwaYaOrodhaMafuta(e.l,ramaniM),inv:[...new Set(e.l.map(x=>x.invoice_no))],mx:e.l.reduce((a,x)=>String(x.tarehe)>a?String(x.tarehe):a,'')})).sort((a,b)=>b.mx.localeCompare(a.mx));
+    const th=tb.closest('table').querySelector('thead');if(th){if(!th.dataset.gm)th.dataset.gm=th.innerHTML;th.innerHTML='<tr><th>#</th><th>Mteja / Mradi</th><th>Kituo</th><th class="num">Lita</th><th class="num">Jumla</th><th class="num">Kimelipwa</th><th class="num">Haijalipwa</th><th>Kitendo</th></tr>';}
     tb.innerHTML=rw.map((e,ix)=>{const vt=[...new Set(e.l.map(x=>BRANCHES[x.tawi]||x.tawi))].join(', '),mr=[...new Set(e.l.map(x=>(x.mradi||'').trim()).filter(Boolean))].map(x=>mradiLebo(x)).join('');
-      return `<tr><td>${ix+1}</td><td><strong>${escH(e.jina)}</strong>${mr}</td><td style="font-size:12px;">${escH(vt)}</td><td class="num">${e.lt.toFixed(1)}</td><td class="num"><b>${fmt0(e.j)}</b></td><td class="num">${fmt0(e.j-e.lp)}</td><td><button class="btn sm secondary" data-m="${escH(jinaKey(e.jina))}" onclick="onyeshaFomuMtejaMafuta(this.dataset.m)">🖨 Fungua</button></td></tr>`;}).join('');
+      return `<tr><td>${ix+1}</td><td><strong>${escH(e.jina)}</strong>${mr}</td><td style="font-size:12px;">${escH(vt)}</td><td class="num">${e.lt.toFixed(1)}</td><td class="num"><b>${fmt0(e.j)}</b></td><td class="num" style="color:var(--a-green,#16a34a);">${fmt0(e.lp)}</td><td class="num">${fmt0(Math.max(0,e.j-e.lp))}</td><td><button class="btn sm secondary" data-m="${escH(jinaKey(e.jina))}" onclick="onyeshaFomuMtejaMafuta(this.dataset.m)">🖨 Fungua</button></td></tr>`;}).join('');
+    return;
+  }
+  if(userRole==='serikali_mafuta'){      // FUAD: ONE row per customer; open it to see all his invoices (and the lines of each)
+    const th=tb.closest('table').querySelector('thead');if(th){if(!th.dataset.gm)th.dataset.gm=th.innerHTML;th.innerHTML='<tr><th>#</th><th>Mteja / Mradi</th><th>Kituo</th><th class="num">Invoice</th><th class="num">Lita</th><th class="num">Jumla</th><th class="num">Kimelipwa</th><th class="num">Baki</th><th>Hali</th><th>Kitendo</th></tr>';}
+    const gk=new Map();
+    orodha.forEach(s=>{const k=jinaKey(s.mteja)||'?';let c=gk.get(k);if(!c){c={key:k,jina:String(s.mteja||'').trim(),l:[],t:''};gk.set(k,c);}c.l.push(s);const t=String(s.created_at||'');if(t>c.t)c.t=t;});
+    const wateja=[...gk.values()].sort((a,b)=>b.t.localeCompare(a.t));
+    if(sm)sm.innerHTML+=`<div class="controls" style="margin-bottom:10px;"><button class="btn sm secondary" onclick="mtejaMafutaZote(true)">📂 Fungua zote</button><button class="btn sm secondary" onclick="mtejaMafutaZote(false)">📁 Funga zote</button></div>`;
+    const kwaTarehe=(a,b)=>String(b.tarehe).localeCompare(String(a.tarehe))||String(b.t||'').localeCompare(String(a.t||''));
+    tb.innerHTML=wateja.length?wateja.map((c,ix)=>{
+      const inv=new Map();c.l.forEach(s=>{let g=inv.get(s.invoice_no);if(!g){g={inv:s.invoice_no,tarehe:s.tarehe,t:'',l:[]};inv.set(s.invoice_no,g);}g.l.push(s);if(s.tarehe>g.tarehe)g.tarehe=s.tarehe;const t=String(s.created_at||'');if(t>g.t)g.t=t;});
+      const invs=[...inv.values()].sort(kwaTarehe);
+      const j=c.l.reduce((a,x)=>a+(Number(x.jumla)||0),0),lt=c.l.reduce((a,x)=>a+(Number(x.lita)||0),0),lp=lipwaYaOrodhaMafuta(c.l,ramaniM),baki=Math.max(0,j-lp);
+      const hc=baki<=0.5?['pill-green','Imelipwa']:lp>0.5?['pill-amber','Amelipa Sehemu']:['pill-red','Haijalipwa'];
+      const vt=[...new Set(c.l.map(x=>BRANCHES[x.tawi]||x.tawi))].join(', '),mr=[...new Set(c.l.map(x=>(x.mradi||'').trim()).filter(Boolean))].map(x=>mradiLebo(x)).join('');
+      const wazi=mtejaMafutaWazi.has(c.key),k=escH(c.key);
+      const kaza=`<tr style="cursor:pointer;" data-m="${k}" onclick="badilishaMtejaMafuta(this.dataset.m)"><td>${ix+1}</td><td><strong>${wazi?'▼':'▶'} ${escH(c.jina)}</strong>${mr}</td><td style="font-size:12px;">${escH(vt)}</td><td class="num">${invs.length}</td><td class="num">${lt.toFixed(2)} L</td><td class="num"><b>${pesa(j)}</b></td><td class="num" style="color:var(--a-green,#16a34a);">${pesa(lp)}</td><td class="num">${pesa(baki)}</td><td><span class="pill ${hc[0]}">${hc[1]}</span></td><td style="white-space:nowrap;"><button class="btn sm secondary" data-m="${k}" onclick="event.stopPropagation();onyeshaFomuMtejaMafuta(this.dataset.m)">🖨 Zote</button> <button class="btn sm secondary" data-m="${k}" onclick="event.stopPropagation();fomuHatua('m:'+this.dataset.m,'pdf')">PDF</button> <button class="btn sm secondary" data-m="${k}" title="Pakua Picha" onclick="event.stopPropagation();fomuHatua('m:'+this.dataset.m,'picha')">🖼</button> <button class="btn sm secondary" data-m="${k}" title="Shiriki (PDF)" onclick="event.stopPropagation();fomuHatua('m:'+this.dataset.m,'shirikipdf')">📤</button></td></tr>`;
+      if(!wazi)return kaza;
+      const mistari=invs.map(g=>{
+        const gj=g.l.reduce((a,x)=>a+(Number(x.jumla)||0),0),glt=g.l.reduce((a,x)=>a+(Number(x.lita)||0),0),gp=lipwaYaInvoiceMafuta(g.l,ramaniM),gb=Math.max(0,gj-gp);
+        const gc=gb<=0.5?['pill-green','Imelipwa']:gp>0.5?['pill-amber','Amelipa '+pesa(gp)+' · baki '+pesa(gb)]:['pill-red','Haijalipwa'];
+        const a=escH(JSON.stringify(g.inv));
+        const kichwa=`<tr style="background:var(--a-bg,#f4f6f9);font-weight:700;"><td>${escH(g.inv)}</td><td>${g.tarehe}</td><td style="font-weight:400;font-size:12px;">${g.l.length} ${g.l.length>1?'magari':'gari'}</td><td>${[...new Set(g.l.map(x=>x.aina))].map(escH).join(', ')}</td><td class="num">${glt.toFixed(2)} L</td><td></td><td class="num">${pesa(gj)}</td><td><span class="pill ${gc[0]}">${gc[1]}</span></td><td style="white-space:nowrap;"><button class="btn sm secondary" onclick="onyeshaInvoiceSerikaliMafutaNo(${a})">🖨</button> ${vitufeVyaFomuMafuta(g.inv)}</td></tr>`;
+        const mstari=g.l.slice().sort((x,y)=>String(x.created_at||'').localeCompare(String(y.created_at||''))).map(s=>`<tr><td></td><td style="font-size:12px;">${s.tarehe}</td><td>${escH(s.gari||'—')}</td><td>${escH(s.aina||'')}</td><td class="num">${Number(s.lita).toFixed(2)} L</td><td class="num">${pesa(s.bei_kwa_lita_serikali)}</td><td class="num">${pesa(s.jumla)}</td><td></td><td>${kitufeMarekebisho('mafuta_mauzo_serikali',s.id)}</td></tr>`).join('');
+        return kichwa+mstari;
+      }).join('');
+      const jumlaSafu=`<tr style="font-weight:700;border-top:2px solid var(--a-line,#ccc);"><td colspan="4">Jumla ya ${escH(c.jina)}</td><td class="num">${lt.toFixed(2)} L</td><td></td><td class="num">${pesa(j)}</td><td colspan="2">Kimelipwa ${pesa(lp)} · Baki ${pesa(baki)}</td></tr>`;
+      return kaza+`<tr><td colspan="10" style="padding:0 0 0 18px;background:rgba(0,0,0,.02);"><div class="table-wrap"><table><thead><tr><th>Invoice</th><th>Tarehe</th><th>Gari</th><th>Mafuta</th><th class="num">Lita</th><th class="num">Bei</th><th class="num">Jumla</th><th>Hali</th><th>Kitendo</th></tr></thead><tbody>${mistari}${jumlaSafu}</tbody></table></div></td></tr>`;
+    }).join(''):safuTupu(10,allSerikaliMafuta.length?'Hakuna invoice za mafuta kwa kituo ulichochagua.':'Hakuna invoice zilizopakiwa — huenda hifadhidata ina tatizo la muda au mtandao umekatika. Onyesha upya ukurasa baada ya dakika chache.');
     return;
   }
   const th0=tb.closest('table').querySelector('thead');if(th0&&th0.dataset.gm){th0.innerHTML=th0.dataset.gm;delete th0.dataset.gm;}
   tb.innerHTML=orodha.length?orodha.map(s=>{
-    const paid=s.hali_malipo==='Imelipwa';
-    let acts=`<button class="btn sm secondary" onclick="onyeshaInvoiceSerikaliMafutaNo('${s.invoice_no}')">🖨</button>`;
+    const hm=haliYaInvoiceMafuta(s,orodha,ramaniM),paid=hm==='kamili';
+    let acts=`<button class="btn sm secondary" onclick="onyeshaInvoiceSerikaliMafutaNo('${s.invoice_no}')">🖨</button>`+vitufeVyaFomuMafuta(s.invoice_no);
     if(userRole==='serikali_mafuta')acts+=kitufeMarekebisho('mafuta_mauzo_serikali',s.id);
-    return `<tr><td>${s.invoice_no}</td><td>${s.tarehe}</td><td><strong>${escH(s.mteja)}</strong>${mradiLebo(s.mradi)}</td><td>${BRANCHES[s.tawi]||s.tawi}${s.rekodi_jina?`<br><span style="font-size:11px;color:var(--a-muted);">${escH(s.rekodi_jina)}</span>`:''}</td><td>${escH(s.gari||'—')}</td><td>${s.aina}</td><td>${Number(s.lita).toFixed(2)} L</td><td>${pesa(s.bei_kwa_lita_serikali)}</td><td class="num"><strong>${pesa(s.jumla)}</strong></td><td><span class="pill ${paid?'pill-green':'pill-red'}">${paid?'Imelipwa':'Haijalipwa'}</span></td><td style="display:flex;gap:4px;flex-wrap:wrap;">${acts}</td></tr>`;
+    return `<tr><td>${s.invoice_no}</td><td>${s.tarehe}</td><td><strong>${escH(s.mteja)}</strong>${mradiLebo(s.mradi)}</td><td>${BRANCHES[s.tawi]||s.tawi}${s.rekodi_jina?`<br><span style="font-size:11px;color:var(--a-muted);">${escH(s.rekodi_jina)}</span>`:''}</td><td>${escH(s.gari||'—')}</td><td>${s.aina}</td><td>${Number(s.lita).toFixed(2)} L</td><td>${pesa(s.bei_kwa_lita_serikali)}</td><td class="num"><strong>${pesa(s.jumla)}</strong></td><td><span class="pill ${paid?'pill-green':hm==='sehemu'?'pill-amber':'pill-red'}">${paid?'Imelipwa':hm==='sehemu'?'Amelipa Sehemu':'Haijalipwa'}</span></td><td style="display:flex;gap:4px;flex-wrap:wrap;">${acts}</td></tr>`;
   }).join(''):safuTupu(11,allSerikaliMafuta.length?'Hakuna invoice za mafuta kwa kituo ulichochagua.':'Hakuna invoice zilizopakiwa — huenda hifadhidata ina tatizo la muda au mtandao umekatika. Onyesha upya ukurasa baada ya dakika chache.');
 }
 function funguaHaririSerikaliMafutaGM(id,ombiId){
@@ -12354,22 +12538,26 @@ const odaMtejaWazi=new Set();
 function badilishaOdaMteja(k){if(odaMtejaWazi.has(k))odaMtejaWazi.delete(k);else odaMtejaWazi.add(k);renderOdaMafuta();}
 function renderOdaMafuta(){
   const tb=$('tbody-oda-mafuta');if(!tb)return;
+  pakiaMaktabaMapema();
   if($('odaGridBody')&&!$('odaGridBody').children.length)jengaGridOda();
   const dl=$('oda-wateja');
   if(dl)dl.innerHTML=[...odaWatejaWanaojulikana().values()].sort((a,b)=>a.jina.localeCompare(b.jina)).map(c=>`<option value="${escH(c.jina)}" label="${escH([c.aina,c.simu].filter(Boolean).join(' · '))}"></option>`).join('');
   if(userRole!=='petroli')return;
   const kwaInvoice=new Map();
   allSerikaliMafuta.filter(s=>s.tawi===userTawi).forEach(s=>{
-    let g=kwaInvoice.get(s.invoice_no);if(!g){g={inv:s.invoice_no,mteja:s.mteja,tarehe:s.tarehe,t:'',magari:new Set(),aina:new Set(),lita:0,jumla:0,lipwa:true,mkopo:false};kwaInvoice.set(s.invoice_no,g);}
+    let g=kwaInvoice.get(s.invoice_no);if(!g){g={inv:s.invoice_no,mteja:s.mteja,tarehe:s.tarehe,t:'',magari:new Set(),aina:new Set(),lita:0,jumla:0,lipwa:true,mkopo:false,lines:[]};kwaInvoice.set(s.invoice_no,g);}
+    g.lines.push(s);
     const t=String(s.created_at||'9999');if(t>g.t)g.t=t;
-    if(s.tarehe>g.tarehe)g.tarehe=s.tarehe;if(s.gari)g.magari.add(s.gari);if(s.aina)g.aina.add(s.aina);g.lita+=Number(s.lita)||0;g.jumla+=Number(s.jumla)||0;if(s.hali_malipo!=='Imelipwa')g.lipwa=false;if(s.aina_malipo==='Mkopo')g.mkopo=true;
+    if(s.tarehe>g.tarehe)g.tarehe=s.tarehe;if(s.gari)g.magari.add(s.gari);if(s.aina)g.aina.add(s.aina);g.lita+=Number(s.lita)||0;g.jumla+=Number(s.jumla)||0;if(s.aina_malipo==='Mkopo')g.mkopo=true;
   });
+  const ramaniO=ramaniMalipoMafuta();
+  kwaInvoice.forEach(g=>{g.kimelipwa=lipwaYaInvoiceMafuta(g.lines,ramaniO);g.baki=Math.max(0,g.jumla-g.kimelipwa);g.lipwa=g.baki<=0.5;});      // part-payments count
   // Group the invoices by customer: one row per customer, open it to see every order and the total on credit.
   const wateja=new Map();
   [...kwaInvoice.values()].forEach(g=>{
     const k=jinaKey(g.mteja)||'?';let c=wateja.get(k);
     if(!c){c={key:k,jina:String(g.mteja||'').trim(),oda:[],lita:0,jumla:0,deni:0,t:''};wateja.set(k,c);}
-    c.oda.push(g);c.lita+=g.lita;c.jumla+=g.jumla;if(!g.lipwa)c.deni+=g.jumla;if(g.t>c.t)c.t=g.t;
+    c.oda.push(g);c.lita+=g.lita;c.jumla+=g.jumla;c.deni+=g.baki;if(g.t>c.t)c.t=g.t;
   });
   const orodha=[...wateja.values()].sort((a,b)=>b.t.localeCompare(a.t));
   tb.innerHTML=orodha.length?orodha.map(c=>{
@@ -12377,7 +12565,7 @@ function renderOdaMafuta(){
     c.oda.sort((a,b)=>String(b.tarehe).localeCompare(String(a.tarehe))||b.t.localeCompare(a.t));
     const kaza=`<tr style="cursor:pointer;" onclick="badilishaOdaMteja('${escH(c.key).replace(/'/g,"&#39;")}')"><td><strong>${wazi?'▼':'▶'} ${escH(c.jina)}</strong></td><td class="num">${c.oda.length}</td><td class="num">${c.lita.toFixed(2)} L</td><td class="num"><strong>${pesa(c.jumla)}</strong></td><td class="num">${c.deni>0?`<span class="pill pill-red">${pesa(c.deni)}</span>`:'<span class="pill pill-green">Hana deni</span>'}</td><td><button class="btn sm secondary" onclick="event.stopPropagation();badilishaOdaMteja('${escH(c.key).replace(/'/g,"&#39;")}')">${wazi?'Funga':'Fungua'}</button></td></tr>`;
     if(!wazi)return kaza;
-    const mistari=c.oda.map(g=>`<tr><td><strong>${escH(g.inv)}</strong></td><td>${g.tarehe}</td><td style="max-width:200px;font-size:12px;">${[...g.magari].map(escH).join(', ')||'—'}</td><td>${[...g.aina].map(escH).join(', ')||'—'}</td><td class="num">${g.lita.toFixed(2)} L</td><td class="num"><strong>${pesa(g.jumla)}</strong></td><td><span class="pill ${g.lipwa?'pill-green':'pill-red'}">${g.lipwa?'Imelipwa':'Haijalipwa'}</span></td><td><button class="btn sm secondary" onclick="onyeshaInvoiceSerikaliMafutaNo('${escH(g.inv)}')">🖨 Invoice</button></td></tr>`).join('');
+    const mistari=c.oda.map(g=>`<tr><td><strong>${escH(g.inv)}</strong></td><td>${g.tarehe}</td><td style="max-width:200px;font-size:12px;">${[...g.magari].map(escH).join(', ')||'—'}</td><td>${[...g.aina].map(escH).join(', ')||'—'}</td><td class="num">${g.lita.toFixed(2)} L</td><td class="num"><strong>${pesa(g.jumla)}</strong></td><td><span class="pill ${g.lipwa?'pill-green':g.kimelipwa>0.5?'pill-amber':'pill-red'}">${g.lipwa?'Imelipwa':g.kimelipwa>0.5?'Amelipa '+pesa(g.kimelipwa)+' · baki '+pesa(g.baki):'Haijalipwa'}</span></td><td><button class="btn sm secondary" onclick="onyeshaInvoiceSerikaliMafutaNo('${escH(g.inv)}')">🖨 Invoice</button> ${vitufeVyaFomuMafuta(g.inv)}</td></tr>`).join('');
     const jumlaSafu=`<tr style="background:var(--a-bg,#f4f6f9);font-weight:700;"><td colspan="4">Jumla ya ${escH(c.jina)}</td><td class="num">${c.lita.toFixed(2)} L</td><td class="num">${pesa(c.jumla)}</td><td colspan="2">Deni: ${pesa(c.deni)}</td></tr>`;
     return kaza+`<tr><td colspan="6" style="padding:0 0 0 18px;background:rgba(0,0,0,.02);"><div class="table-wrap"><table><thead><tr><th>Invoice</th><th>Tarehe</th><th>Magari</th><th>Mafuta</th><th class="num">Lita</th><th class="num">Jumla</th><th>Malipo</th><th>Kitendo</th></tr></thead><tbody>${mistari}${jumlaSafu}</tbody></table></div></td></tr>`;
   }).join(''):safuTupu(6,'Bado hakuna oda za mkopo zilizorekodiwa kituoni hiki.');
@@ -12652,7 +12840,7 @@ function dataYaStatement(jina,mwezi){
   return{mteja:String(jina).trim(),mwezi,imehifadhiwa:!!saved,invoice_no:nambari,kuanzia:p.kuanzia,hadi:p.hadi,punguzoImebadilishwa:!!saved,
     tarehe_taarifa:saved&&saved.tarehe_taarifa?saved.tarehe_taarifa:mwishoWaMwezi(mwezi),rows,
     punguzo_lita:saved?Number(saved.punguzo_lita):0,punguzo_kiwango:saved?Number(saved.punguzo_kiwango):kiwangoKawaida,
-    mizani_awali:saved?Number(saved.mizani_awali):mizani,kilicholipwa:saved?Number(saved.kilicholipwa):malipoMwezi};
+    mizani_awali:saved?Number(saved.mizani_awali):mizani,kilicholipwa:saved?Number(saved.kilicholipwa):malipoMwezi,malipo_rekodiwa:malipoMwezi};
 }
 function jumlaZaStatement(d){return hesabuJumlaZaStatement(d.rows,d.punguzo_lita,d.punguzo_kiwango,d.mizani_awali,d.kilicholipwa);}
 const MIEZI_FUPI=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -12661,7 +12849,7 @@ const fmtQ2=(n)=>Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,ma
 // the head of a petrol invoice / statement: logo on the left, the company details on the right
 function kichwaChaPetroli(tarehe,inv,kituo,naNembo){
   const K=STMT_KAMPUNI;
-  return `<div class="pt-kichwa">${naNembo?'<div class="pt-nembo"><div class="inv-logo"></div></div>':''}<div class="pt-maandishi"><div class="pt-jina">${K.jina}</div><div>${K.tin}</div><div>${K.anwani}</div><div>${K.barua}</div><div class="pt-tarehe">Date: ${maandishiYaTarehe(tarehe)}</div><div class="pt-inv">Invoice No:${escH(inv)}</div><div>${K.simu}</div>${kituo?`<div>Station: ${escH(kituo)}</div>`:''}</div></div>`;
+  return `<div class="pt-kichwa">${naNembo?'<div class="pt-nembo"><div class="inv-logo"></div></div>':''}<div class="pt-maandishi"><div class="pt-jina">${K.jina}</div><div>${K.tin}</div><div>${K.anwani}</div><div>${K.barua}</div><div class="pt-tarehe">Date: ${maandishiYaTarehe(tarehe)}</div>${inv?`<div class="pt-inv">Invoice No:${escH(inv)}</div>`:''}<div>${K.simu}</div>${kituo?`<div>Station: ${escH(kituo)}</div>`:''}</div></div>`;
 }
 function maandishiYaTarehe(iso){const [y,m,dd]=iso.split('-').map(Number);return `${dd} ${MIEZI_KAMILI[m-1]} ${y}`;}
 function maandishiYaMwezi(mwezi){const [y,m]=mwezi.split('-').map(Number);return `${MIEZI_KAMILI[m-1].slice(0,3).toUpperCase()} ${y}`;}
@@ -12716,7 +12904,7 @@ function onyeshaStatement(){
       <div><label>Discount — Lita</label><input type="number" step="0.01" min="0" id="stmt-pl" value="${d.punguzo_lita}" oninput="onParamStatement(false,true)"/></div>
       <div><label>Discount — kwa Lita (TZS)</label><input type="number" min="0" id="stmt-pk" value="${d.punguzo_kiwango}" oninput="onParamStatement()"/></div>
       <div><label>Previous Balance (TZS)</label><input type="number" id="stmt-mz" value="${d.mizani_awali}" oninput="onParamStatement()"/></div>
-      <div><label>Amount Paid (TZS)</label><input type="number" min="0" id="stmt-kl" value="${d.kilicholipwa}" oninput="onParamStatement()"/></div>
+      <div><label>Amount Paid (TZS)</label><input type="number" min="0" id="stmt-kl" value="${d.kilicholipwa}" oninput="onParamStatement()"/><div style="font-size:11px;color:var(--a-muted);margin-top:3px;">Malipo yaliyorekodiwa mwezi huu: <b>${fmt0(d.malipo_rekodiwa||0)}</b>. Ukiweka kiasi kikubwa zaidi, ukihifadhi utaulizwa kurekodi tofauti kama malipo ya mteja (ndipo Meneja Mkuu anaziona).</div></div>
     </div>
     <p style="font-size:11.5px;color:var(--a-muted);margin:0 0 10px;">${d.imehifadhiwa?'✔ Statement hii imehifadhiwa. ':'Bado haijahifadhiwa. '}Magari yanayojumuishwa ni yale yaliyo kati ya tarehe mbili "Magari kuanzia / hadi" hapo juu (unaweza kupanua "hadi" kujumuisha siku za mwanzo wa mwezi unaofuata — statement ya mwezi unaofuata itaanzia siku inayofuata). Discount (lita) huwekwa lita zote isipokuwa ubadilishe. Previous Balance ni deni la statement iliyotangulia; Amount Paid ni malipo yaliyorekodiwa mwezi huu.</p>
     <div class="controls" style="margin-bottom:12px;">${userRole==='gm'?'':'<button class="btn gold" onclick="hifadhiStatement()">💾 Hifadhi Statement</button>'}<button class="btn secondary" onclick="chapishaStatement()">🖨 Chapisha / Onyesha</button></div>
@@ -12733,11 +12921,44 @@ function onParamStatement(kipindiKimebadilika,punguzoLimebadilika){
   d.punguzo_lita=n('stmt-pl');d.punguzo_kiwango=n('stmt-pk');d.mizani_awali=n('stmt-mz');d.kilicholipwa=n('stmt-kl');
   $('stmtSheet').innerHTML=htmlYaStatement(d);
 }
-function chapishaStatement(){if(!stmtCur)return;setWaPhone('stmtOverlay','');$('stmtPrintBody').innerHTML=htmlYaStatement(stmtCur,true);$('stmtOverlay').dataset.jina='statement-'+stmtCur.mteja.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'-'+stmtCur.mwezi;openSheet('stmtOverlay');}
+function chapishaStatement(){if(!stmtCur)return;{const _r=allSerikaliMafuta.find(x=>jinaKey(x.mteja)===jinaKey(stmtCur.mteja)&&x.simu_mteja);setWaPhone('stmtOverlay',_r?_r.simu_mteja:'');}$('stmtPrintBody').innerHTML=htmlYaStatement(stmtCur,true);$('stmtOverlay').dataset.jina='statement-'+stmtCur.mteja.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'-'+stmtCur.mwezi;openSheet('stmtOverlay');}
+// A payment typed on the statement ("Amount Paid") is only a number on that statement. This records it as a REAL payment on the
+// customer's fuel debts (the oldest invoice first — the same rule as the "Lipa" button), so every list and the GM's account show it.
+async function rekodiMalipoKutokaStatement(d,kiasi){
+  const key=jinaKey(d.mteja);
+  const tareheYa=(w)=>{const l=allSerikaliMafuta.filter(x=>x.invoice_no===w.invoice_no).map(x=>String(x.tarehe)).sort();return l[0]||String(w.created_at||'').slice(0,10);};
+  const wazi=allWateja.filter(w=>w.chanzo==='Mafuta'&&!w.deleted_at&&jinaKey(w.jina)===key&&(Number(w.bakaa)||0)>0.004)
+    .sort((a,b)=>tareheYa(a).localeCompare(tareheYa(b))||String(a.invoice_no).localeCompare(String(b.invoice_no),'en',{numeric:true}));
+  const leo=leoISO(),tarehe=leo.slice(0,7)===d.mwezi?leo:d.tarehe_taarifa;      // the payment belongs to the statement's month
+  const h=await authHeaders();let baki=kiasi,jumla=0;const sehemu=[];
+  for(const c of wazi){
+    if(baki<=0.004)break;
+    const s=round2(Math.min(baki,Number(c.bakaa)));
+    const r=await fetch(`${SB_URL}/rest/v1/rpc/rekodi_malipo_madeni`,{method:'POST',headers:h,body:JSON.stringify({p_id:String(c.id),p_kiasi:s,p_tarehe:tarehe||null,p_maelezo:'Kutoka Statement '+maandishiYaMwezi(d.mwezi)})});
+    const x=await r.json();
+    if(!r.ok||!x||x.halisi==null)throw new Error(((x&&(x.message||x.hint))||'Imeshindwa kuhifadhi malipo')+(jumla>0?` — ${pesa(jumla)} tayari zimehifadhiwa (${sehemu.join(', ')}). Usirudie kiasi hicho.`:''));
+    const halisi=Number(x.halisi);jumla+=halisi;baki-=halisi;sehemu.push(c.invoice_no);
+    c.kilicholipwa=(Number(c.kilicholipwa)||0)+halisi;c.bakaa=Number(x.bakaa_baada);c.hali=c.bakaa<=0?'Amelipa Kamili':'Amelipa Sehemu';
+  }
+  return{jumla,baki:Math.max(0,baki),sehemu};
+}
+let _stmtInaHifadhi=false;
 async function hifadhiStatement(){
-  if(!stmtCur)return;const d=stmtCur;
+  if(!stmtCur||_stmtInaHifadhi)return;const d=stmtCur;
   if(!d.invoice_no){arifu('notifyStmt','❌ Weka Invoice No ya statement.','error');return;}
   if(!navigator.onLine){arifu('notifyStmt','❌ Hakuna mtandao.','error');return;}
+  _stmtInaHifadhi=true;
+  try{await hifadhiStatementNdani(d);}finally{_stmtInaHifadhi=false;}
+}
+async function hifadhiStatementNdani(d){
+  const rekodiwa=stmtCtx.malipo.filter(m=>jinaKey(m.mteja)===jinaKey(d.mteja)).reduce((a,m)=>a+Number(m.kiasi||0),0),tofauti=round2(d.kilicholipwa-rekodiwa);
+  if(tofauti>0.5&&confirm(`Amount Paid ni ${pesa(d.kilicholipwa)}, lakini malipo yaliyorekodiwa kwa ${d.mteja} mwezi huu ni ${pesa(rekodiwa)}.\n\nRekodi tofauti ya ${pesa(tofauti)} kama malipo kwenye madeni yake (invoice za zamani kwanza)? Ndivyo Meneja Mkuu na orodha zote zitakavyoona malipo.\n\nOK = rekodi malipo na uhifadhi statement.  Cancel = hifadhi statement tu.`)){
+    try{
+      const rr=await rekodiMalipoKutokaStatement(d,tofauti);
+      toast(`✅ Malipo ya ${pesa(rr.jumla)} yamerekodiwa kwenye ${rr.sehemu.length} invoice.`+(rr.baki>0.5?` ⚠ ${pesa(rr.baki)} imezidi deni — haikurekodiwa.`:''));
+      await pakiaMuktadhaWaStatement(d.mwezi);loadAllBaada();
+    }catch(e){arifu('notifyStmt','❌ Malipo hayakurekodiwa: '+escH(e.message),'error');return;}
+  }
   const row={mteja:d.mteja,mwezi:d.mwezi,invoice_no:d.invoice_no,punguzo_lita:d.punguzo_lita,punguzo_kiwango:d.punguzo_kiwango,mizani_awali:d.mizani_awali,kilicholipwa:d.kilicholipwa,tarehe_taarifa:d.tarehe_taarifa,kipindi_kuanzia:d.kuanzia,kipindi_hadi:d.hadi,updated_at:new Date().toISOString()};
   try{
     const h=await authHeaders();h['Prefer']='resolution=merge-duplicates,return=representation';
@@ -12876,6 +13097,49 @@ async function pakuaStatementExcel(wote){
       toast('ℹ Excel imetengenezwa bila rangi na nembo (zana ya rangi haikupatikana) — jaribu tena ukiwa na mtandao.');
     }catch(_e){toast('❌ Excel haikutengenezwa — angalia mtandao wako.');}
   }
+}
+// ── PRINT / PDF / IMAGE / SHARE straight from the list: the form opens and the chosen action runs on it ──
+// what: 'stmt' = the statement on screen · otherwise an invoice number of a fuel order
+async function fomuHatua(what,kind){
+  if(what==='stmt'){if(!stmtCur){toast('Chagua mteja kwanza');return;}chapishaStatement();}
+  else if(String(what).startsWith('m:'))await onyeshaFomuMtejaMafuta(what.slice(2));      // every invoice of one customer
+  else onyeshaInvoiceSerikaliMafutaNo(what);
+  if(!document.querySelector('#stmtOverlay.open'))return;
+  await new Promise(r=>setTimeout(r,80));      // let the form draw (and its logo) before it is photographed
+  const fn={chapa:chapishaFomu,pdf:pakuaFomu,picha:pakuaFomuPicha,shiriki:shirikiFomu,shirikipdf:shirikiFomuPdf}[kind];
+  if(fn)fn();
+}
+// The same buttons for one fuel invoice row
+const vitufeVyaFomuMafuta=(inv)=>{const a=escH(JSON.stringify(inv));return `<button class="btn sm secondary" title="Pakua PDF" onclick="fomuHatua(${a},'pdf')">PDF</button><button class="btn sm secondary" title="Pakua Picha" onclick="fomuHatua(${a},'picha')">🖼</button><button class="btn sm secondary" title="Shiriki (PDF)" onclick="fomuHatua(${a},'shirikipdf')">📤</button>`;};
+// ONE PDF with every customer's statement of the month (each starts on a new page)
+async function pakuaStatementPdfWote(){
+  const mwezi=mweziWaStatement();
+  let orodha=wateja_wa_mwezi(mwezi).map(w=>dataYaStatement(w.jina,mwezi));
+  if(stmtCur&&stmtCur.mwezi===mwezi)orodha=orodha.map(d=>jinaKey(d.mteja)===jinaKey(stmtCur.mteja)?stmtCur:d);      // what is on the screen (with his edits) wins
+  if(!orodha.length){toast('Hakuna Order za mafuta mwezi huu');return;}
+  try{if(!(window.jspdf&&window.jspdf.jsPDF)||typeof html2canvas==='undefined'){toast('⏳ Inapakia zana ya PDF...');await Promise.all([pakiaMaktaba('html2canvas'),pakiaMaktaba('jspdf')]);}}
+  catch(e){toast('❌ Zana ya PDF haijapakiwa — angalia mtandao wako.');return;}
+  const ov=$('stmtOverlay'),body=$('stmtPrintBody'),jinaAwali=ov.dataset.jina;
+  let pdf=null;
+  try{
+    openSheet('stmtOverlay');
+    for(let i=0;i<orodha.length;i++){
+      toast(`⏳ Inaandaa statement ${i+1} kati ya ${orodha.length}...`);
+      body.innerHTML=htmlYaStatement(orodha[i],true);
+      const canvas=await fomuKamataPicha(true,false);
+      if(!canvas)throw new Error('statement ya '+orodha[i].mteja+' haikutengenezwa');
+      const {jsPDF}=window.jspdf;
+      kurasaZaPicha(canvas).forEach(k=>{
+        if(!pdf)pdf=new jsPDF({orientation:'p',unit:'mm',format:'a4'});else pdf.addPage();
+        const pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight();
+        let w=pw,h=k.height*pw/k.width;if(h>ph){w=pw*ph/h;h=ph;}
+        pdf.addImage(k.toDataURL('image/jpeg',0.9),'JPEG',(pw-w)/2,0,w,h);
+      });
+    }
+    pdf.save(`Statement_${maandishiYaMwezi(mwezi).replace(' ','_')}.pdf`);
+    toast(`✅ PDF ya wateja ${orodha.length} imepakuliwa!`);
+  }catch(e){toast('❌ PDF haikutengenezwa: '+e.message);}
+  body.innerHTML='';ov.dataset.jina=jinaAwali||'';closeSheet('stmtOverlay');
 }
 // ═══════════════════════════════════════════════════════════════════════════
 // RIPOTI YA MADENI — Abdul's debt-collection report, in the layout of his Excel workbook:
@@ -13044,6 +13308,17 @@ function fomuChapishaOrderZote(){
   sel.value=myTawi;gmRipoti('ordertoa');
 }
 function gmOdamuhMwezi(){const t=leoISO();$('gmrp-odamuh-k').value=t.slice(0,8)+'01';$('gmrp-odamuh-h').value=t;gmRipoti('odamuh');}
+// The sales officer's own form of the sales records (day by day, earliest → latest) for the dates picked above the list
+function fomuYaMauzoAfisa(){
+  const leo=leoISO();let k=($('mauzo-kuanzia')||{}).value||'',h=($('mauzo-hadi')||{}).value||'';
+  if(!k&&!h){k=leo.slice(0,8)+'01';h=leo;}else{if(!k)k=h;if(!h)h=leo;}      // no dates picked: this month up to today
+  if(k>h)[k,h]=[h,k];
+  const myTawi=ninaTawiLaKazi()?userTawi:viewingTawi;if(!myTawi||myTawi==='yote'){toast('❌ Chagua tawi kwanza (juu kushoto)');return;}
+  $('gmrp-mauzo-k').value=k;$('gmrp-mauzo-h').value=h;
+  const sel=$('gmrp-mauzo-t');if(!sel.querySelector(`option[value="${myTawi}"]`))sel.insertAdjacentHTML('beforeend',`<option value="${escH(myTawi)}">${escH(BRANCHES[myTawi]||myTawi)}</option>`);
+  sel.value=myTawi;
+  window._mauzoKwaSiku=true;try{gmRipoti('mauzo');}finally{window._mauzoKwaSiku=false;}
+}
 function gmRipotiOtomatiki(kind){const k=$(`gmrp-${kind}-k`).value,h=$(`gmrp-${kind}-h`).value;if(k&&h)gmRipoti(kind);}
 function gmOrodhaKamili(kind){
   const el=$('gmOr-'+kind);if(!el)return;
@@ -13097,8 +13372,29 @@ function gmRipoti(kind){
     mwili=jed([['#'],['Tarehe'],['Aina'],['Mteja'],['Particulars'],['QTY',1],['Unit Price',1],['Punguzo',1],['Jumla',1],['Aina ya Mapato'],...(yote?[['Tawi']]:[])],
       l.length?njiaZote.map(n=>_kundi('SALES — '+n.toUpperCase(),mf[n]||[])).join('')+_kundi('ORDER',lOda):'',
       l.length?`<tr class="stmt-tot"><td colspan="7">JUMLA YOTE — SALES + ORDER (mistari ${l.length})</td><td class="num">${fmt0(pg)}</td><td class="num">${fmt0(jj)}</td><td colspan="${nc-8}"></td></tr>`:'');
+    if(window._mauzoKwaSiku){      // the sales officer's form: DAY BY DAY, from the earliest date to the latest, each day with its total and how it was paid
+      // ORDER sales belong to the order officers, not to the sales officer: they are shown as "Order" only and are NOT part of any total
+      kichwa='DAILY SALES RECORDS — REKODI ZA MAUZO KWA SIKU';
+      const kwaSiku=new Map();l.forEach(x=>{const d=String(x.tarehe||'').slice(0,10);let a=kwaSiku.get(d);if(!a){a=[];kwaSiku.set(d,a);}a.push(x);});
+      const ds=[...kwaSiku.keys()].sort();_n=0;
+      const sehemu=ds.map(d=>{const a=kwaSiku.get(d).slice().sort(cmp),t=jumlaZaVikundiVyaMauzo(a),jd=maandishiYaTarehe(d);
+        return `<tr class="stmt-bill"><td colspan="${nc}" style="background:#F0EEE8!important;color:#1d2733!important;font-weight:700;">${jd}</td></tr>${a.map(_sat).join('')}<tr class="stmt-tot"><td colspan="7">JUMLA YA SIKU — ${jd} (bila Order)</td><td class="num">${fmt0(t.p)}</td><td class="num">${fmt0(t.j)}</td><td colspan="${nc-8}"></td></tr><tr><td colspan="${nc}" style="font-size:11.5px;color:#333;">${chipsZaVikundiVyaMauzo(t.t)}</td></tr>`;}).join('');
+      const yoteV=jumlaZaVikundiVyaMauzo(l),kol=VIKUNDI_VYA_MAUZO.filter(([key])=>key!=='order'&&yoteV.t[key]>0.004);
+      mwili=jed([['#'],['Tarehe'],['Aina'],['Mteja'],['Particulars'],['QTY',1],['Unit Price',1],['Punguzo',1],['Jumla',1],['Aina ya Mapato'],...(yote?[['Tawi']]:[])],sehemu,
+        l.length?`<tr class="stmt-tot"><td colspan="7">JUMLA YOTE (bila Order) — ${ds.length} siku</td><td class="num">${fmt0(yoteV.p)}</td><td class="num">${fmt0(yoteV.j)}</td><td colspan="${nc-8}"></td></tr>${yoteV.o>0.004?`<tr><td colspan="8" style="text-align:right;">ORDER (nje ya jumla)</td><td class="num">${fmt0(yoteV.o)}</td><td colspan="${nc-9}"></td></tr>`:''}`:'');
+      mwili+=`<div class="stmt-bill" style="margin-top:14px;">MUHTASARI WA KILA SIKU</div>`+jed([['Tarehe'],...kol.map(([,lbl])=>[lbl,1]),['Jumla ya Siku',1],['Order',1]],
+        ds.map(d=>{const t=jumlaZaVikundiVyaMauzo(kwaSiku.get(d));return `<tr><td style="white-space:nowrap;">${maandishiYaTarehe(d)}</td>${kol.map(([key])=>`<td class="num">${t.t[key]>0.004?fmt0(t.t[key]):'—'}</td>`).join('')}<td class="num"><b>${fmt0(t.j)}</b></td><td class="num">${t.o>0.004?fmt0(t.o):'—'}</td></tr>`;}).join(''),
+        l.length?`<tr class="stmt-tot"><td>JUMLA YOTE</td>${kol.map(([key])=>`<td class="num">${fmt0(yoteV.t[key])}</td>`).join('')}<td class="num">${fmt0(yoteV.j)}</td><td class="num">${yoteV.o>0.004?fmt0(yoteV.o):'—'}</td></tr>`:'');
+      // how the sales were paid — credit sales (Madeni) always have their own row; Order is shown on its own line below the total
+      const safuMalipo=[['cash','Cash',true],['nmb','NMB'],['crdb','CRDB'],['lipa','Lipa Namba'],['bank','Benki (nyingine)'],['madeni','Credit Sales / Madeni',true]].filter(([key,,daima])=>daima||yoteV.t[key]>0.004);
+      const kilipwaYote=safuMalipo.reduce((x,[key])=>x+yoteV.kl[key],0),bakiYote=safuMalipo.reduce((x,[key])=>x+yoteV.bk[key],0);
+      mwili+=`<div class="stmt-bill" style="margin-top:14px;">MUHTASARI WA MALIPO</div>`+jed([['Aina ya Mapato'],['Jumla',1],['Kilicholipwa',1],['Baki (Deni)',1]],
+        safuMalipo.map(([key,lbl])=>`<tr><td>${lbl}</td><td class="num">${fmt0(yoteV.t[key])}</td><td class="num">${fmt0(yoteV.kl[key])}</td><td class="num">${fmt0(yoteV.bk[key])}</td></tr>`).join(''),
+        `<tr class="stmt-tot"><td>JUMLA YOTE (bila Order)</td><td class="num">${fmt0(yoteV.j)}</td><td class="num">${fmt0(kilipwaYote)}</td><td class="num">${fmt0(bakiYote)}</td></tr><tr><td>ORDER</td><td class="num">${fmt0(yoteV.o)}</td><td class="num">—</td><td class="num">—</td></tr><tr><td colspan="4" style="font-size:11px;color:#555;">Order si mauzo ya afisa wa mauzo: haihesabiwi kama imelipwa wala kwenye jumla.</td></tr>`);
+    }else{
     const kwaAina={};l.forEach(x=>{const a=njiaYa(x),e=kwaAina[a]||(kwaAina[a]={j:0,l:0,b:0});e.j+=Number(x.jumla)||0;e.l+=Number(x.kilicholipwa)||0;e.b+=Number(x.bakaa)||0;});
     mwili+=`<div class="stmt-bill" style="margin-top:14px;">MUHTASARI WA MALIPO</div>`+jed([['Aina ya Mapato'],['Jumla',1],['Kilicholipwa',1],['Baki (Deni)',1]],Object.entries(kwaAina).map(([a,e])=>`<tr><td>${escH(a)}</td><td class="num">${fmt0(e.j)}</td><td class="num">${fmt0(e.l)}</td><td class="num">${fmt0(e.b)}</td></tr>`).join(''),`<tr class="stmt-tot"><td>JUMLA YOTE</td><td class="num">${fmt0(jj)}</td><td class="num">${fmt0(lp)}</td><td class="num">${fmt0(bk)}</td></tr>`);
+    }
     if(yote){const kwaTawi={};l.forEach(x=>{kwaTawi[x.tawi]=(kwaTawi[x.tawi]||0)+(Number(x.jumla)||0);});
       mwili+=`<div class="stmt-bill" style="margin-top:14px;">MAUZO KWA TAWI</div>`+jed([['Tawi'],['Jumla ya Mauzo',1]],Object.entries(kwaTawi).sort((a,b)=>b[1]-a[1]).map(([t,v])=>`<tr><td>${escH(BRANCHES[t]||t)}</td><td class="num">${fmt0(v)}</td></tr>`).join(''));}
   }else if(kind==='manunuzi'){
@@ -13129,9 +13425,10 @@ function gmRipoti(kind){
   }else if(kind==='mafuta'){
     kichwa='FUEL ORDER INVOICES — INVOICE ZA ORDER ZA MAFUTA';
     const l=fT(allSerikaliMafuta).filter(x=>!x.deleted_at&&x.tarehe>=k&&x.tarehe<=h).sort(cmp);
-    const jj=l.reduce((a,x)=>a+(Number(x.jumla)||0),0),lp=l.filter(x=>x.hali_malipo==='Imelipwa').reduce((a,x)=>a+(Number(x.jumla)||0),0);
+    const ramaniR=ramaniMalipoMafuta(),jj=l.reduce((a,x)=>a+(Number(x.jumla)||0),0),lp=lipwaYaOrodhaMafuta(l,ramaniR);      // part-payments included
+    const haliMf=(x)=>{const h=haliYaInvoiceMafuta(x,l,ramaniR);return h==='kamili'?'✓ Imelipwa':h==='sehemu'?'◐ Amelipa Sehemu':'⏳ Haijalipwa';};
     mwili=jed([['#'],['Tarehe'],['Invoice'],['Mteja / Mradi'],['Gari'],['Aina'],['Lita',1],['Bei kwa Lita',1],['Jumla',1],['Malipo']],
-      l.map((x,i)=>`<tr><td>${i+1}</td><td style="white-space:nowrap;">${x.tarehe}</td><td>${escH(x.invoice_no||'')}</td><td>${escH(x.mteja||'')}${x.mradi?'<br><span style="font-size:11px;">'+escH(x.mradi)+'</span>':''}</td><td>${escH(x.gari||'—')}</td><td>${escH(x.aina||'')}</td><td class="num">${Number(x.lita||0).toFixed(2)}</td><td class="num">${fmt0(Number(x.bei_kwa_lita_serikali)||0)}</td><td class="num">${fmt0(Number(x.jumla)||0)}</td><td>${x.hali_malipo==='Imelipwa'?'✓ Imelipwa':'⏳ Haijalipwa'}</td></tr>`).join(''),
+      l.map((x,i)=>`<tr><td>${i+1}</td><td style="white-space:nowrap;">${x.tarehe}</td><td>${escH(x.invoice_no||'')}</td><td>${escH(x.mteja||'')}${x.mradi?'<br><span style="font-size:11px;">'+escH(x.mradi)+'</span>':''}</td><td>${escH(x.gari||'—')}</td><td>${escH(x.aina||'')}</td><td class="num">${Number(x.lita||0).toFixed(2)}</td><td class="num">${fmt0(Number(x.bei_kwa_lita_serikali)||0)}</td><td class="num">${fmt0(Number(x.jumla)||0)}</td><td>${haliMf(x)}</td></tr>`).join(''),
       l.length?`<tr class="stmt-tot"><td colspan="8">JUMLA (invoice ${l.length})</td><td class="num">${fmt0(jj)}</td><td></td></tr>`:'')+(l.length?`<div class="stmt-bill" style="margin-top:14px;">MUHTASARI</div>`+jed([['Maelezo'],['Kiasi',1]],`<tr><td>Imelipwa</td><td class="num">${fmt0(lp)}</td></tr><tr><td>Haijalipwa</td><td class="num">${fmt0(jj-lp)}</td></tr>`,`<tr class="stmt-tot"><td>JUMLA</td><td class="num">${fmt0(jj)}</td></tr>`):'');
   }else if(kind==='stock'){
     kichwa='STOCK LIST — ORODHA YA STOCK ILIYOPO';
