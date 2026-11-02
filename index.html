@@ -1646,7 +1646,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
         <div class="card" style="border-left:3px solid var(--a-rg)"><div class="c-label">Jumla Mapato (zote)</div><div class="c-value" id="zmpJumla" style="color:var(--a-rg)">—</div></div>
       </div>
       <div class="section">
-        <div class="section-header"><h3>📊 Muhtasari wa Kila Siku — Mapato − Matumizi = Salio</h3></div>
+        <div class="section-header"><h3>📊 Muhtasari wa Kila Siku — Mapato − Matumizi = Salio</h3><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;"><input type="month" id="zm-mm-mwezi" style="width:auto" title="Mwezi"/><button class="btn sm gold" onclick="tengenezaFomuMweziZuhura('zm-mm-mwezi')">🖨 Fomu ya Mwezi</button></div></div>
         <div class="section-body"><div class="table-wrap"><table>
           <thead><tr><th>Tarehe</th><th class="num">Salio la Jana</th><th class="num">Mapato ya Siku</th><th class="num">Jumla ya Mapato</th><th class="num">Matumizi</th><th class="num">Salio la Siku</th></tr></thead>
           <tbody id="tbody-zm-muhtasari-siku"><tr class="loading-row"><td colspan="6">Inapakia...</td></tr></tbody>
@@ -1689,7 +1689,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
         </div>
       </div>
       <div class="section">
-        <div class="section-header"><h3>📊 Muhtasari wa Kila Siku — Mapato − Matumizi = Salio</h3></div>
+        <div class="section-header"><h3>📊 Muhtasari wa Kila Siku — Mapato − Matumizi = Salio</h3><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;"><input type="month" id="zmt-mm-mwezi" style="width:auto" title="Mwezi"/><button class="btn sm gold" onclick="tengenezaFomuMweziZuhura('zmt-mm-mwezi')">🖨 Fomu ya Mwezi</button></div></div>
         <div class="section-body"><div class="table-wrap"><table>
           <thead><tr><th>Tarehe</th><th class="num">Salio la Jana</th><th class="num">Mapato ya Siku</th><th class="num">Jumla ya Mapato</th><th class="num">Matumizi</th><th class="num">Salio la Siku</th></tr></thead>
           <tbody id="tbody-zmt-muhtasari-siku"><tr class="loading-row"><td colspan="6">Inapakia...</td></tr></tbody>
@@ -3320,7 +3320,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
     <button class="inv-close" onclick="closeSheet('mmOverlay')">&times;</button>
     <div class="inv-header"><div class="inv-logo"></div></div>
     <div class="inv-co" style="text-align:center;"><b>NGARA HUDUMA COMPANY LIMITED</b></div>
-    <div class="inv-title" style="margin-top:8px;">......MONTHLY MAPATO &amp; MATUMIZI SUMMARY......</div>
+    <div class="inv-title" style="margin-top:8px;" id="mmKichwa">......MONTHLY MAPATO &amp; MATUMIZI SUMMARY......</div>
     <div class="inv-row2" style="margin-top:6px;">
       <div class="inv-field">Month: <b id="mmMwezi"></b></div>
       <div class="inv-field">Prepared by: <b id="mmNa"></b></div>
@@ -13786,8 +13786,34 @@ function tengenezaFomuMwezi(){
   rows+=`<tr class="inv-total-row"><td colspan="2" style="text-align:right;">TOTAL</td><td class="num">${f(jM)}</td><td class="num">${f(jT)}</td><td class="num">${f(bal)}</td></tr>`;
   $('mmBody').innerHTML=rows;
   $('mmMwezi').textContent=`${MIEZI_KAMILI[m-1]} ${y}`;$('mmNa').textContent=userJina||'';
+  {const kt=$('mmKichwa');if(kt)kt.textContent='......MONTHLY MAPATO & MATUMIZI SUMMARY......';}
   $('mmBf').textContent=pesa2(bf);$('mmMapato').textContent=pesa2(jM);$('mmJumlaMapato').textContent=pesa2(round2(bf+jM));$('mmMatumizi').textContent=pesa2(jT);$('mmClosing').textContent=pesa2(bal);
   $('mmOverlay').dataset.jina=`monthly-mapato-matumizi-${mw}`;
+  setWaPhone('mmOverlay',ADMIN_PHONE);
+  openSheet('mmOverlay');
+}
+// The same monthly form for ZUHURA'S private Mapato and Matumizi (seen by her, the General Manager and the Director)
+function tengenezaFomuMweziZuhura(inputId){
+  const mw=($(inputId)||{}).value||leoISO().slice(0,7);
+  const [y,m]=mw.split('-').map(Number);if(!y||!m){toast('❌ Chagua mwezi');return;}
+  const z=(n)=>String(n).padStart(2,'0'),siku=new Date(y,m,0).getDate(),mwanzo=`${y}-${z(m)}-01`;
+  const f=(n)=>{const v=round2(n);return v.toLocaleString('en-US',{minimumFractionDigits:Number.isInteger(v)?0:2,maximumFractionDigits:2});};
+  const mapato={},matumizi={};let bf=0;
+  zmMapatoRekodi().forEach(e=>{const t=String(e.tarehe||'').slice(0,10),a=jumlaYaMapato(e);if(!t)return;if(t<mwanzo)bf+=a;else if(t.slice(0,7)===mw)mapato[t]=(mapato[t]||0)+a;});
+  allZMatumizi.filter(x=>!x.deleted_at).forEach(x=>{const t=String(x.tarehe||'').slice(0,10),a=Number(x.kiasi)||0;if(!t)return;if(t<mwanzo)bf-=a;else if(t.slice(0,7)===mw)matumizi[t]=(matumizi[t]||0)+a;});
+  bf=round2(bf);
+  let bal=bf,jM=0,jT=0,rows=`<tr><td></td><td><b>B/F</b></td><td></td><td></td><td class="num"><b>${f(bf)}</b></td></tr>`;
+  for(let d=1;d<=siku;d++){
+    const t=`${y}-${z(m)}-${z(d)}`,a=round2(mapato[t]||0),b=round2(matumizi[t]||0);
+    bal=round2(bal+a-b);jM=round2(jM+a);jT=round2(jT+b);
+    rows+=`<tr><td>${d}</td><td>${z(d)} / ${z(m)} / ${y}</td><td class="num">${a?f(a):''}</td><td class="num">${b?f(b):''}</td><td class="num">${(a||b)?'<b>'+f(bal)+'</b>':f(bal)}</td></tr>`;
+  }
+  rows+=`<tr class="inv-total-row"><td colspan="2" style="text-align:right;">TOTAL</td><td class="num">${f(jM)}</td><td class="num">${f(jT)}</td><td class="num">${f(bal)}</td></tr>`;
+  $('mmBody').innerHTML=rows;
+  const kt=$('mmKichwa');if(kt)kt.textContent='......MONTHLY MAPATO & MATUMIZI SUMMARY — ZUHURA......';
+  $('mmMwezi').textContent=`${MIEZI_KAMILI[m-1]} ${y}`;$('mmNa').textContent=userJina||'';
+  $('mmBf').textContent=pesa2(bf);$('mmMapato').textContent=pesa2(jM);$('mmJumlaMapato').textContent=pesa2(round2(bf+jM));$('mmMatumizi').textContent=pesa2(jT);$('mmClosing').textContent=pesa2(bal);
+  $('mmOverlay').dataset.jina=`zuhura-monthly-mapato-matumizi-${mw}`;
   setWaPhone('mmOverlay',ADMIN_PHONE);
   openSheet('mmOverlay');
 }
