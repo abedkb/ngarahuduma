@@ -3571,9 +3571,10 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       <tr><td style="text-align:right;">PAYMENT THROUGH BANKS</td><td class="num" id="mcBankPayment"></td></tr>
       <tr><td style="text-align:right;">PAYMENT THROUGH LIPA NAMBA</td><td class="num" id="mcLipaPayment"></td></tr>
       <tr><td style="text-align:right;">TOTAL CASH SALES</td><td class="num" id="mcCashSales"></td></tr>
+      <tr><td style="text-align:right;">TOTAL CREDIT SALES (MADENI)</td><td class="num" id="mcCreditSales"></td></tr>
       <tr><td style="text-align:right;">TOTAL ORDER SALES</td><td class="num" id="mcOrderSales"></td></tr>
       <tr><td style="text-align:right;">TOTAL TRANSFERRED SALES</td><td class="num" id="mcTransferSales"></td></tr>
-      <tr><td style="text-align:right;font-weight:700;">TOTAL DISCOUNT, BANK, LIPA NAMBA, CASH, ORDER AND TRANSFER SALES</td><td class="num" id="mcSalesTotal"></td></tr>
+      <tr><td style="text-align:right;font-weight:700;">TOTAL DISCOUNT, BANK, LIPA NAMBA, CASH, CREDIT, ORDER AND TRANSFER SALES</td><td class="num" id="mcSalesTotal"></td></tr>
       <tr class="inv-total-row"><td style="text-align:right;">CLOSING BALANCE STOCK</td><td class="num" id="mcClosing"></td></tr>
     </table>
     <div class="inv-print-btn" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
@@ -9118,15 +9119,16 @@ function mizaniYaMwezi(tawi,mwaka,mwezi,opening){
   // every sale lands in exactly ONE line: Order (government) / Lipa Namba / a bank (NMB, CRDB…) / cash — tolerant of the older ways the method was saved
   const njiaYa=(s)=>{
     if(s.chanzo==='Serikali')return'order';
+    if(s.aina==='Mkopo')return'credit';      // goods sold on credit leave the stock too, but they are debt, not cash
     const n=String(s.njia_ya_malipo||'').trim().toLowerCase(),b=String(s.benki||'').trim().toLowerCase();
     if(n==='cash'||n==='mkono'||n==='taslimu'||(!n&&!b))return'cash';
     return(b||n).includes('lipa')?'lipa':'bank';
   };
   const jumlaYa=(k)=>monthMauzo.filter(s=>njiaYa(s)===k).reduce((a,s)=>a+(Number(s.jumla)||0),0);
-  const bankPayment=jumlaYa('bank'),lipaPayment=jumlaYa('lipa'),cashSales=jumlaYa('cash'),orderSales=jumlaYa('order');      // ORDER = government / company sales
+  const bankPayment=jumlaYa('bank'),lipaPayment=jumlaYa('lipa'),cashSales=jumlaYa('cash'),creditSales=jumlaYa('credit'),orderSales=jumlaYa('order');      // ORDER = government / company sales
   const transferSales=totalTransferred;      // goods handed to other branches leave this stock — exactly like the paper form
-  const salesTotal=totalDiscount+bankPayment+lipaPayment+cashSales+orderSales+transferSales;
-  return{opening,purchasing,totalReceived,receivedByOfficer,totalTransferred,transferredByOfficer,combinedTotal,totalDiscount,bankPayment,lipaPayment,cashSales,orderSales,transferSales,salesTotal,closing:combinedTotal-salesTotal,nReceived:received.length,nTransferred:transferred.length};
+  const salesTotal=totalDiscount+bankPayment+lipaPayment+cashSales+creditSales+orderSales+transferSales;
+  return{opening,purchasing,totalReceived,receivedByOfficer,totalTransferred,transferredByOfficer,combinedTotal,totalDiscount,bankPayment,lipaPayment,cashSales,creditSales,orderSales,transferSales,salesTotal,closing:combinedTotal-salesTotal,nReceived:received.length,nTransferred:transferred.length};
 }
 async function generateMonthlyClosingForm(){
   const tawi=viewingTawi;
@@ -9152,7 +9154,7 @@ async function generateMonthlyClosingForm(){
   }catch(e){opening=parseFloat($('mc-salio-mwenyewe').value)||0;}
 
   const M=mizaniYaMwezi(tawi,mwaka,mwezi,opening);
-  const {purchasing,receivedByOfficer,transferredByOfficer,combinedTotal,totalDiscount,bankPayment,lipaPayment,cashSales,orderSales,transferSales,salesTotal,closing}=M;
+  const {purchasing,receivedByOfficer,transferredByOfficer,combinedTotal,totalDiscount,bankPayment,lipaPayment,cashSales,creditSales,orderSales,transferSales,salesTotal,closing}=M;
 
   try{
     const existingRow=await DB.get('stock_closing_balance',`tawi=eq.${tawi}&mwaka=eq.${mwaka}&mwezi=eq.${mwezi}`);
@@ -9173,7 +9175,7 @@ async function generateMonthlyClosingForm(){
   $('mcCombinedTotal').textContent=pesa(combinedTotal);
   $('mcDiscount').textContent=pesa(totalDiscount);
   $('mcBankPayment').textContent=pesa(bankPayment);$('mcLipaPayment').textContent=pesa(lipaPayment);
-  $('mcCashSales').textContent=pesa(cashSales);
+  $('mcCashSales').textContent=pesa(cashSales);$('mcCreditSales').textContent=pesa(creditSales);
   $('mcOrderSales').textContent=pesa(orderSales);
   $('mcTransferSales').textContent=pesa(transferSales);
   $('mcSalesTotal').textContent=pesa(salesTotal);
@@ -9189,9 +9191,9 @@ async function gmMweziYote(){
   const miezi=['Januari','Februari','Machi','Aprili','Mei','Juni','Julai','Agosti','Septemba','Oktoba','Novemba','Desemba'];
   const makundi=[['HARDWARE',Object.keys(HARDWARE_BRANCHES).filter(t=>t!=='matumizibranch')],['PETROL STATIONS',Object.keys(PETROL_BRANCHES)]];
   const v=(n)=>n?pesa(round2(n)):'—';
-  const z={opening:0,purchasing:0,totalReceived:0,combinedTotal:0,transferSales:0,totalDiscount:0,bankPayment:0,lipaPayment:0,cashSales:0,orderSales:0,salesTotal:0,closing:0};
+  const z={opening:0,purchasing:0,totalReceived:0,combinedTotal:0,transferSales:0,totalDiscount:0,bankPayment:0,lipaPayment:0,cashSales:0,creditSales:0,orderSales:0,salesTotal:0,closing:0};
   let bilaHistoria=0,mwili='';
-  const jumlaSafu=(l,t,kali)=>`<tr class="stmt-tot"${kali?' style="background:#fde3d3"':''}><td>${l}</td>${['opening','purchasing','totalReceived','combinedTotal','transferSales','totalDiscount','bankPayment','lipaPayment','cashSales','orderSales','salesTotal','closing'].map(f=>`<td class="num">${pesa(round2(t[f]))}</td>`).join('')}</tr>`;
+  const jumlaSafu=(l,t,kali)=>`<tr class="stmt-tot"${kali?' style="background:#fde3d3"':''}><td>${l}</td>${['opening','purchasing','totalReceived','combinedTotal','transferSales','totalDiscount','bankPayment','lipaPayment','cashSales','creditSales','orderSales','salesTotal','closing'].map(f=>`<td class="num">${pesa(round2(t[f]))}</td>`).join('')}</tr>`;
   for(const [kundi,orodha] of makundi){
     const kt=Object.assign({},z,Object.fromEntries(Object.keys(z).map(k=>[k,0]))),safu=[];
     for(const tawi of orodha){
@@ -9200,12 +9202,12 @@ async function gmMweziYote(){
       if(!shughuli)continue;
       if(o==null)bilaHistoria++;
       Object.keys(kt).forEach(k=>{kt[k]+=Number(M[k])||0;z[k]+=Number(M[k])||0;});
-      safu.push(`<tr><td>${escH(BRANCHES[tawi]||tawi)}${o==null?' *':''}</td><td class="num">${v(M.opening)}</td><td class="num">${v(M.purchasing)}</td><td class="num">${v(M.totalReceived)}</td><td class="num"><b>${v(M.combinedTotal)}</b></td><td class="num">${v(M.transferSales)}</td><td class="num">${v(M.totalDiscount)}</td><td class="num">${v(M.bankPayment)}</td><td class="num">${v(M.lipaPayment)}</td><td class="num">${v(M.cashSales)}</td><td class="num">${v(M.orderSales)}</td><td class="num"><b>${v(M.salesTotal)}</b></td><td class="num"><b>${pesa(round2(M.closing))}</b></td></tr>`);
+      safu.push(`<tr><td>${escH(BRANCHES[tawi]||tawi)}${o==null?' *':''}</td><td class="num">${v(M.opening)}</td><td class="num">${v(M.purchasing)}</td><td class="num">${v(M.totalReceived)}</td><td class="num"><b>${v(M.combinedTotal)}</b></td><td class="num">${v(M.transferSales)}</td><td class="num">${v(M.totalDiscount)}</td><td class="num">${v(M.bankPayment)}</td><td class="num">${v(M.lipaPayment)}</td><td class="num">${v(M.cashSales)}</td><td class="num">${v(M.creditSales)}</td><td class="num">${v(M.orderSales)}</td><td class="num"><b>${v(M.salesTotal)}</b></td><td class="num"><b>${pesa(round2(M.closing))}</b></td></tr>`);
     }
-    if(safu.length)mwili+=`<tr><td colspan="13" style="background:#f3f3f3;font-weight:700;">${kundi}</td></tr>`+safu.join('')+jumlaSafu('Jumla ya '+kundi.toLowerCase(),kt,false);
+    if(safu.length)mwili+=`<tr><td colspan="14" style="background:#f3f3f3;font-weight:700;">${kundi}</td></tr>`+safu.join('')+jumlaSafu('Jumla ya '+kundi.toLowerCase(),kt,false);
   }
   if(!mwili){toast('ℹ Hakuna shughuli za stock kwa mwezi huo.');return;}
-  const hd=['Tawi / Branch','Opening','Purchases','Received','Total (A)','Transferred','Discount','Bank','Lipa Namba','Cash','Order','Total Out (B)','CLOSING (A−B)'];
+  const hd=['Tawi / Branch','Opening','Purchases','Received','Total (A)','Transferred','Discount','Bank','Lipa Namba','Cash','Credit (Madeni)','Order','Total Out (B)','CLOSING (A−B)'];
   $('rpPrintBody').innerHTML=`<div class="inv-header" style="margin-bottom:6px;"><div class="inv-logo"></div></div>
     <div class="stmt-co"><b>NGARA HUDUMA COMPANY LIMITED</b><br>TIN NO. 147-228-198 — VRN NO. 40311079R · P.O. BOX 123 NGARA, KAGERA-TANZANIA<br>MONTHLY CLOSING STOCK — MATAWI YOTE (GENERAL)<br>Mwezi: ${miezi[mwezi-1]} ${mwaka}</div>
     <div class="table-wrap"><table class="inv-table stmt-tbl" style="font-size:11.5px;"><thead><tr>${hd.map((x,i)=>`<th${i?' class="num"':''}>${x}</th>`).join('')}</tr></thead><tbody>${mwili}${jumlaSafu('JUMLA YA KAMPUNI',z,true)}</tbody></table></div>
