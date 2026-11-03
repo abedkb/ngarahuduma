@@ -12873,8 +12873,10 @@ function tengenezaFomuUnunuziMafuta(id){
     <div class="inv-meta">Name of Driver: <b>${escH(dereva)}</b><br>Truck number: <b>${escH(gari)}</b></div>`,`product-purchase-form-${tawi}-${r.tarehe}-${r.aina}`);
 }
 const AKAUNTI_ZA_BENKI=[{benki:'NMB',namba:'32510048030',jina:'NGARA HUDUMA CO LTD'},{benki:'CRDB',namba:'10381380071',jina:'NGARA HUDUMA FILLING STATION'}];
-// the bank details on a sales officer's invoice (plain style, the same accounts as the petrol invoice)
-const htmlYaBenkiYaInvoice=()=>`<div class="inv-benki"><div class="t">PAYMENT DETAILS</div><table><thead><tr><th>Bank</th><th>Account Number</th><th>Account Name</th></tr></thead><tbody>${AKAUNTI_ZA_BENKI.map(a=>`<tr><td><b>${a.benki}</b></td><td>${a.namba}</td><td>${a.jina||BENKI_JINA}</td></tr>`).join('')}</tbody></table></div>`;
+// the HARDWARE company's own accounts (sales officer invoices) — the petrol stations keep AKAUNTI_ZA_BENKI above
+const AKAUNTI_ZA_HARDWARE=[{benki:'NMB',namba:'32110036076',jina:'NGARA HUDUMA COMPANY LIMITED'},{benki:'CRDB',namba:'0150740823400',jina:'NGARA HUDUMA COMPANY LIMITED'}];
+// the bank details on a sales officer's (hardware) invoice, plain style
+const htmlYaBenkiYaInvoice=()=>`<div class="inv-benki"><div class="t">PAYMENT DETAILS</div><table><thead><tr><th>Bank</th><th>Account Number</th><th>Account Name</th></tr></thead><tbody>${AKAUNTI_ZA_HARDWARE.map(a=>`<tr><td><b>${a.benki}</b></td><td>${a.namba}</td><td>${a.jina||BENKI_JINA}</td></tr>`).join('')}</tbody></table></div>`;
 const AKAUNTI_YA_USD=[['BANK','USD'],['ACCOUNT NUMBER','10561305159'],['ACCOUNT NAME','NGARA HUDUMA FILLING STATION'],['SWIFT','CORUTZTZ'],['BRANCH','NGARA'],['CODE','3630']];      // the third account of the fuel invoice and statement, in this order
 const htmlYaBenki=()=>`<div class="stmt-bank"><b>PAYMENT DETAILS</b><table class="stmt-bank-tbl"><thead><tr><th>Bank</th><th>Account Number</th><th>Account Name</th></tr></thead><tbody>${AKAUNTI_ZA_BENKI.map(a=>`<tr><td><b>${a.benki}</b></td><td>${a.namba}</td><td>${a.jina||BENKI_JINA}</td></tr>`).join('')}</tbody></table><div class="stmt-usd" style="margin-top:8px;font-size:12.5px;line-height:1.55;">${AKAUNTI_YA_USD.map(([k,v])=>`<div>${k}: <b>${v}</b></div>`).join('')}</div></div>`;
 const MIEZI_KAMILI=['January','February','March','April','May','June','July','August','September','October','November','December'];
